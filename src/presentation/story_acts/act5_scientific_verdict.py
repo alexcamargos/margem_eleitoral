@@ -5,9 +5,19 @@ Submete as divergências das pesquisas de véspera aos testes formais de hipóte
 o diagnóstico científico do Total Survey Error (TSE).
 """
 
+import importlib
 from typing import Sequence
 
 import streamlit as st
+
+import src.analytics.hypothesis_tests
+
+try:
+    from src.analytics.hypothesis_tests import extract_pre_eve_estimates
+except ImportError:
+    # Recarrega o módulo caso o servidor Streamlit em execução mantenha versão anterior em sys.modules
+    importlib.reload(src.analytics.hypothesis_tests)
+    from src.analytics.hypothesis_tests import extract_pre_eve_estimates
 
 from src.analytics.hypothesis_tests import (
     decompose_total_survey_error,
@@ -66,16 +76,17 @@ def render_act5(
     sample_sizes = [p.tamanho_amostra for p in eve_polls if c1 in p.votos_validos]
     residuals = [val - p_true_1 for val in p_hats]
 
-    # Estimativa de movimentação pré-véspera (T-7 a T-3) para cálculo de late swing
+    # Estimativa de movimentação pré-véspera para cálculo de late swing (com expansão dinâmica)
     pre_eve_p_hats: list[float] = []
+    effective_window_days: int | None = None
     if all_polls and eve_polls:
-        min_eve_date = min(p.data_fim_campo for p in eve_polls)
-        pre_eve_polls = [
-            p
-            for p in all_polls
-            if c1 in p.votos_validos and 0 < (min_eve_date - p.data_fim_campo).days <= 7
-        ]
-        pre_eve_p_hats = [p.votos_validos[c1] for p in pre_eve_polls]
+        pre_eve_p_hats, effective_window_days = extract_pre_eve_estimates(
+            all_polls=all_polls,
+            eve_polls=eve_polls,
+            candidate=c1,
+            standard_window_days=7,
+            max_window_days=14,
+        )
 
     # 1. Testes de Hipótese Automatizados
     t_res = run_paired_t_test(residuals)
@@ -197,10 +208,28 @@ def render_act5(
             help="Variância empírica entre os institutos de véspera.",
         )
     with c_tse4:
+        late_swing_val = tse_decomp.get("late_swing_variance")
+        if late_swing_val is not None:
+            late_swing_str = f"{late_swing_val:.2f}"
+            window_info = (
+                f"janela de {effective_window_days} dias"
+                if effective_window_days
+                else "janela padrão"
+            )
+            late_swing_help = (
+                f"Fração de variância atribuível ao voto de última hora ({window_info} vs véspera)."
+            )
+        else:
+            late_swing_str = "N/D"
+            late_swing_help = (
+                "Não disponível: ausência de pesquisas na janela de pré-véspera "
+                "(até 14 dias antes da eleição)."
+            )
+
         st.metric(
             "Late Swing Estimado",
-            f"{tse_decomp['late_swing_variance']:.2f}",
-            help="Fração de variância atribuível ao voto de última hora (T-7 a T-3 vs véspera).",
+            late_swing_str,
+            help=late_swing_help,
         )
     with c_tse5:
         st.metric(

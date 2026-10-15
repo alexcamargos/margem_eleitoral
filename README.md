@@ -1,13 +1,13 @@
-# margem_eleitoral: Auditoria e Storytelling de Pesquisas Eleitorais (Brasil 2026)
+# Margem Eleitoral: Auditoria e Storytelling Científico de Pesquisas Eleitorais
 
 [![Python Version](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Package Manager](https://img.shields.io/badge/package%20manager-uv-blueviolet.svg)](https://docs.astral.sh/uv/)
-[![Test Suite](https://img.shields.io/badge/tests-67%20passed-success.svg)](https://pytest.org/)
+[![Test Suite](https://img.shields.io/badge/tests-68%20passed-success.svg)](https://pytest.org/)
 [![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](https://pytest-cov.readthedocs.io/)
 [![Code Style](https://img.shields.io/badge/code%20style-ruff-black.svg)](https://docs.astral.sh/ruff/)
 [![Standards](https://img.shields.io/badge/standards-WAPOR%20%7C%20AAPOR-orange.svg)](https://wapor.org/)
 
-Aplicação analítica interativa de **Data Storytelling** em Python projetada para auditar tecnicamente as pesquisas de intenção de voto registradas no Tribunal Superior Eleitoral (TSE) para a eleição presidencial de 2026 (com benchmark comparativo de 2022). 
+Aplicação analítica interativa de **Data Storytelling** em Python projetada para auditar tecnicamente as pesquisas de intenção de voto registradas no Tribunal Superior Eleitoral (TSE). Desenvolvida sob uma arquitetura modular extensível a múltiplos anos e ciclos eleitorais, a metodologia do projeto é validada inicialmente no MVP com dados de 2022 e 2026, com suporte estrutural de expansão contínua para outros anos e pleitos futuros.
 
 O projeto confronta o ceticismo popular e narrativas conspiratórias de fraude eleitoral a partir de **testes formais de hipótese estatística**, medição do ***Total Survey Error* (TSE)**, cálculo da taxa de cobertura de intervalos de confiança com **efeito de delineamento ($deff$)** e modelagem contínua de tendências latentes do eleitorado.
 
@@ -17,7 +17,7 @@ O projeto confronta o ceticismo popular e narrativas conspiratórias de fraude e
 
 Nas democracias contemporâneas, divergências entre levantamentos amostrais e a apuração oficial das urnas eletrônicas são frequentemente instrumentalizadas para questionar a lisura do processo eleitoral. 
 
-O **margem_eleitoral** substitui o debate passional por **evidências matemáticas auditáveis**. A plataforma integra dois pilares visuais e analíticos de referência internacional (inspirados no jornalismo de dados de FiveThirtyEight e Plano Político):
+O projeto **Margem Eleitoral** substitui o debate passional por **evidências matemáticas auditáveis**. A plataforma integra dois pilares visuais e analíticos de referência internacional (inspirados no jornalismo de dados de FiveThirtyEight e Plano Político):
 
 1. **Agregador Dinâmico Contínuo:** Modelo temporal com decaimento exponencial (meia-vida de 14 dias), ponderação por qualidade metodológica e raiz da amostra ($\sqrt{n_i}$), extraindo a trajetória latente do eleitorado com envelopes de credibilidade de 80% e 95%.
 2. **Painel de Auditoria e Desempenho de Institutos:** Plataforma de responsabilização que avalia a precisão de véspera, o viés partidário direcional (*house effects*) e o Erro Ponderado multivariado de cada instituto em relação à apuração oficial do TSE.
@@ -78,7 +78,7 @@ O projeto segue premissas estatísticas não-negociáveis respaldadas pelos padr
 A base de código é estruturada em camadas estritamente desacopladas:
 
 ```
-eleicoes2026-audit/
+margem_eleitoral/
 ├── config/
 │   ├── settings.yaml            # Parâmetros de corte temporal, thresholds e metadados
 │   └── taxonomy_mapping.yaml    # Harmonização de institutos, métodos e candidatos
@@ -115,7 +115,7 @@ eleicoes2026-audit/
 │       ├── normalizer.py        # Harmonização taxonômica de nomes e métodos
 │       ├── schemas.py           # Contratos estritos Pydantic v2
 │       └── valid_votes.py       # Algoritmo de conversão para votos válidos
-├── tests/                       # Suíte de 67 testes funcionais (pytest)
+├── tests/                       # Suíte de 68 testes funcionais (pytest)
 ├── pyproject.toml               # Configuração do projeto e dependências uv
 └── uv.lock                      # Trava determinística de dependências
 ```
@@ -146,7 +146,7 @@ uv run app.py
 *(ou pelo comando tradicional: `uv run streamlit run src/presentation/app.py`)*
 
 ### 4. Execução dos Testes Automatizados e Cobertura
-O repositório conta com **67 testes unitários** e de integração, com **91% de cobertura global**:
+O repositório conta com **68 testes unitários** e de integração, com **91% de cobertura global**:
 ```bash
 uv run pytest --cov=src --cov-report=term-missing tests/
 ```

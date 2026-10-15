@@ -1,7 +1,7 @@
-"""Aplicação Principal de Auditoria e Storytelling de Pesquisas Eleitorais (margem_eleitoral).
+"""Aplicação Principal de Auditoria e Storytelling de Pesquisas Eleitorais (Margem Eleitoral).
 
 Ponto de entrada Streamlit com suporte a navegação por Atos, visualização analítica
-no padrão dark mode da referência (Plano Político), e atualização contínua para o 2º Turno de 2026.
+no padrão dark mode da referência (Plano Político), e atualização contínua para múltiplos ciclos eleitorais.
 """
 
 import sys
@@ -156,7 +156,7 @@ def main() -> None:
         None.
     """
     st.set_page_config(
-        page_title="margem_eleitoral | Auditoria e Storytelling de Pesquisas 2026",
+        page_title="Margem Eleitoral | Auditoria Científica de Pesquisas Eleitorais",
         page_icon="📊",
         layout="wide",
         initial_sidebar_state="expanded",
@@ -165,13 +165,13 @@ def main() -> None:
     init_session_state()
     apply_custom_css()
 
-    # Barra lateral de controles e extensão contínua para o 2º Turno
+    # Barra lateral de controles e extensão contínua para múltiplos ciclos eleitorais
     st.sidebar.markdown("## ⚙️ Parâmetros de Auditoria")
     ano_opcao = st.sidebar.selectbox(
         "Ciclo Eleitoral:",
         [2026, 2022],
         index=0,
-        help="Base ativa oficial do ciclo presidencial (2026 oficial pós-1º Turno ou 2022 histórico).",
+        help="Base ativa oficial do ciclo eleitoral (dados de 2026 pós-1º Turno ou histórico de 2022).",
     )
     ano_eleicao = int(ano_opcao)
 
@@ -258,7 +258,7 @@ def main() -> None:
 
     # Header de Navegação Superior e Botão de Consulta Metodológica
     st.markdown(
-        '<div class="breadcrumb-text">Início &gt; Auditoria e Storytelling de Pesquisas</div>',
+        '<div class="breadcrumb-text">Início &gt; Margem Eleitoral &gt; Auditoria e Storytelling de Pesquisas</div>',
         unsafe_allow_html=True,
     )
     col_title, col_doc = st.columns([3, 1])

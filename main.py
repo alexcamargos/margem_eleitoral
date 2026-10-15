@@ -1,4 +1,4 @@
-"""Ponto de entrada do pacote margem_eleitoral.
+"""Ponto de entrada do pacote Margem Eleitoral.
 
 Para executar a aplicação interativa:
     uv run app
@@ -19,7 +19,7 @@ def main() -> None:
     Raises:
         SystemExit: Ao finalizar a execução do servidor Streamlit.
     """
-    print("Iniciando margem_eleitoral (Auditoria e Storytelling de Pesquisas 2026)...")
+    print("Iniciando Margem Eleitoral (Auditoria e Storytelling Científico de Pesquisas Eleitorais)...")
     run()
 
 

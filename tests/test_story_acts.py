@@ -1,5 +1,7 @@
 """Testes unitários para os módulos de Atos de Storytelling (Atos 1 a 5)."""
 
+from datetime import timedelta
+
 from pytest_mock import MockerFixture
 
 from src.presentation.story_acts.act1_uncertainty import render_act1
@@ -7,7 +9,11 @@ from src.presentation.story_acts.act2_election_film import render_act2
 from src.presentation.story_acts.act3_eve_clash import render_act3
 from src.presentation.story_acts.act4_error_anatomy import render_act4
 from src.presentation.story_acts.act5_scientific_verdict import render_act5
-from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficialTSESchema
+from src.transformations.schemas import (
+    MetodologiaEnum,
+    PesquisaEleitoralSchema,
+    ResultadoOficialTSESchema,
+)
 
 
 def mock_columns(mocker: MockerFixture, arg: int | list) -> list:
@@ -95,7 +101,20 @@ def test_render_act5(
     sample_historical_campaign_polls_2026: list[PesquisaEleitoralSchema],
     sample_tse_result_2026: ResultadoOficialTSESchema,
 ) -> None:
-    """Valida a renderização do Ato 5 com Testes de Hipótese e TSE."""
+    """Valida a renderização do Ato 5 com Testes de Hipótese e TSE.
+
+    Args:
+        mocker: Fixture de mock do pytest-mock.
+        sample_eve_polls_2026: Fixture com pesquisas de véspera.
+        sample_historical_campaign_polls_2026: Fixture com histórico de campanha (>14 dias).
+        sample_tse_result_2026: Fixture com resultado oficial apurado.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
     eve_polls = sample_eve_polls_2026
     all_polls = sample_historical_campaign_polls_2026 + eve_polls
     tse_result = sample_tse_result_2026
@@ -103,11 +122,83 @@ def test_render_act5(
     mocker.patch("streamlit.markdown")
     mocker.patch("streamlit.columns", side_effect=lambda arg: mock_columns(mocker, arg))
     mocker.patch("streamlit.write")
-    mocker.patch("streamlit.metric")
+    mock_metric = mocker.patch("streamlit.metric")
     mocker.patch("streamlit.plotly_chart")
 
     # Renderiza sem all_polls
     render_act5(eve_polls, tse_result)
+    calls_sem_all = [
+        call for call in mock_metric.call_args_list if call[0][0] == "Late Swing Estimado"
+    ]
+    assert len(calls_sem_all) == 1
+    assert calls_sem_all[0][0][1] == "N/D"
 
-    # Renderiza com all_polls (ativa cálculo de late swing)
+    mock_metric.reset_mock()
+
+    # Renderiza com all_polls onde todas são > 14 dias (deve continuar N/D)
     render_act5(eve_polls, tse_result, all_polls=all_polls)
+    calls_com_all = [
+        call for call in mock_metric.call_args_list if call[0][0] == "Late Swing Estimado"
+    ]
+    assert len(calls_com_all) == 1
+    assert calls_com_all[0][0][1] == "N/D"
+
+
+def test_render_act5_with_pre_eve_polls(
+    mocker: MockerFixture,
+    sample_eve_polls_2026: list[PesquisaEleitoralSchema],
+    sample_tse_result_2026: ResultadoOficialTSESchema,
+) -> None:
+    """Valida a renderização do Ato 5 com cálculo de late swing ativo via pré-véspera.
+
+    Args:
+        mocker: Fixture de mock do pytest-mock.
+        sample_eve_polls_2026: Fixture com pesquisas de véspera.
+        sample_tse_result_2026: Fixture com resultado oficial do TSE.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    eve_polls = sample_eve_polls_2026
+    c1 = sorted(
+        sample_tse_result_2026.resultado_nominal.keys(),
+        key=lambda c: sample_tse_result_2026.resultado_nominal[c],
+        reverse=True,
+    )[0]
+
+    # Cria pesquisa de pré-véspera a 10 dias da véspera (janela expandida)
+    min_date = min(p.data_fim_campo for p in eve_polls)
+    pre_poll = PesquisaEleitoralSchema(
+        id_registro_tse="BR-09999/2026",
+        instituto_razao_social="Instituto Teste Ltda",
+        instituto_nome_fantasia="Instituto Teste",
+        data_inicio_campo=min_date - timedelta(days=12),
+        data_fim_campo=min_date - timedelta(days=10),
+        data_divulgacao=min_date - timedelta(days=9),
+        tamanho_amostra=2000,
+        margem_erro_declarada=2.0,
+        nivel_confianca=0.95,
+        metodologia=MetodologiaEnum.PRESENCIAL_DOMICILIAR,
+        deff_estimado=1.3,
+        votos_totais={c1: 45.0, "Outros": 50.0},
+        votos_validos={c1: 47.4, "Outros": 52.6},
+        percentual_indecisos=2.0,
+        percentual_brancos_nulos=3.0,
+    )
+    all_polls = [pre_poll] + eve_polls
+
+    mocker.patch("streamlit.markdown")
+    mocker.patch("streamlit.columns", side_effect=lambda arg: mock_columns(mocker, arg))
+    mocker.patch("streamlit.write")
+    mock_metric = mocker.patch("streamlit.metric")
+    mocker.patch("streamlit.plotly_chart")
+
+    render_act5(eve_polls, sample_tse_result_2026, all_polls=all_polls)
+
+    calls = [call for call in mock_metric.call_args_list if call[0][0] == "Late Swing Estimado"]
+    assert len(calls) == 1
+    assert calls[0][0][1] != "N/D"
+    assert "janela de 14 dias" in calls[0][1]["help"]

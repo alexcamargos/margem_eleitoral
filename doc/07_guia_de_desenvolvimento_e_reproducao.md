@@ -1,6 +1,6 @@
 # Guia de Engenharia, Testes e Reprodução
 
-Este guia prático fornece as instruções detalhadas para configurar o ambiente de desenvolvimento, executar a aplicação interativa, rodar a suíte completa de 67 testes automatizados com medição de cobertura, verificar padrões de código e executar pipelines de ingestão de dados.
+Este guia prático fornece as instruções detalhadas para configurar o ambiente de desenvolvimento, executar a aplicação interativa, rodar a suíte completa de 68 testes automatizados com medição de cobertura, verificar padrões de código e executar pipelines de ingestão de dados.
 
 ---
 
@@ -61,7 +61,7 @@ Após o disparo, a interface estará acessível no navegador padrão no endereç
 O projeto adota uma rigorosa política de garantia de qualidade (QA) baseada em testes funcionais nativos do `pytest`, sem uso do módulo legado `unittest`.
 
 ### 1. Executar Todos os Testes
-Para rodar a suíte completa de 67 testes:
+Para rodar a suíte completa de 68 testes:
 
 ```bash
 uv run pytest tests/
@@ -140,7 +140,7 @@ uv run ruff format src/ tests/
 
 Para reprocessar os dados brutos e atualizar os arquivos consolidados em formato Parquet:
 
-### 1. Ingestão e Processamento do Ciclo de 2026
+### 1. Ingestão e Processamento do Ciclo de 2026 (Exemplo de Validação do MVP)
 ```bash
 uv run python -m src.ingestion.pipeline --year 2026
 ```
@@ -149,6 +149,8 @@ uv run python -m src.ingestion.pipeline --year 2026
 ```bash
 uv run python -m src.ingestion.pipeline --year 2022
 ```
+
+> **Suporte Multianual:** O parâmetro `--year <ano>` aceita qualquer ano eleitoral configurado, permitindo estender o pipeline para novos pleitos futuros além dos anos de validação do MVP.
 
 O pipeline realiza automaticamente as seguintes operações:
 1. Localiza os dados brutos em `data/raw/{ano}/` (ou realiza o download do arquivo ZIP de dados abertos do TSE caso ausente);

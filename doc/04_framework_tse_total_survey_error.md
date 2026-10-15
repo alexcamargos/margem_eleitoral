@@ -1,6 +1,6 @@
 # Framework de Total Survey Error (TSE) e Auditoria Antifraude
 
-O projeto **margem_eleitoral** adota o paradigma científico do **Total Survey Error (TSE)** — *Erro Total de Pesquisa* — formalizado por Robert Groves et al. (2004) e Paul Biemer (2010), como estrutura teórica fundamental para auditar a fidedignidade dos levantamentos eleitorais e confrontar formalmente hipóteses de fraude.
+O projeto **Margem Eleitoral** adota o paradigma científico do **Total Survey Error (TSE)** — *Erro Total de Pesquisa* — formalizado por Robert Groves et al. (2004) e Paul Biemer (2010), como estrutura teórica fundamental para auditar a fidedignidade dos levantamentos eleitorais e confrontar formalmente hipóteses de fraude.
 
 ---
 

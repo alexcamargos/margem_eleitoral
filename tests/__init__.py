@@ -1,1 +1,1 @@
-"""Suíte de testes automatizados do margem_eleitoral."""
+"""Suíte de testes automatizados do Margem Eleitoral."""

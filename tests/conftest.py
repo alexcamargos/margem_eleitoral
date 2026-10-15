@@ -1,4 +1,4 @@
-"""Fixtures compartilhadas para a suíte de testes unitários do margem_eleitoral.
+"""Fixtures compartilhadas para a suíte de testes unitários do Margem Eleitoral.
 
 Fornece dados canônicos em memória para validação dos módulos analíticos,
 componentes visuais e Atos de storytelling sem dependência de chamadas externas de rede.

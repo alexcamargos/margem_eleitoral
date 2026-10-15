@@ -145,26 +145,30 @@ def create_trend_aggregator_chart(
         min_date = min(p.data_fim_campo for p in polls)
         max_date = max(p.data_fim_campo for p in polls)
 
+        ano = polls[0].ano if (hasattr(polls[0], "ano") and polls[0].ano) else min_date.year
         milestones = [
-            ("2026-08-16", "Início Propaganda"),
-            ("2026-08-28", "Horário Eleitoral"),
-            ("2026-09-29", "Debate na TV"),
-            ("2026-10-02", "Reta Final"),
+            (f"{ano}-08-16", "Início Propaganda"),
+            (f"{ano}-08-26" if ano == 2022 else f"{ano}-08-28", "Horário Eleitoral"),
+            (f"{ano}-09-29", "Debate na TV"),
+            (f"{ano}-09-30" if ano == 2022 else f"{ano}-10-02", "Reta Final"),
         ]
         for m_str, m_label in milestones:
             from datetime import date as dt_date
 
-            m_dt = dt_date.fromisoformat(m_str)
-            if min_date <= m_dt <= max_date:
-                fig.add_vline(
-                    x=m_str,
-                    line_dash="dot",
-                    line_color="#475569",
-                    line_width=1.2,
-                    annotation_text=m_label,
-                    annotation_position="top left",
-                    annotation_font=dict(size=9, color="#94A3B8"),
-                )
+            try:
+                m_dt = dt_date.fromisoformat(m_str)
+                if min_date <= m_dt <= max_date:
+                    fig.add_vline(
+                        x=m_str,
+                        line_dash="dot",
+                        line_color="#475569",
+                        line_width=1.2,
+                        annotation_text=m_label,
+                        annotation_position="top left",
+                        annotation_font=dict(size=9, color="#94A3B8"),
+                    )
+            except ValueError:
+                pass
 
     fig.update_layout(
         title=dict(

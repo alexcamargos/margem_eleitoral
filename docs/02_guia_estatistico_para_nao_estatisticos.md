@@ -70,7 +70,7 @@ Da mesma forma, durante uma campanha eleitoral ocorrem:
 * O fenômeno do **voto útil**: eleitores de candidatos com pouca chance migram seus votos nas últimas 48 horas para evitar a vitória de seu adversário mais rejeitado;
 * Eleitores indecisos que só decidem seu voto na fila da seção eleitoral.
 
-Por essa razão, no projeto **margem_eleitoral**, adotamos um princípio científico rigoroso da literatura internacional:
+Por essa razão, no projeto **Margem Eleitoral**, adotamos um princípio científico rigoroso da literatura internacional:
 * **Apenas pesquisas cujo campo de coleta terminou a no máximo 72 horas antes do pleito podem ser comparadas diretamente com o resultado da urna.**
 * Pesquisas anteriores a 72 horas pertencem exclusivamente à análise de trajetória e evolução temporal (o "filme da eleição"), e não ao teste formal de erro de véspera.
 

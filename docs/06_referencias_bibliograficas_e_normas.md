@@ -1,6 +1,6 @@
 # Referências Bibliográficas e Normas Técnicas
 
-Este documento reúne o arcabouço bibliográfico, as normas profissionais internacionais e a legislação eleitoral brasileira que fundamentam todas as decisões metodológicas, estatísticas e de engenharia de dados do projeto **margem_eleitoral**.
+Este documento reúne o arcabouço bibliográfico, as normas profissionais internacionais e a legislação eleitoral brasileira que fundamentam todas as decisões metodológicas, estatísticas e de engenharia de dados do projeto **Margem Eleitoral**.
 
 ---
 

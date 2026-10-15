@@ -1,6 +1,6 @@
 # Jornada de Data Storytelling e Guia da Interface
 
-A interface da aplicação **margem_eleitoral** foi projetada para transformar dados estatísticos complexos e modelos matemáticos de alta densidade em uma experiência fluida, acessível e esclarecedora para o cidadão comum, jornalistas, gestores e especialistas.
+A interface da aplicação **Margem Eleitoral** foi projetada para transformar dados estatísticos complexos e modelos matemáticos de alta densidade em uma experiência fluida, acessível e esclarecedora para o cidadão comum, jornalistas, gestores e especialistas.
 
 Este documento detalha o roteiro narrativo em cinco atos sequenciais, os componentes visuais em Plotly e os recursos interativos de simulação e sincronização em tempo real.
 
@@ -96,12 +96,12 @@ A interface adota a estética de **jornalismo analítico profissional em Dark Mo
 
 ---
 
-## Sincronização Contínua e Extensão ao 2º Turno de 2026
+## Sincronização Contínua e Extensão a Múltiplos Ciclos Eleitorais
 
-Para viabilizar o acompanhamento contínuo da eleição em tempo real, a barra lateral da aplicação integra um módulo de sincronização:
+Para viabilizar o acompanhamento contínuo da eleição em tempo real e a expansão para outros anos, a barra lateral da aplicação integra um módulo de sincronização:
 
 1. **Seletor de Ano e Turno:**
-   * Permite alternar instantaneamente entre a auditoria da eleição de **2026** (com foco no 1º e 2º turno) e o benchmark histórico de **2022**.
+   * Permite alternar instantaneamente entre a auditoria da eleição selecionada (como 2026 com 1º e 2º turnos) e o benchmark histórico de 2022, com suporte arquitetural para futuros pleitos e anos adicionais após a validação do MVP.
 2. **Formulário de Inserção de Pesquisa em Tempo Real:**
    * Permite cadastrar um novo levantamento de 2º Turno informando número de registro no TSE, nome do instituto, metodologia, tamanho de amostra e percentuais brutos dos concorrentes.
    * O sistema recalcula automaticamente os votos válidos com validação estrita via Pydantic e injeta os dados na sessão, atualizando instantaneamente o agregador e as métricas.

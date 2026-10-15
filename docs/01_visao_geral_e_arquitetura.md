@@ -1,6 +1,6 @@
 # Visão Geral e Arquitetura de Software
 
-O **margem_eleitoral** foi concebido sob princípios rigorosos de engenharia de software e ciência de dados moderna, priorizando reprodutibilidade científica, desacoplamento de responsabilidades, alta performance computacional e integridade de dados.
+O projeto **Margem Eleitoral** foi concebido sob princípios rigorosos de engenharia de software e ciência de dados moderna, priorizando reprodutibilidade científica, desacoplamento de responsabilidades, alta performance computacional, arquitetura extensível a múltiplos ciclos eleitorais e integridade de dados.
 
 Este documento detalha as decisões estruturais do repositório, o fluxo de ponta a ponta dos dados e a justificativa técnica para a seleção de cada componente do stack.
 
@@ -54,7 +54,7 @@ margem_eleitoral/
 │       ├── normalizer.py        # Harmonização taxonômica e fonética
 │       ├── schemas.py           # Contratos de dados Pydantic
 │       └── valid_votes.py       # Algoritmo de conversão canônica para votos válidos
-├── tests/                       # Suíte de 67 testes com 91% de cobertura (pytest)
+├── tests/                       # Suíte de 68 testes com 91% de cobertura (pytest)
 ├── pyproject.toml               # Configuração de build, dependências uv e linter ruff
 └── README.md                    # Apresentação executiva do repositório
 ```
@@ -152,6 +152,7 @@ class PesquisaEleitoralSchema(BaseModel):
 * **Expressão Regular:** O número de registro do TSE deve seguir rigorosamente a máscara oficial `UF-NNNNN/AAAA`.
 * **Cronologia de Campo:** Validador `@model_validator(mode="after")` assegura que `data_inicio_campo <= data_fim_campo <= data_divulgacao`.
 * **Metodologia Tipada:** Conversão obrigatória para `MetodologiaEnum` (`PRESENCIAL_DOMICILIAR`, `TELEFONICA_CATI`, `ONLINE`, etc.).
+* **Ciclos Eleitorais Suportados:** O atributo `ano` aceita qualquer ano de eleição (como 2022, 2026 ou pleitos futuros), permitindo estender a base após a validação do MVP.
 
 ### Contrato de Resultado Oficial do TSE (`ResultadoOficialTSESchema`)
 

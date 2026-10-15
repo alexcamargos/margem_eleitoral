@@ -1,8 +1,8 @@
 # Sumário Executivo e Índice Geral da Documentação
 
-Bem-vindo à documentação técnica e analítica do projeto **margem_eleitoral** (*Auditoria e Storytelling de Pesquisas Eleitorais — Brasil 2026*). 
+Bem-vindo à documentação técnica e analítica do projeto **Margem Eleitoral** (*Auditoria e Storytelling Científico de Pesquisas Eleitorais*). 
 
-Este repositório reúne um arcabouço computacional e estatístico sênior desenvolvido em Python para auditar, modelar e interpretar pesquisas eleitorais registradas no Tribunal Superior Eleitoral (TSE), confrontando tecnicamente a crença popular de fraude eleitoral a partir de formulações científicas consagradas mundialmente pela **WAPOR** (*World Association for Public Opinion Research*) e **AAPOR** (*American Association for Public Opinion Research*).
+Este repositório reúne um arcabouço computacional e estatístico sênior desenvolvido em Python para auditar, modelar e interpretar pesquisas eleitorais registradas no Tribunal Superior Eleitoral (TSE). Projetada sob uma arquitetura modular extensível a múltiplos ciclos eleitorais, a solução tem sua validação inicial no MVP com os dados das eleições de 2022 e 2026, com suporte estrutural para expansão a quaisquer anos e pleitos futuros, confrontando tecnicamente a crença popular de fraude eleitoral a partir de formulações científicas consagradas mundialmente pela **WAPOR** (*World Association for Public Opinion Research*) e **AAPOR** (*American Association for Public Opinion Research*).
 
 ---
 
@@ -18,7 +18,7 @@ A documentação está organizada modularmente em 7 tratados temáticos, permiti
 | [**Doc 04**](04_framework_tse_total_survey_error.md) | **Framework de Total Survey Error (TSE)** | Pesquisadores, Auditores, Peritos | Modelo de Groves et al. (2004) aplicado ao Brasil: decomposição do erro em amostragem, cobertura, abstenção diferencial, efeito de casa e movimentação de última hora (*late swing*). |
 | [**Doc 05**](05_jornada_data_storytelling_e_interface.md) | **Jornada de Storytelling e Interface** | Designers de Produto, Jornalistas de Dados | Detalhamento dos 5 Atos Narrativos da aplicação, componentes visuais em Plotly (Forest Plot, Small Multiples de Tilt, Barras de Erro Ponderado) e sincronização do 2º Turno. |
 | [**Doc 06**](06_referencias_bibliograficas_e_normas.md) | **Referências Bibliográficas e Normas** | Acadêmicos, Auditores Legais | Normas WAPOR/AAPOR, resoluções do TSE, bibliografia seminal (Mosteller, Kish, Groves, Biemer, Silver, Gelman, Jackman) e manuais de amostragem. |
-| [**Doc 07**](07_guia_de_desenvolvimento_e_reproducao.md) | **Guia de Engenharia e Reprodução** | Desenvolvedores, Avaliadores Técnicos | Guia prático de setup com `uv`, execução do Streamlit, pipelines de ingestão, execução da suíte de 67 testes automatizados com cobertura de 91% e linter Ruff. |
+| [**Doc 07**](07_guia_de_desenvolvimento_e_reproducao.md) | **Guia de Engenharia e Reprodução** | Desenvolvedores, Avaliadores Técnicos | Guia prático de setup com `uv`, execução do Streamlit, pipelines de ingestão, execução da suíte de 68 testes automatizados com cobertura de 91% e linter Ruff. |
 
 ---
 
@@ -43,5 +43,5 @@ flowchart TD
 
 ## Links Rápidos para Execução
 * **Executar a aplicação interativa:** `uv run app`
-* **Rodar os 67 testes com cobertura:** `uv run pytest --cov=src --cov-report=term-missing tests/`
+* **Rodar os 68 testes com cobertura:** `uv run pytest --cov=src --cov-report=term-missing tests/`
 * **Verificação de qualidade de código:** `uv run ruff check src/ tests/`

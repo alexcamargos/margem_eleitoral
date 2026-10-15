@@ -1,6 +1,6 @@
 # Metodologia e Formulações Estatísticas
 
-Este documento constitui o tratado matemático e estatístico formal do projeto **margem_eleitoral**. Todas as equações, deduções e algoritmos implementados no código-fonte são aqui especificados com rigor formal, acompanhados de suas justificativas teóricas e respaldo na literatura científica de amostragem e opinião pública.
+Este documento constitui o tratado matemático e estatístico formal do projeto **Margem Eleitoral**. Todas as equações, deduções e algoritmos implementados no código-fonte são aqui especificados com rigor formal, acompanhados de suas justificativas teóricas e respaldo na literatura científica de amostragem e opinião pública.
 
 ---
 

@@ -35,8 +35,8 @@ def render_documentation_content() -> None:
             a crença popular de que divergências entre pesquisas eleitorais e os resultados apurados nas
             urnas eletrônicas seriam sinônimo de manipulação ou fraude.
 
-            A plataforma aplica formulações consolidadas internacionalmente pela **WAPOR** (*World Association for Public Opinion Research*)
-            e pela **AAPOR** (*American Association for Public Opinion Research*), permitindo que qualquer cidadão, jornalista
+            A plataforma aplica formulações consolidadas internacionalmente pela [**WAPOR**](https://wapor.org/) (*World Association for Public Opinion Research*)
+            e pela [**AAPOR**](https://aapor.org/) (*American Association for Public Opinion Research*), permitindo que qualquer cidadão, jornalista
             ou analista possa auditar o desempenho histórico e a calibração de cada instituto com base em evidências verificáveis.
             Concebida como uma arquitetura modular extensível a múltiplos ciclos eleitorais, a solução tem sua validação
             inicial no MVP com dados de 2022 e 2026, estruturada para abranger outros anos e pleitos futuros.
@@ -142,7 +142,7 @@ def render_documentation_content() -> None:
             r"""
             ---
 
-            ### 3. Métricas Internacionais WAPOR / AAPOR
+            ### 3. Métricas Internacionais [WAPOR](https://wapor.org/) / [AAPOR](https://aapor.org/)
             * **Mosteller 3 ($M_3$):** Erro absoluto pontual do candidato líder:
             """
         )

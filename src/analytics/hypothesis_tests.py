@@ -9,6 +9,8 @@ from typing import Sequence
 import numpy as np
 from scipy import stats
 
+from src.transformations.schemas import PesquisaEleitoralSchema
+
 
 def run_paired_t_test(residuals: Sequence[float]) -> dict[str, float | bool]:
     """Executa o teste t de Student para média dos resíduos igual a zero.
@@ -131,36 +133,97 @@ def run_coverage_binomial_test(
     }
 
 
+def extract_pre_eve_estimates(
+    all_polls: Sequence[PesquisaEleitoralSchema],
+    eve_polls: Sequence[PesquisaEleitoralSchema],
+    candidate: str,
+    standard_window_days: int = 7,
+    max_window_days: int = 14,
+) -> tuple[list[float], int | None]:
+    """Extrai intenções de voto de pré-véspera com expansão dinâmica de janela temporal.
+
+    Busca pesquisas com término de campo anterior à data inicial das pesquisas de véspera.
+    Aplica janela primária padrão (default: 7 dias). Se nenhum levantamento for encontrado,
+    expande dinamicamente a busca até o limite máximo (default: 14 dias) para capturar
+    a rodada imediatamente anterior.
+
+    Args:
+        all_polls: Sequência com todas as pesquisas da campanha eleitoral.
+        eve_polls: Sequência das pesquisas de véspera consolidadas.
+        candidate: Nome do candidato a ser extraído.
+        standard_window_days: Janela inicial em dias (default: 7).
+        max_window_days: Janela máxima de expansão em dias (default: 14).
+
+    Returns:
+        tuple[list[float], int | None]: Tupla contendo:
+            - Lista de intenções de voto apuradas em votos válidos para o candidato.
+            - Janela efetiva em dias utilizada (7 ou 14) ou None se não houver dados.
+
+    Raises:
+        ValueError: Se standard_window_days <= 0 ou max_window_days < standard_window_days.
+    """
+    if standard_window_days <= 0 or max_window_days < standard_window_days:
+        raise ValueError("Limiares de janela temporal inválidos.")
+
+    if not all_polls or not eve_polls:
+        return [], None
+
+    min_eve_date = min(p.data_fim_campo for p in eve_polls)
+
+    # 1º estágio: Janela padrão (até 7 dias)
+    standard_polls = [
+        p
+        for p in all_polls
+        if candidate in p.votos_validos
+        and 0 < (min_eve_date - p.data_fim_campo).days <= standard_window_days
+    ]
+    if standard_polls:
+        return [p.votos_validos[candidate] for p in standard_polls], standard_window_days
+
+    # 2º estágio: Janela expandida (até 14 dias)
+    extended_polls = [
+        p
+        for p in all_polls
+        if candidate in p.votos_validos
+        and 0 < (min_eve_date - p.data_fim_campo).days <= max_window_days
+    ]
+    if extended_polls:
+        return [p.votos_validos[candidate] for p in extended_polls], max_window_days
+
+    return [], None
+
+
 def decompose_total_survey_error(
     p_hat_series: Sequence[float],
     p_true: float,
     sample_sizes: Sequence[int],
     deff: float = 1.3,
     pre_eve_p_hat_series: Sequence[float] | None = None,
-) -> dict[str, float]:
+) -> dict[str, float | None]:
     """Decompõe o Total Survey Error (TSE) em variância amostral, viés, late swing e resíduo estrutural.
 
     MSE = Bias^2 + Var_Total
 
     Permite quantificar o efeito do voto útil e movimentação de última hora (late swing)
-    ao contrastar as estimativas de véspera com a série de pesquisas pré-véspera (T-7 a T-3).
+    ao contrastar as estimativas de véspera com a série de pesquisas pré-véspera (T-7 a T-3 ou janela expandida).
+    Caso não haja pesquisas de pré-véspera disponíveis, late_swing_variance é retornado como None.
 
     Args:
         p_hat_series: Sequência de estimativas dos institutos de véspera para o candidato líder.
         p_true: Percentual oficial apurado pelo TSE para o candidato líder.
         sample_sizes: Tamanhos amostrais de cada instituto correspondente.
         deff: Efeito de delineamento médio aplicado (default: 1.3).
-        pre_eve_p_hat_series: Sequência opcional de estimativas pré-véspera (T-7 a T-3)
+        pre_eve_p_hat_series: Sequência opcional de estimativas pré-véspera
             para isolar a movimentação tardia do eleitorado.
 
     Returns:
-        dict[str, float]: Dicionário com:
+        dict[str, float | None]: Dicionário com:
             - bias: Viés médio (mean(p_hat) - p_true).
             - mse: Erro quadrático médio total.
             - theoretical_sampling_variance: Variância estocástica esperada pelo tamanho amostral.
             - empirical_variance: Variância observada entre os institutos de véspera.
             - non_sampling_error_variance: Componente não-amostral total (excesso de dispersão).
-            - late_swing_variance: Variância atribuível à movimentação tardia (T-7 a T-3 vs véspera).
+            - late_swing_variance: Variância atribuível à movimentação tardia (ou None se indisponível).
             - structural_non_sampling_variance: Erro estrutural não-amostral residual (abstenção/coleta).
 
     Raises:
@@ -186,14 +249,14 @@ def decompose_total_survey_error(
     excesso_dispersao = max(0.0, var_empirica - var_teorica)
 
     # 5. Estimativa de Late Swing (movimentação de última hora entre pré-véspera e véspera)
-    if pre_eve_p_hat_series and len(pre_eve_p_hat_series) > 0:
+    if pre_eve_p_hat_series is not None and len(pre_eve_p_hat_series) > 0:
         mean_eve = float(np.mean(p_arr))
         mean_pre = float(np.mean(pre_eve_p_hat_series))
         delta_late = abs(mean_eve - mean_pre)
-        late_swing_var = float(delta_late**2)
+        late_swing_var: float | None = float(delta_late**2)
         structural_var = max(0.0, excesso_dispersao - min(excesso_dispersao, late_swing_var))
     else:
-        late_swing_var = 0.0
+        late_swing_var = None
         structural_var = excesso_dispersao
 
     # 6. MSE Total
@@ -205,6 +268,6 @@ def decompose_total_survey_error(
         "theoretical_sampling_variance": round(var_teorica, 2),
         "empirical_variance": round(var_empirica, 2),
         "non_sampling_error_variance": round(excesso_dispersao, 2),
-        "late_swing_variance": round(late_swing_var, 2),
+        "late_swing_variance": round(late_swing_var, 2) if late_swing_var is not None else None,
         "structural_non_sampling_variance": round(structural_var, 2),
     }

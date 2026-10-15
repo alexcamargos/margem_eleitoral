@@ -27,8 +27,8 @@ def render_act1() -> None:
         > *“Como é possível que apenas 2.000 pessoas representem a vontade de 156 milhões de brasileiros?”*
 
         Essa é a dúvida central que alimenta o ceticismo popular e teorias infundadas sobre pesquisas.
-        A resposta não reside em política ou adivinhação, mas na **Lei dos Grandes Números**
-        e no **Teorema Central do Limite (TCL)**.
+        A resposta não reside em política ou adivinhação, mas na [**Lei dos Grandes Números**](https://pt.wikipedia.org/wiki/Lei_dos_grandes_n%C3%BAmeros)
+        e no [**Teorema Central do Limite (TCL)**](https://pt.wikipedia.org/wiki/Teorema_central_do_limite).
         """
     )
 

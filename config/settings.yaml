@@ -1,0 +1,47 @@
+election:
+  year: 2026
+  first_round_date: "2026-10-04"
+  second_round_date: "2026-10-25"
+  default_round: 1
+
+elections:
+  2026:
+    year: 2026
+    first_round_date: "2026-10-04"
+    second_round_date: "2026-10-25"
+    default_round: 1
+    candidates:
+      - "Flávio Bolsonaro"
+      - "Lula"
+      - "Augusto Cury"
+      - "Renan Santos"
+      - "Ronaldo Caiado"
+      - "Romeu Zema"
+      - "Outros"
+  2022:
+    year: 2022
+    first_round_date: "2022-10-02"
+    second_round_date: "2022-10-30"
+    default_round: 1
+    candidates:
+      - "Lula"
+      - "Bolsonaro"
+      - "Simone Tebet"
+      - "Ciro Gomes"
+      - "Outros"
+
+audit_parameters:
+  eve_cutoff_days: 3 # 72 horas antes da votação para pesquisas de véspera
+  half_life_days: 14 # Meia-vida em dias para decaimento temporal exponencial
+  default_deff: 1.3  # Fator de correção de delineamento amostral médio
+  deff_min: 1.2
+  deff_max: 1.5
+  confidence_level: 0.95
+  credible_intervals:
+    - 0.80
+    - 0.95
+
+typical_error_thresholds:
+  below_typical_max: 3.5 # Erro ponderado <= 3.5 é considerado abaixo do típico
+  typical_max: 6.5       # Erro ponderado <= 6.5 é considerado erro típico
+                         # Acima de 6.5 é erro acima do típico

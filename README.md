@@ -85,7 +85,6 @@ margem_eleitoral/
 ├── data/
 │   ├── raw/                     # Snapshots brutos imutáveis (PesqEle e API TSE)
 │   └── processed/               # Datasets limpos e padronizados em Parquet e JSON
-├── doc/                         # Documentação técnica completa espelhada
 ├── docs/                        # Documentação técnica e estatística modular
 │   ├── 00_indice_geral.md       # Mapa de leitura e navegação
 │   ├── 01_visao_geral_e_arquitetura.md
@@ -160,7 +159,7 @@ uv run ruff check src/ tests/
 
 ## Documentação Técnica de Suporte
 
-A documentação detalhada foi modularizada na pasta [`docs/`](docs/00_indice_geral.md) (com espelho idêntico em [`doc/`](doc/00_indice_geral.md)):
+A documentação detalhada foi modularizada na pasta [`docs/`](docs/00_indice_geral.md):
 
 * [**Doc 00: Sumário e Mapa de Navegação**](docs/00_indice_geral.md) — Índice temático completo.
 * [**Doc 01: Visão Geral e Arquitetura de Software**](docs/01_visao_geral_e_arquitetura.md) — Princípios de SoC, contratos Pydantic v2, Polars e pipelines Parquet.

@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Testing and linting caches
+.pytest_cache/
+.coverage
+.ruff_cache/
+htmlcov/
+
+# Data directory
+data/

@@ -76,10 +76,12 @@ Onde:
 4. **Excesso de Dispersão Não-Amostral ($\text{Var}_{\text{Não-Amostral}}$):**
    $$\text{Var}_{\text{Não-Amostral}} = \max\left(0{,}0; \; \text{Var}_{\text{Empírica}} - \text{Var}_{\text{Teórica}}\right)$$
 5. **Variância Atribuível a Movimentação Tardia (Late Swing):**
-   Contrastando a série de pesquisas de véspera ($\le 72$h) com os levantamentos de pré-véspera ($T-7$ a $T-3$):
+   Contrastando a série de pesquisas de véspera ($\le 72$h) com os levantamentos de pré-véspera ($T-7$ a $T-3$ ou rodada imediatamente anterior expandida até $14$ dias):
    $$\text{Var}_{\text{Late Swing}} = (\bar{p}_{\text{véspera}} - \bar{p}_{\text{pré-véspera}})^2$$
+   *Nota Metodológica:* O sistema aplica busca dinâmica em dois estágios: janela padrão de até $7$ dias antes da véspera e, caso não haja levantamentos no período (cenário atípico de espaçamento amostral), expande dinamicamente para até $14$ dias para capturar a rodada anterior. Se mesmo com $14$ dias não houver dados, o indicador é reportado como **`N/D`** (Não Disponível), evitando atribuir espuriamente valor zero a uma ausência amostral.
 6. **Variância Estrutural Residual:**
    $$\text{Var}_{\text{Estrutural}} = \max\left(0{,}0; \; \text{Var}_{\text{Não-Amostral}} - \min(\text{Var}_{\text{Não-Amostral}}, \text{Var}_{\text{Late Swing}})\right)$$
+   *(Caso o Late Swing seja `N/D`, todo o excesso de dispersão não-amostral é mantido como variância estrutural).*
 
 Esta decomposição permite quantificar com exatidão científica quanto do desvio observado deveu-se à amostragem, quanto decorreu do voto útil de última hora e quanto resultou de efeitos metodológicos dos institutos.
 

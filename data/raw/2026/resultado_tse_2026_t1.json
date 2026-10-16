@@ -1,0 +1,18 @@
+{
+  "cargo": "PRESIDENTE",
+  "turno": 1,
+  "ano": 2026,
+  "total_votos_validos": 119300788,
+  "total_brancos": 2300798,
+  "total_nulos": 3674249,
+  "total_abstencoes": 33469244,
+  "resultado_nominal": {
+    "Flávio Bolsonaro": 47.03,
+    "Lula": 45.16,
+    "Augusto Cury": 2.89,
+    "Renan Santos": 2.24,
+    "Ronaldo Caiado": 2.18,
+    "Romeu Zema": 0.27,
+    "Outros": 0.23
+  }
+}

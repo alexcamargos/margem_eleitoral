@@ -2,11 +2,18 @@
 
 Permite a execução direta via:
     uv run app.py
-ou
     python app.py
+ou via servidor Streamlit / Streamlit Community Cloud:
+    streamlit run app.py
 """
 
-from src.presentation.app import run
+import streamlit as st
+
+from src.presentation.app import main, run
 
 if __name__ == "__main__":
-    run()
+    if st.runtime.exists():
+        main()
+    else:
+        run()
+

@@ -351,9 +351,11 @@ def main() -> None:
 
 
 def run() -> None:
-    """Inicia a aplicação interativa do Streamlit via linha de comando.
+    """Inicia a aplicação interativa do Streamlit via linha de comando ou renderiza a página ativa.
 
-    Configura os argumentos necessários e delega a execução para o CLI oficial do Streamlit.
+    Se o runtime do Streamlit já estiver em execução (ex.: Streamlit Community Cloud ou
+    `streamlit run`), executa `main()` diretamente para evitar `RuntimeError: Runtime instance
+    already exists!`. Caso contrário, delega a inicialização para o CLI oficial do Streamlit.
 
     Args:
         None.
@@ -362,8 +364,12 @@ def run() -> None:
         None.
 
     Raises:
-        SystemExit: Ao finalizar a execução do servidor Streamlit.
+        SystemExit: Ao finalizar a execução do servidor Streamlit via CLI.
     """
+    if st.runtime.exists():
+        main()
+        return
+
     app_path = Path(__file__).resolve()
     args = ["run", str(app_path), *sys.argv[1:]]
     sys.argv = ["streamlit", *args]
@@ -371,7 +377,5 @@ def run() -> None:
 
 
 if __name__ == "__main__":
-    if st.runtime.exists():
-        main()
-    else:
-        run()
+    run()
+

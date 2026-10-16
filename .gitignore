@@ -14,6 +14,3 @@ wheels/
 .coverage
 .ruff_cache/
 htmlcov/
-
-# Data directory
-data/

@@ -1,0 +1,13 @@
+{
+  "cargo": "PRESIDENTE",
+  "turno": 2,
+  "ano": 2022,
+  "total_votos_validos": 124252796,
+  "total_brancos": 1760641,
+  "total_nulos": 3930765,
+  "total_abstencoes": 31900000,
+  "resultado_nominal": {
+    "Lula": 50.9,
+    "Bolsonaro": 49.1
+  }
+}

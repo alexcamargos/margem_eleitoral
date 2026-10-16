@@ -123,7 +123,7 @@ def test_main_sync_button_clicked(mocker: MockerFixture) -> None:
 
 
 def test_run(mocker: MockerFixture) -> None:
-    """Verifica se a função run configura os argumentos e invoca a CLI do Streamlit.
+    """Verifica se a função run configura os argumentos e invoca a CLI do Streamlit quando o runtime não existe.
 
     Args:
         mocker: Fixture do pytest-mock.
@@ -134,6 +134,7 @@ def test_run(mocker: MockerFixture) -> None:
     Raises:
         None.
     """
+    mocker.patch("streamlit.runtime.exists", return_value=False)
     mock_exit = mocker.patch("sys.exit")
     mock_stcli = mocker.patch("streamlit.web.cli.main", return_value=0)
     mocker.patch("sys.argv", ["app", "--server.port", "8502"])
@@ -146,6 +147,28 @@ def test_run(mocker: MockerFixture) -> None:
     assert "app.py" in call_args[1]
     assert call_args[2:] == ["--server.port", "8502"]
     mock_exit.assert_called_once_with(0)
+
+
+def test_run_when_runtime_exists(mocker: MockerFixture) -> None:
+    """Verifica se run() invoca main() diretamente sem chamar stcli quando o runtime do Streamlit já está ativo.
+
+    Args:
+        mocker: Fixture do pytest-mock.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    mocker.patch("streamlit.runtime.exists", return_value=True)
+    mock_main = mocker.patch("src.presentation.app.main")
+    mock_stcli = mocker.patch("streamlit.web.cli.main")
+
+    run()
+
+    mock_main.assert_called_once()
+    mock_stcli.assert_not_called()
 
 
 def test_root_main_script(mocker: MockerFixture) -> None:
@@ -165,3 +188,4 @@ def test_root_main_script(mocker: MockerFixture) -> None:
 
     root_main.main()
     mock_run.assert_called_once()
+

@@ -1,0 +1,16 @@
+{
+  "cargo": "PRESIDENTE",
+  "turno": 1,
+  "ano": 2022,
+  "total_votos_validos": 118580000,
+  "total_brancos": 1964779,
+  "total_nulos": 3487874,
+  "total_abstencoes": 32770982,
+  "resultado_nominal": {
+    "Lula": 48.43,
+    "Bolsonaro": 43.2,
+    "Simone Tebet": 4.16,
+    "Ciro Gomes": 3.04,
+    "Outros": 1.17
+  }
+}

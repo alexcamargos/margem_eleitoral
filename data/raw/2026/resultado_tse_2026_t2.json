@@ -1,0 +1,13 @@
+{
+  "cargo": "PRESIDENTE",
+  "turno": 2,
+  "ano": 2026,
+  "total_votos_validos": 122510940,
+  "total_brancos": 2105430,
+  "total_nulos": 3512800,
+  "total_abstencoes": 32800000,
+  "resultado_nominal": {
+    "Flávio Bolsonaro": 50.45,
+    "Lula": 49.55
+  }
+}

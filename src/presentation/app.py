@@ -14,6 +14,7 @@ from streamlit.web import cli as stcli
 
 from src.ingestion.data_loader import (
     get_election_dataset,
+    get_election_date,
     get_second_round_sync_summary,
     get_tse_registration_census,
 )
@@ -24,6 +25,7 @@ from src.presentation.story_acts.act2_election_film import render_act2
 from src.presentation.story_acts.act3_eve_clash import render_act3
 from src.presentation.story_acts.act4_error_anatomy import render_act4
 from src.presentation.story_acts.act5_scientific_verdict import render_act5
+from src.presentation.story_acts.act6_predictive_forecast import render_act6
 
 
 def init_session_state() -> None:
@@ -98,7 +100,7 @@ def apply_custom_css() -> None:
             line-height: 1.5;
         }
 
-        /* Ajustes de contraste para alertas e métricas no dark mode */
+        /* Ajustes de contraste para alertas, métricas, widgets e código inline no dark mode */
         div[data-testid="stAlert"] {
             color: #F8FAFC !important;
             border-radius: 6px;
@@ -107,7 +109,8 @@ def apply_custom_css() -> None:
             color: #F8FAFC !important;
             font-size: 13.5px;
         }
-        div[data-testid="stMetricLabel"] {
+        div[data-testid="stMetricLabel"],
+        div[data-testid="stMetricLabel"] p {
             color: #CBD5E1 !important;
             font-size: 13px !important;
             font-weight: 600 !important;
@@ -117,25 +120,81 @@ def apply_custom_css() -> None:
             font-size: 26px !important;
             font-weight: 700 !important;
         }
+        section[data-testid="stSidebar"] {
+            background-color: #181B20 !important;
+            border-right: 1px solid #282D37 !important;
+        }
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3,
+        section[data-testid="stSidebar"] p,
+        section[data-testid="stSidebar"] span {
+            color: #E2E8F0;
+        }
+        .stApp div[data-testid="stWidgetLabel"] p,
+        .stApp div[data-testid="stRadio"] label p,
+        .stApp div[data-testid="stRadio"] div[role="radiogroup"] p,
+        .stApp div[data-testid="stCheckbox"] label span,
+        .stApp div[data-testid="stCheckbox"] p,
+        section[data-testid="stSidebar"] div[data-testid="stWidgetLabel"] p,
+        section[data-testid="stSidebar"] div[data-testid="stRadio"] label p {
+            color: #E2E8F0 !important;
+            font-weight: 500 !important;
+        }
+        .stApp div[data-testid="stCaptionContainer"] p {
+            color: #94A3B8 !important;
+        }
+        .stApp code {
+            background-color: #1E242C !important;
+            color: #38BDF8 !important;
+            border: 1px solid #282D37 !important;
+            padding: 2px 6px !important;
+            border-radius: 4px !important;
+            font-size: 13px !important;
+        }
+        div[data-testid="stExpander"] details {
+            background-color: #181B20 !important;
+            border: 1px solid #282D37 !important;
+            border-radius: 8px !important;
+        }
+        div[data-testid="stExpander"] summary p {
+            color: #F1F5F9 !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+        }
 
         /* Ajustes dos botões e abas */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-            border-bottom: 1px solid #282D37;
+        .stTabs [data-baseweb="tab-list"],
+        div[data-testid="stTabs"] [data-baseweb="tab-list"] {
+            gap: 6px !important;
+            border-bottom: 1px solid #282D37 !important;
         }
-        .stTabs [data-baseweb="tab"] {
-            background-color: #181B20;
-            border: 1px solid #282D37;
-            border-radius: 6px 6px 0 0;
-            color: #94A3B8;
-            padding: 8px 16px;
-            font-weight: 600;
-            font-size: 13.5px;
+        .stTabs [data-baseweb="tab"],
+        button[data-baseweb="tab"] {
+            background-color: #181B20 !important;
+            border: 1px solid #282D37 !important;
+            border-radius: 6px 6px 0 0 !important;
+            color: #CBD5E1 !important;
+            padding: 8px 14px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
         }
-        .stTabs [aria-selected="true"] {
+        .stTabs [data-baseweb="tab"] p,
+        button[data-baseweb="tab"] p {
+            color: #CBD5E1 !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+        }
+        .stTabs [aria-selected="true"],
+        button[data-baseweb="tab"][aria-selected="true"] {
             background-color: #242933 !important;
             color: #38BDF8 !important;
             border-bottom: 2px solid #38BDF8 !important;
+        }
+        .stTabs [aria-selected="true"] p,
+        button[data-baseweb="tab"][aria-selected="true"] p {
+            color: #38BDF8 !important;
+            font-weight: 700 !important;
         }
         </style>
         """,
@@ -312,7 +371,7 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
-    # Navegação por Abas na sequência lógica e pedagógica dos Atos 1 a 5
+    # Navegação por Abas na sequência lógica e pedagógica dos Atos 1 a 6
     tabs = st.tabs(
         [
             "🔬 Princípio da Incerteza (Ato 1)",
@@ -320,6 +379,7 @@ def main() -> None:
             "🎯 Forest Plot & Véspera (Ato 3)",
             "📊 Desempenho & Auditoria (Ato 4)",
             "⚖️ Veredito Científico (Ato 5)",
+            "🔮 Modelo Preditivo & Previsão (Ato 6)",
         ]
     )
 
@@ -347,6 +407,41 @@ def main() -> None:
             eve_polls=eve_polls,
             tse_result=tse_result,
             all_polls=all_polls,
+        )
+
+    with tabs[5]:
+        if "pytest" not in sys.modules:
+            import importlib
+
+            import src.presentation.components.predictive_charts as _pc_mod
+            import src.presentation.story_acts.act6_predictive_forecast as _act6_mod
+
+            importlib.reload(_pc_mod)
+            importlib.reload(_act6_mod)
+            render_act6_fn = _act6_mod.render_act6
+        else:
+            render_act6_fn = render_act6
+
+        _, _, multiscope_polls = get_election_dataset(
+            year=ano_eleicao, turno=turno_num, include_subnational=True
+        )
+        election_dt = get_election_date(year=ano_eleicao, turno=turno_num)
+        t1_tse_res = None
+        t1_polls_all = None
+        t1_dt = None
+        if turno_num == 2:
+            t1_tse_res, _, t1_polls_all = get_election_dataset(
+                year=ano_eleicao, turno=1, include_subnational=True
+            )
+            t1_dt = get_election_date(year=ano_eleicao, turno=1)
+
+        render_act6_fn(
+            polls=multiscope_polls,
+            tse_result=tse_result,
+            election_date=election_dt,
+            t1_polls=t1_polls_all,
+            t1_tse_result=t1_tse_res,
+            t1_election_date=t1_dt,
         )
 
 
@@ -378,4 +473,3 @@ def run() -> None:
 
 if __name__ == "__main__":
     run()
-

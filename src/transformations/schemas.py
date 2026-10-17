@@ -21,6 +21,14 @@ class MetodologiaEnum(str, Enum):
     ONLINE = "ONLINE"
 
 
+class AbrangenciaEnum(str, Enum):
+    """Classificação de abrangência geográfica das pesquisas eleitorais."""
+
+    NACIONAL = "NACIONAL"
+    REGIONAL = "REGIONAL"
+    ESTADUAL = "ESTADUAL"
+
+
 class PesquisaEleitoralSchema(BaseModel):
     """Contrato de dados para um levantamento de pesquisa eleitoral registrado.
 
@@ -43,6 +51,9 @@ class PesquisaEleitoralSchema(BaseModel):
         turno: Turno da eleição auditada (1 ou 2).
         cargo: Cargo eletivo em disputa (padrão: 'PRESIDENTE').
         ano: Ano do ciclo eleitoral (padrão: 2026).
+        abrangencia: Escopo geográfico da coleta (NACIONAL, REGIONAL ou ESTADUAL).
+        uf: Sigla da Unidade da Federação ou recorte territorial (padrão: 'BR').
+        regiao: Sigla da macrorregião geográfica correspondente (padrão: 'BR').
     """
 
     id_registro_tse: str = Field(..., pattern=r"^[A-Z]{2}-\d{5}/\d{4}$")
@@ -63,6 +74,9 @@ class PesquisaEleitoralSchema(BaseModel):
     turno: int = Field(default=1, ge=1, le=2)
     cargo: str = Field(default="PRESIDENTE")
     ano: int = Field(default=2026)
+    abrangencia: AbrangenciaEnum = Field(default=AbrangenciaEnum.NACIONAL)
+    uf: str = Field(default="BR", min_length=2, max_length=5)
+    regiao: str = Field(default="BR", min_length=1, max_length=5)
 
     @model_validator(mode="after")
     def validate_chronology(self) -> Self:

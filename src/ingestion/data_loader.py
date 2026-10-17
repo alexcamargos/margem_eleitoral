@@ -15,6 +15,7 @@ import yaml
 from src.ingestion.pesqele_collector import PesqEleCollector
 from src.ingestion.pipeline import run_etl_for_year
 from src.transformations.schemas import (
+    AbrangenciaEnum,
     MetodologiaEnum,
     PesquisaEleitoralSchema,
     ResultadoOficialTSESchema,
@@ -106,6 +107,10 @@ def polars_to_polls(df: pl.DataFrame) -> list[PesquisaEleitoralSchema]:
         if isinstance(dt_div, str):
             dt_div = date.fromisoformat(dt_div)
 
+        abrang_val = row.get("abrangencia") or "NACIONAL"
+        uf_val = row.get("uf") or "BR"
+        reg_val = row.get("regiao") or "BR"
+
         p = PesquisaEleitoralSchema(
             id_registro_tse=row["id_registro_tse"],
             instituto_razao_social=row["instituto_razao_social"],
@@ -125,6 +130,9 @@ def polars_to_polls(df: pl.DataFrame) -> list[PesquisaEleitoralSchema]:
             turno=row["turno"],
             cargo=row.get("cargo", "PRESIDENTE"),
             ano=row.get("ano", 2026),
+            abrangencia=AbrangenciaEnum(str(abrang_val).upper()),
+            uf=str(uf_val).upper(),
+            regiao=str(reg_val).upper(),
         )
         polls.append(p)
 
@@ -135,16 +143,19 @@ def get_election_dataset(
     year: int = 2026,
     turno: int = 1,
     cutoff_days: int = 3,
+    include_subnational: bool = False,
 ) -> tuple[ResultadoOficialTSESchema, list[PesquisaEleitoralSchema], list[PesquisaEleitoralSchema]]:
     """Carrega o resultado oficial do TSE e as pesquisas eleitorais para um dado pleito.
 
     Separa as pesquisas entre levantamentos de véspera (fim de campo <= cutoff_days antes da eleição)
-    e o conjunto total longitudinal para o Agregador Dinâmico.
+    e o conjunto total longitudinal para o Agregador Dinâmico e para o Modelo Preditivo.
 
     Args:
         year: Ano eleitoral (ex.: 2026, 2022).
         turno: Turno da eleição (1 ou 2).
         cutoff_days: Limite em dias para inclusão no critério de véspera (default: 3 dias / 72h).
+        include_subnational: Se True, inclui pesquisas ESTADUAL e REGIONAL além das NACIONAL
+            (default: False para manter a auditoria nacional dos Atos 2 a 5).
 
     Returns:
         tuple[ResultadoOficialTSESchema, list[PesquisaEleitoralSchema], list[PesquisaEleitoralSchema]]:
@@ -170,6 +181,9 @@ def get_election_dataset(
 
     # 2. Carrega as pesquisas via Polars Parquet
     df_polls = pl.read_parquet(parquet_path)
+    if "abrangencia" not in df_polls.columns:
+        run_etl_for_year(year=year, turno=turno)
+        df_polls = pl.read_parquet(parquet_path)
     all_polls = polars_to_polls(df_polls)
 
     # Filtra por turno
@@ -182,6 +196,9 @@ def get_election_dataset(
         df_polls = pl.read_parquet(parquet_path)
         all_polls = polars_to_polls(df_polls)
         all_polls_turno = [p for p in all_polls if p.turno == turno]
+
+    if not include_subnational:
+        all_polls_turno = [p for p in all_polls_turno if p.abrangencia == AbrangenciaEnum.NACIONAL]
 
     # 3. Segrega pesquisas de véspera (<= 72 horas / 3 dias da eleição)
     election_date = get_election_date(year=year, turno=turno)

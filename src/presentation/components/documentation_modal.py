@@ -79,12 +79,13 @@ def render_documentation_content() -> None:
 
             ---
 
-            ### Como Navegar pelos Cinco Atos da Aplicação
+            ### Como Navegar pelos Seis Atos da Aplicação
             1. **Ato 1 (O Princípio da Incerteza):** Entenda como a Lei dos Grandes Números permite que 2.000 entrevistados representem 156 milhões de brasileiros.
             2. **Ato 2 (O Filme da Eleição):** Acompanhe a trajetória da corrida eleitoral no agregador contínuo com faixas de incerteza.
             3. **Ato 3 (O Confronto de Véspera):** Visualize no Forest Plot se os intervalos de confiança dos institutos cobriram o resultado oficial da urna.
             4. **Ato 4 (Anatomia do Erro e Auditoria):** Analise o Erro Ponderado, a classificação por faixas de acerto e a inclinação longitudinal de cada instituto.
             5. **Ato 5 (O Veredito Científico):** Veja a síntese dos testes formais de hipótese que demonstram por que as divergências decorrem de dinâmicas amostrais e comportamentais, descartando fraudes.
+            6. **Ato 6 (Modelo Preditivo & Previsão Eleitoral):** Explore o Modelo Estado-Espaço Hierárquico Calibrado que integra pesquisas Nacionais, Estaduais e Regionais ponderadas pelo Colégio Eleitoral do TSE, valida previsões contra o 1º Turno (*Point-in-Time Backtesting*) e calibra os institutos para prever o vencedor do 2º Turno de 2026.
             """
         )
 
@@ -222,7 +223,18 @@ def render_documentation_content() -> None:
             r"""
             * **Teste t pareado e Teste de Wilcoxon:** Verificam se a média e a mediana dos resíduos $(\hat{p}_{v,i} - P_{\text{TSE}})$ diferem de zero ($H_0: \mu = 0$).
             * **ANOVA de Efeitos Fixos (Tipo II):** Avalia se o resíduo concentra significância estatística em institutos específicos ou no vetor metodológico (Presencial vs. CATI).
+
+            ---
+
+            ### 8. Modelo Preditivo Estado-Espaço Hierárquico Calibrado (Ato 6)
+            Combina pesquisas **Nacionais**, **Estaduais** e **Regionais** sob pós-estratificação pelo Colégio Eleitoral do TSE ($\omega_{\text{SE}}=0{,}426, \omega_{\text{NE}}=0{,}271, \omega_{\text{S}}=0{,}147, \omega_{\text{N}}=0{,}086, \omega_{\text{CO}}=0{,}070$), correção de House Effects e calibração pós-1º Turno:
             """
+        )
+        st.latex(
+            r"w_{\text{audit}, i} = \exp\left(-\lambda \cdot \text{EP}_{\text{T1}, i}\right), \quad \tilde{y}_{k, c} = y_{k, c}^{(\text{nac})} - \alpha_{\text{shrink}} \cdot \hat{\delta}_{i(k), c}"
+        )
+        st.latex(
+            r"P(\text{Vitória}_A) = \frac{1}{N_{\text{sim}}} \sum_{s=1}^{N_{\text{sim}}} \mathbb{I}\left(\tilde{P}_A^{(s)} > \max_{B \neq A} \tilde{P}_B^{(s)}\right), \quad \tilde{\mathbf{P}}^{(s)} \sim t_{\nu=5}\left(\hat{\boldsymbol{\mu}}(T_{\text{eleição}}), \boldsymbol{\Sigma}_{\text{total}}\right)"
         )
 
 

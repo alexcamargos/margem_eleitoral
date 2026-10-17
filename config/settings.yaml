@@ -45,3 +45,124 @@ typical_error_thresholds:
   below_typical_max: 3.5 # Erro ponderado <= 3.5 é considerado abaixo do típico
   typical_max: 6.5       # Erro ponderado <= 6.5 é considerado erro típico
                          # Acima de 6.5 é erro acima do típico
+
+electoral_college:
+  macro_regions:
+    SE:
+      name: "Sudeste"
+      weight: 0.426
+    NE:
+      name: "Nordeste"
+      weight: 0.271
+    S:
+      name: "Sul"
+      weight: 0.147
+    N:
+      name: "Norte"
+      weight: 0.086
+    CO:
+      name: "Centro-Oeste"
+      weight: 0.070
+  uf_to_region:
+    SP: "SE"
+    MG: "SE"
+    RJ: "SE"
+    ES: "SE"
+    BA: "NE"
+    PE: "NE"
+    CE: "NE"
+    MA: "NE"
+    PB: "NE"
+    RN: "NE"
+    AL: "NE"
+    PI: "NE"
+    SE: "NE"
+    RS: "S"
+    PR: "S"
+    SC: "S"
+    PA: "N"
+    AM: "N"
+    RO: "N"
+    TO: "N"
+    AC: "N"
+    AP: "N"
+    RR: "N"
+    GO: "CO"
+    MT: "CO"
+    MS: "CO"
+    DF: "CO"
+  uf_weights:
+    SP: 0.221
+    MG: 0.104
+    RJ: 0.082
+    BA: 0.072
+    RS: 0.055
+    PR: 0.054
+    PE: 0.045
+    CE: 0.044
+    PA: 0.039
+    SC: 0.035
+    GO: 0.032
+    MA: 0.032
+    PB: 0.020
+    ES: 0.019
+    AM: 0.017
+    RN: 0.016
+    PI: 0.016
+    MT: 0.016
+    AL: 0.015
+    DF: 0.014
+    MS: 0.013
+    SE: 0.011
+    RO: 0.008
+    TO: 0.007
+    AC: 0.004
+    AP: 0.004
+    RR: 0.003
+  regional_differentials:
+    # Desvio médio histórico em p.p. da região em relação à média nacional (positivo = acima da média nacional)
+    SE:
+      "Flávio Bolsonaro": 4.2
+      "Bolsonaro": 4.5
+      "Lula": -4.0
+    NE:
+      "Flávio Bolsonaro": -16.5
+      "Bolsonaro": -18.0
+      "Lula": 17.5
+    S:
+      "Flávio Bolsonaro": 11.8
+      "Bolsonaro": 12.5
+      "Lula": -11.5
+    N:
+      "Flávio Bolsonaro": 2.5
+      "Bolsonaro": 2.0
+      "Lula": -2.2
+    CO:
+      "Flávio Bolsonaro": 10.5
+      "Bolsonaro": 11.0
+      "Lula": -10.0
+
+predictive_model:
+  half_life_days: 14.0
+  trend_window_days: 14
+  drift_damping: 0.65
+  swing_gain: 0.45
+  t1_calibration_lambda: 0.25
+  t1_bias_shrinkage: 0.45
+  peer_tilt_shrinkage: 0.50
+  structural_tse_sigma: 1.15
+  n_simulations: 10000
+  random_seed: 42
+  backtest_horizons:
+    - 30
+    - 21
+    - 14
+    - 7
+    - 3
+    - 1
+  promotion_gates:
+    max_m3_error: 2.0
+    max_m5_error: 3.5
+    max_brier_score: 0.15
+    min_coverage_95: 80.0
+

@@ -202,3 +202,103 @@ def test_render_act5_with_pre_eve_polls(
     assert len(calls) == 1
     assert calls[0][0][1] != "N/D"
     assert "janela de 14 dias" in calls[0][1]["help"]
+
+
+def test_render_act6(
+    mocker: MockerFixture,
+    sample_eve_polls_2026: list[PesquisaEleitoralSchema],
+    sample_historical_campaign_polls_2026: list[PesquisaEleitoralSchema],
+    sample_tse_result_2026: ResultadoOficialTSESchema,
+) -> None:
+    """Valida a renderização completa do Ato 6 no 1º Turno e no 2º Turno calibrado.
+
+    Args:
+        mocker: Fixture de mock do pytest-mock.
+        sample_eve_polls_2026: Fixture com pesquisas de véspera.
+        sample_historical_campaign_polls_2026: Fixture com histórico de campanha.
+        sample_tse_result_2026: Fixture com resultado oficial do TSE.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    from datetime import date
+
+    from src.presentation.story_acts.act6_predictive_forecast import render_act6
+
+    all_polls = sample_historical_campaign_polls_2026 + sample_eve_polls_2026
+
+    mock_md = mocker.patch("streamlit.markdown")
+    mocker.patch("streamlit.columns", side_effect=lambda arg: mock_columns(mocker, arg))
+    mocker.patch("streamlit.slider", return_value=1)
+    mocker.patch("streamlit.checkbox", side_effect=[False, True, True, True])
+    mock_plotly = mocker.patch("streamlit.plotly_chart")
+    mock_df = mocker.patch("streamlit.dataframe")
+    mocker.patch("streamlit.caption")
+    mocker.patch("streamlit.success")
+    mocker.patch("streamlit.warning")
+    mocker.patch("streamlit.expander", return_value=mocker.MagicMock())
+
+    # 1º Turno (com resultado oficial do TSE para backtest)
+    render_act6(
+        polls=all_polls,
+        tse_result=sample_tse_result_2026,
+        election_date=date(2026, 10, 4),
+    )
+
+    assert mock_md.call_count >= 6
+    assert mock_plotly.call_count == 3
+    assert mock_df.call_count >= 3
+
+    # 2º Turno (com calibração empírica do 1º turno)
+    polls_t2 = [p.model_copy(update={"turno": 2}) for p in all_polls]
+    tse_t2 = sample_tse_result_2026.model_copy(
+        update={
+            "turno": 2,
+            "resultado_nominal": {"Flávio Bolsonaro": 0.0, "Lula": 0.0},
+        }
+    )
+    render_act6(
+        polls=polls_t2,
+        tse_result=tse_t2,
+        election_date=date(2026, 10, 25),
+        t1_polls=all_polls,
+        t1_tse_result=sample_tse_result_2026,
+        t1_election_date=date(2026, 10, 4),
+    )
+
+    assert mock_plotly.call_count >= 5
+
+
+def test_render_act6_empty_polls(
+    mocker: MockerFixture,
+    sample_tse_result_2026: ResultadoOficialTSESchema,
+) -> None:
+    """Valida a renderização segura do Ato 6 quando a lista de pesquisas é vazia.
+
+    Args:
+        mocker: Fixture de mock do pytest-mock.
+        sample_tse_result_2026: Fixture com resultado oficial do TSE.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    from datetime import date
+
+    from src.presentation.story_acts.act6_predictive_forecast import render_act6
+
+    mocker.patch("streamlit.markdown")
+    mock_info = mocker.patch("streamlit.info")
+
+    render_act6(
+        polls=[],
+        tse_result=sample_tse_result_2026,
+        election_date=date(2026, 10, 25),
+    )
+
+    assert mock_info.called

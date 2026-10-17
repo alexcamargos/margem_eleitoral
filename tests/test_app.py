@@ -63,7 +63,7 @@ def test_main_render_flow(mocker: MockerFixture) -> None:
     mocker.patch("streamlit.button", return_value=False)
     mocker.patch("streamlit.markdown")
     mocker.patch("src.presentation.app.render_documentation_modal")
-    mock_tabs = [mocker.MagicMock() for _ in range(5)]
+    mock_tabs = [mocker.MagicMock() for _ in range(6)]
     mocker.patch("streamlit.tabs", return_value=mock_tabs)
 
     mocker.patch("src.presentation.app.render_act1")
@@ -71,6 +71,7 @@ def test_main_render_flow(mocker: MockerFixture) -> None:
     mocker.patch("src.presentation.app.render_act3")
     mocker.patch("src.presentation.app.render_act4")
     mocker.patch("src.presentation.app.render_act5")
+    mocker.patch("src.presentation.app.render_act6")
 
     main()
 
@@ -112,6 +113,7 @@ def test_main_sync_button_clicked(mocker: MockerFixture) -> None:
     mocker.patch("src.presentation.app.render_act3")
     mocker.patch("src.presentation.app.render_act4")
     mocker.patch("src.presentation.app.render_act5")
+    mocker.patch("src.presentation.app.render_act6")
 
     mock_sync = mocker.patch(
         "src.ingestion.pesqele_collector.PesqEleCollector.sync_official_second_round_polls",
@@ -188,4 +190,3 @@ def test_root_main_script(mocker: MockerFixture) -> None:
 
     root_main.main()
     mock_run.assert_called_once()
-

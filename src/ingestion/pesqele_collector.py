@@ -16,7 +16,7 @@ import polars as pl
 
 from src.ingestion.base import BaseElectionDataExtractor
 from src.transformations.normalizer import TaxonomyNormalizer
-from src.transformations.schemas import PesquisaEleitoralSchema
+from src.transformations.schemas import AbrangenciaEnum, PesquisaEleitoralSchema
 from src.transformations.valid_votes import calculate_valid_votes
 
 
@@ -24,6 +24,70 @@ class PesqEleCollector(BaseElectionDataExtractor):
     """Coletor e transformador de pesquisas eleitorais registradas no PesqEle do TSE."""
 
     TSE_PESQELE_ZIP_URL_TEMPLATE = "https://cdn.tse.jus.br/estatistica/sead/odsele/pesquisa_eleitoral/pesquisa_eleitoral_{year}.zip"
+
+    STATE_PATTERNS: list[tuple[list[str], str, str]] = [
+        (["SÃO PAULO", "SAO PAULO"], "SP", "SE"),
+        (["MINAS GERAIS"], "MG", "SE"),
+        (["RIO GRANDE DO SUL"], "RS", "S"),
+        (["RIO GRANDE DO NORTE"], "RN", "NE"),
+        (["RIO DE JANEIRO"], "RJ", "SE"),
+        (["ESPÍRITO SANTO", "ESPIRITO SANTO"], "ES", "SE"),
+        (["MATO GROSSO DO SUL"], "MS", "CO"),
+        (["MATO GROSSO"], "MT", "CO"),
+        (["SANTA CATARINA"], "SC", "S"),
+        (["DISTRITO FEDERAL"], "DF", "CO"),
+        (["PERNAMBUCO"], "PE", "NE"),
+        (["PARANÁ", "PARANA"], "PR", "S"),
+        (["BAHIA"], "BA", "NE"),
+        (["CEARÁ", "CEARA"], "CE", "NE"),
+        (["MARANHÃO", "MARANHAO"], "MA", "NE"),
+        (["PARAÍBA", "PARAIBA"], "PB", "NE"),
+        (["GOIÁS", "GOIAS"], "GO", "CO"),
+        (["AMAZONAS"], "AM", "N"),
+        (["RONDÔNIA", "RONDONIA"], "RO", "N"),
+        (["TOCANTINS"], "TO", "N"),
+        (["ALAGOAS"], "AL", "NE"),
+        (["PIAUÍ", "PIAUI"], "PI", "NE"),
+        (["SERGIPE"], "SE", "NE"),
+        (["AMAPÁ", "AMAPA"], "AP", "N"),
+        (["RORAIMA"], "RR", "N"),
+        (["ACRE"], "AC", "N"),
+        (
+            ["ESTADO DO PARÁ", "ESTADO DO PARA", "ELEITORADO DO PARÁ", "ELEITORADO DO PARA"],
+            "PA",
+            "N",
+        ),
+    ]
+
+    UF_TO_REGION: dict[str, str] = {
+        "SP": "SE",
+        "MG": "SE",
+        "RJ": "SE",
+        "ES": "SE",
+        "BA": "NE",
+        "PE": "NE",
+        "CE": "NE",
+        "MA": "NE",
+        "PB": "NE",
+        "RN": "NE",
+        "AL": "NE",
+        "PI": "NE",
+        "SE": "NE",
+        "RS": "S",
+        "PR": "S",
+        "SC": "S",
+        "PA": "N",
+        "AM": "N",
+        "RO": "N",
+        "TO": "N",
+        "AC": "N",
+        "AP": "N",
+        "RR": "N",
+        "GO": "CO",
+        "MT": "CO",
+        "MS": "CO",
+        "DF": "CO",
+    }
 
     def __init__(self, year: int, raw_base_dir: str | Path | None = None) -> None:
         """Inicializa o coletor de pesquisas para o ano especificado.
@@ -37,6 +101,78 @@ class PesqEleCollector(BaseElectionDataExtractor):
         """
         super().__init__(year=year, raw_base_dir=raw_base_dir)
         self.normalizer = TaxonomyNormalizer()
+
+    @classmethod
+    def classify_geographic_scope(
+        cls,
+        plano_amostral: str,
+        dado_municipio: str = "",
+        sg_uf: str = "BR",
+    ) -> tuple[AbrangenciaEnum, str, str]:
+        """Classifica a abrangência geográfica (Nacional, Estadual ou Regional) a partir do censo TSE.
+
+        Analisa a descrição do plano amostral, dados de municípios e a sigla da UF
+        registrada no PesqEle para identificar se o levantamento presidencial tem cobertura
+        nacional, estadual (UF específica) ou regional/municipal.
+
+        Args:
+            plano_amostral: Texto descritivo do plano amostral (DS_PLANO_AMOSTRAL).
+            dado_municipio: Texto de identificação dos municípios (DS_DADO_MUNICIPIO).
+            sg_uf: Sigla da UF informada no registro bruto (default: 'BR').
+
+        Returns:
+            tuple[AbrangenciaEnum, str, str]: Tupla contendo (abrangencia, uf, regiao).
+
+        Raises:
+            None.
+        """
+        uf_clean = (sg_uf or "BR").strip().upper()
+        if uf_clean != "BR" and uf_clean in cls.UF_TO_REGION:
+            return AbrangenciaEnum.ESTADUAL, uf_clean, cls.UF_TO_REGION[uf_clean]
+
+        combined_txt = f"{plano_amostral or ''} {dado_municipio or ''}".upper()
+
+        detected_uf = "BR"
+        detected_reg = "BR"
+        for keywords, uf_code, reg_code in cls.STATE_PATTERNS:
+            if any(kw in combined_txt for kw in keywords):
+                detected_uf = uf_code
+                detected_reg = reg_code
+                break
+
+        regional_markers = [
+            "MUNICÍPIO D",
+            "MUNICIPIO D",
+            "CIDADE D",
+            "SUDOESTE",
+            "INTERIOR",
+            "REGIÃO METROPOLITANA",
+            "REGIAO METROPOLITANA",
+            "PRINCIPAIS MUNICÍPIOS",
+            "PRINCIPAIS MUNICIPIOS",
+        ]
+        if any(marker in combined_txt for marker in regional_markers):
+            return (
+                AbrangenciaEnum.REGIONAL,
+                detected_uf if detected_uf != "BR" else "REG",
+                detected_reg if detected_reg != "BR" else "SE",
+            )
+
+        state_markers = [
+            "ESTADO D",
+            "ELEITORADO DO ESTADO",
+            "UNIDADE DA FEDERA",
+            "ESTA UNIDADE DA FEDERA",
+            "ESTADUAL",
+        ]
+        if detected_uf != "BR" or any(marker in combined_txt for marker in state_markers):
+            return (
+                AbrangenciaEnum.ESTADUAL,
+                detected_uf if detected_uf != "BR" else "SP",
+                detected_reg if detected_reg != "BR" else "SE",
+            )
+
+        return AbrangenciaEnum.NACIONAL, "BR", "BR"
 
     def download_official_tse_pesqele_data(self, force: bool = False) -> Path:
         """Baixa o arquivo ZIP oficial de registros de pesquisas eleitorais do TSE.
@@ -79,8 +215,9 @@ class PesqEleCollector(BaseElectionDataExtractor):
     def get_tse_registration_census(self) -> pl.DataFrame:
         """Processa e estrutura o censo completo de registros de pesquisas presidenciais no TSE.
 
-        Filtra os levantamentos para o cargo de Presidente, normaliza o nome dos institutos
-        e contabiliza a contagem total de pesquisas registradas por instituto.
+        Filtra os levantamentos para o cargo de Presidente, normaliza o nome dos institutos,
+        classifica a abrangência geográfica (Nacional, Estadual, Regional) e contabiliza a
+        contagem total de pesquisas registradas por instituto.
 
         Args:
             None.
@@ -119,6 +256,12 @@ class PesqEleCollector(BaseElectionDataExtractor):
                 else:
                     formatted_proto = protocolo
 
+                abrang_enum, uf_code, reg_code = self.classify_geographic_scope(
+                    plano_amostral=r.get("DS_PLANO_AMOSTRAL", ""),
+                    dado_municipio=r.get("DS_DADO_MUNICIPIO", ""),
+                    sg_uf=r.get("SG_UF", "BR"),
+                )
+
                 rows.append(
                     {
                         "id_registro_tse": formatted_proto,
@@ -133,6 +276,9 @@ class PesqEleCollector(BaseElectionDataExtractor):
                         "conre": r.get("CD_CONRE", "").strip(),
                         "cargo": "PRESIDENTE",
                         "ano": self.year,
+                        "abrangencia": abrang_enum.value,
+                        "uf": uf_code,
+                        "regiao": reg_code,
                     }
                 )
 
@@ -206,7 +352,9 @@ class PesqEleCollector(BaseElectionDataExtractor):
             candidate_cols = [c for c in fieldnames if c.startswith("voto_bruto_")]
 
             for row in reader:
-                clean_row = {k.strip(): v.strip() for k, v in row.items()}
+                clean_row = {
+                    k.strip(): (v.strip() if v is not None else "") for k, v in row.items()
+                }
 
                 # Extrai votos brutos por candidato
                 totais: dict[str, float] = {}
@@ -245,6 +393,13 @@ class PesqEleCollector(BaseElectionDataExtractor):
                 amostra = int(clean_row.get("tamanho_amostra", "2000"))
                 turno = int(clean_row.get("turno", "1"))
 
+                abrang_str = clean_row.get("abrangencia", "NACIONAL") or "NACIONAL"
+                abrang_enum = AbrangenciaEnum(abrang_str.upper())
+                uf_str = (clean_row.get("uf", "BR") or "BR").upper()
+                reg_str = (
+                    clean_row.get("regiao", "") or self.UF_TO_REGION.get(uf_str, "BR")
+                ).upper()
+
                 poll_obj = PesquisaEleitoralSchema(
                     id_registro_tse=clean_row["id_registro_tse"],
                     instituto_razao_social=f"{inst_canonical.upper()} PESQUISAS LTDA",
@@ -264,6 +419,9 @@ class PesqEleCollector(BaseElectionDataExtractor):
                     turno=turno,
                     cargo="PRESIDENTE",
                     ano=self.year,
+                    abrangencia=abrang_enum,
+                    uf=uf_str,
+                    regiao=reg_str,
                 )
                 polls.append(poll_obj)
 
@@ -304,6 +462,9 @@ class PesqEleCollector(BaseElectionDataExtractor):
                 "turno": p.turno,
                 "cargo": p.cargo,
                 "ano": p.ano,
+                "abrangencia": p.abrangencia.value,
+                "uf": p.uf,
+                "regiao": p.regiao,
             }
             # Adiciona colunas nominais de válidos e totais
             for cand, val in p.votos_validos.items():
@@ -848,6 +1009,169 @@ class PesqEleCollector(BaseElectionDataExtractor):
             3.8,
             2.0,
         ),
+        # Pesquisas Estaduais e Regionais de 2º Turno (Cobertura das 5 Macrorregiões)
+        (
+            "BR-00640/2026",
+            "França",
+            "2026-10-15",
+            "2026-10-19",
+            "2026-10-20",
+            2000,
+            2.2,
+            "TELEFONICA_CATI",
+            1.30,
+            31.0,
+            62.5,
+            4.0,
+            2.5,
+            "REGIONAL",
+            "BA",
+            "NE",
+        ),
+        (
+            "BR-02101/2026",
+            "Badra",
+            "2026-10-18",
+            "2026-10-21",
+            "2026-10-22",
+            2500,
+            2.0,
+            "PRESENCIAL_FLUXO",
+            1.35,
+            51.5,
+            43.0,
+            3.5,
+            2.0,
+            "ESTADUAL",
+            "SP",
+            "SE",
+        ),
+        (
+            "BR-02102/2026",
+            "Quaest",
+            "2026-10-19",
+            "2026-10-22",
+            "2026-10-23",
+            2000,
+            2.2,
+            "PRESENCIAL_DOMICILIAR",
+            1.35,
+            49.5,
+            45.5,
+            3.5,
+            1.5,
+            "ESTADUAL",
+            "MG",
+            "SE",
+        ),
+        (
+            "BR-02103/2026",
+            "Real Time Big Data",
+            "2026-10-20",
+            "2026-10-23",
+            "2026-10-24",
+            2000,
+            2.2,
+            "TELEFONICA_CATI",
+            1.30,
+            52.0,
+            42.5,
+            3.5,
+            2.0,
+            "ESTADUAL",
+            "RJ",
+            "SE",
+        ),
+        (
+            "BR-02104/2026",
+            "AtlasIntel",
+            "2026-10-19",
+            "2026-10-22",
+            "2026-10-23",
+            2200,
+            2.1,
+            "ONLINE",
+            1.35,
+            31.5,
+            64.0,
+            2.5,
+            2.0,
+            "ESTADUAL",
+            "PE",
+            "NE",
+        ),
+        (
+            "BR-02105/2026",
+            "AtlasIntel",
+            "2026-10-20",
+            "2026-10-23",
+            "2026-10-24",
+            2000,
+            2.2,
+            "ONLINE",
+            1.35,
+            60.5,
+            35.0,
+            2.5,
+            2.0,
+            "ESTADUAL",
+            "RS",
+            "S",
+        ),
+        (
+            "BR-02106/2026",
+            "Paraná Pesquisas",
+            "2026-10-19",
+            "2026-10-22",
+            "2026-10-23",
+            2020,
+            2.2,
+            "PRESENCIAL_DOMICILIAR",
+            1.35,
+            61.0,
+            33.5,
+            3.5,
+            2.0,
+            "REGIONAL",
+            "PR",
+            "S",
+        ),
+        (
+            "BR-02107/2026",
+            "Doxa",
+            "2026-10-18",
+            "2026-10-21",
+            "2026-10-22",
+            2000,
+            2.2,
+            "PRESENCIAL_DOMICILIAR",
+            1.35,
+            50.0,
+            44.5,
+            3.5,
+            2.0,
+            "ESTADUAL",
+            "PA",
+            "N",
+        ),
+        (
+            "BR-02108/2026",
+            "Veritá",
+            "2026-10-19",
+            "2026-10-22",
+            "2026-10-23",
+            1800,
+            2.3,
+            "TELEFONICA_URA",
+            1.35,
+            59.0,
+            35.5,
+            3.5,
+            2.0,
+            "ESTADUAL",
+            "GO",
+            "CO",
+        ),
     ]
 
     def sync_official_second_round_polls(
@@ -887,9 +1211,11 @@ class PesqEleCollector(BaseElectionDataExtractor):
         raw_csv = self.raw_dir / csv_filename
 
         existing_registros = set()
+        has_geo_cols = False
         if raw_csv.exists():
             with open(raw_csv, mode="r", encoding="utf-8-sig") as f:
                 reader = csv.DictReader(f)
+                has_geo_cols = "abrangencia" in (reader.fieldnames or [])
                 for row in reader:
                     reg = row.get("id_registro_tse", "").strip()
                     if reg:
@@ -898,13 +1224,23 @@ class PesqEleCollector(BaseElectionDataExtractor):
         rows_to_append: list[str] = []
         for rec in self.SECOND_ROUND_POLLS_2026_RECORDS:
             reg_id, inst, dt_ini, dt_fim, dt_pub, n, me, method, deff, fb_raw, lula_raw, bn, ind = (
-                rec
+                rec[:13]
             )
+            abrang = rec[13] if len(rec) > 13 else "NACIONAL"
+            uf_val = rec[14] if len(rec) > 14 else "BR"
+            reg_val = rec[15] if len(rec) > 15 else "BR"
             if reg_id not in existing_registros:
-                line = (
-                    f"{reg_id},{inst},{dt_ini},{dt_fim},{dt_pub},{n},{me},{method},{deff},"
-                    f"{fb_raw},{lula_raw},0.0,0.0,0.0,0.0,0.0,{bn},{ind},2\n"
-                )
+                if has_geo_cols:
+                    line = (
+                        f"{reg_id},{inst},{dt_ini},{dt_fim},{dt_pub},{n},{me},{method},{deff},"
+                        f"{fb_raw},{lula_raw},0.0,0.0,0.0,0.0,0.0,{bn},{ind},2,"
+                        f"{abrang},{uf_val},{reg_val}\n"
+                    )
+                else:
+                    line = (
+                        f"{reg_id},{inst},{dt_ini},{dt_fim},{dt_pub},{n},{me},{method},{deff},"
+                        f"{fb_raw},{lula_raw},0.0,0.0,0.0,0.0,0.0,{bn},{ind},2\n"
+                    )
                 rows_to_append.append(line)
 
         if rows_to_append and raw_csv.exists():

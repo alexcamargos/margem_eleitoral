@@ -26,6 +26,7 @@ dev = [
 
 [project.scripts]
 app = "src.presentation.app:run"
+margem = "src.cli:main"
 
 [build-system]
 requires = ["hatchling"]

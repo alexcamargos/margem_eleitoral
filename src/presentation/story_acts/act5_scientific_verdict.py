@@ -34,14 +34,14 @@ from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficia
 
 def render_act5(
     eve_polls: Sequence[PesquisaEleitoralSchema],
-    tse_result: ResultadoOficialTSESchema,
+    tse_result: ResultadoOficialTSESchema | None,
     all_polls: Sequence[PesquisaEleitoralSchema] | None = None,
 ) -> None:
     """Renderiza a narrativa e os testes estatísticos do Ato 5.
 
     Args:
         eve_polls: Lista das pesquisas de véspera avaliadas (campo até 72h).
-        tse_result: Resultado oficial apurado pelo TSE.
+        tse_result: Resultado oficial apurado pelo TSE (ou None/pendente se eleição em andamento).
         all_polls: Lista opcional de todas as pesquisas da campanha para estimativa de late swing.
 
     Returns:
@@ -51,6 +51,26 @@ def render_act5(
         None.
     """
     st.markdown("## Ato 5: O Veredito Científico (Diagnóstico do Total Survey Error)")
+
+    if tse_result is None or not getattr(tse_result, "apuracao_concluida", True):
+        st.markdown(
+            """
+            <div style="background-color: #1A202C; border-left: 4px solid #F59E0B; padding: 18px 20px; border-radius: 8px; margin-top: 15px; margin-bottom: 25px;">
+                <div style="color: #FBBF24; font-weight: 700; font-size: 15px; margin-bottom: 6px;">
+                    ⏳ Aguardando Totalização Oficial das Urnas pelo TSE (25/10/2026)
+                </div>
+                <div style="color: #E2E8F0; font-size: 13.5px; line-height: 1.6;">
+                    O diagnóstico inferencial antifraude e os <b>testes formais de hipótese estatística</b>
+                    (Teste $t$ pareado de Student, Teste de Wilcoxon dos resíduos e decomposição de <i>Total Survey Error</i> de Groves et al.)
+                    dependem da confrontação formal entre as estimativas das pesquisas e o dado oficial apurado da urna.<br>
+                    Assim que a apuração do 2º Turno for concluída no dia 25/10/2026, os testes serão calculados e exibidos em tempo real.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
+
     st.markdown(
         """
         > *“Divergências pontuais entre pesquisas e a urna configuram prova de fraude eleitoral?”*

@@ -32,14 +32,14 @@ from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficia
 def render_act4(
     eve_polls: Sequence[PesquisaEleitoralSchema],
     all_polls: Sequence[PesquisaEleitoralSchema],
-    tse_result: ResultadoOficialTSESchema,
+    tse_result: ResultadoOficialTSESchema | None,
 ) -> None:
     """Renderiza a tela de Auditoria e Desempenho de Pesquisas em duas camadas.
 
     Args:
         eve_polls: Lista das pesquisas de véspera avaliadas (campo até 72h).
         all_polls: Conjunto de todas as pesquisas da campanha para o grid de inclinação.
-        tse_result: Apuração oficial do TSE.
+        tse_result: Apuração oficial do TSE (ou None/pendente se eleição em andamento).
 
     Returns:
         None.
@@ -47,6 +47,26 @@ def render_act4(
     Raises:
         None.
     """
+    if tse_result is None or not getattr(tse_result, "apuracao_concluida", True):
+        st.markdown("## Ato 4: Anatomia do Erro e Auditoria de Institutos")
+        st.markdown(
+            """
+            <div style="background-color: #1A202C; border-left: 4px solid #F59E0B; padding: 18px 20px; border-radius: 8px; margin-top: 15px; margin-bottom: 25px;">
+                <div style="color: #FBBF24; font-weight: 700; font-size: 15px; margin-bottom: 6px;">
+                    ⏳ Aguardando Totalização Oficial das Urnas pelo TSE (25/10/2026)
+                </div>
+                <div style="color: #E2E8F0; font-size: 13.5px; line-height: 1.6;">
+                    O cálculo do <b>Erro Ponderado (EP)</b>, métricas consagradas da WAPOR/AAPOR (Mosteller $M_3$, $M_5$ e Log-Odds $A$)
+                    e a <b>Faixa do Acaso ($P_{90}$)</b> via Monte Carlo requerem o fechamento e totalização da apuração pelo TSE.<br>
+                    Durante a fase de campanha ativa, as discrepâncias empíricas e inclinações de cada instituto são modeladas no
+                    <b>Ato 6 (Previsão Preditiva)</b>, com os institutos sendo ponderados pelo histórico apurado no 1º Turno.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
+
     # 1. Alerta metodológico dourado superior
     st.markdown(
         """

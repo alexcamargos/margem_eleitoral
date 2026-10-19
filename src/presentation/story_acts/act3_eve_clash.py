@@ -18,13 +18,13 @@ from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficia
 
 def render_act3(
     eve_polls: Sequence[PesquisaEleitoralSchema],
-    tse_result: ResultadoOficialTSESchema,
+    tse_result: ResultadoOficialTSESchema | None,
 ) -> None:
     """Renderiza a narrativa e os componentes do Forest Plot no Ato 3.
 
     Args:
         eve_polls: Lista das pesquisas que cumpriram o critério de véspera (<= 72h).
-        tse_result: Resultado oficial apurado pelo TSE.
+        tse_result: Resultado oficial apurado pelo TSE (ou None/pendente se eleição em andamento).
 
     Returns:
         None.
@@ -33,6 +33,28 @@ def render_act3(
         None.
     """
     st.markdown("## Ato 3: A Prova dos Fatos (Pesquisas de Véspera vs. Urna)")
+
+    if tse_result is None or not getattr(tse_result, "apuracao_concluida", True):
+        st.markdown(
+            """
+            <div style="background-color: #1A202C; border-left: 4px solid #F59E0B; padding: 18px 20px; border-radius: 8px; margin-top: 15px; margin-bottom: 25px;">
+                <div style="color: #FBBF24; font-weight: 700; font-size: 15px; margin-bottom: 6px;">
+                    ⏳ Aguardando Totalização Oficial das Urnas pelo TSE (25/10/2026)
+                </div>
+                <div style="color: #E2E8F0; font-size: 13.5px; line-height: 1.6;">
+                    O <b>Forest Plot</b> e o teste de cobertura nominal de 95% confrontam diretamente as estimativas de véspera
+                    contra os votos válidos reais apurados nas urnas eletrônicas.<br>
+                    Como o pleito do 2º Turno ainda está em andamento, esta auditoria formal será liberada imediatamente após
+                    a divulgação dos boletins de urna pelo TSE.<br>
+                    Para acompanhar o cenário dinâmico atual e as projeções probabilísticas, consulte o
+                    <b>Ato 2 (Agregador Dinâmico)</b> e o <b>Ato 6 (Modelo Preditivo / Nowcasting)</b>.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
+
     st.markdown(
         """
         > *“Apenas as pesquisas finalizadas a no máximo 72 horas antes da abertura das urnas "

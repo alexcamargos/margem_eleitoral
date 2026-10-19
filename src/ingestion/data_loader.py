@@ -14,6 +14,7 @@ import yaml
 
 from src.ingestion.pesqele_collector import PesqEleCollector
 from src.ingestion.pipeline import run_etl_for_year
+from src.ingestion.tse_results import TSEResultsExtractor
 from src.transformations.schemas import (
     AbrangenciaEnum,
     MetodologiaEnum,
@@ -171,13 +172,24 @@ def get_election_dataset(
     tse_json_path = processed_dir / f"resultado_oficial_{year}_t{turno}.json"
 
     # Se os arquivos processados não existirem, executa o pipeline de ETL sob demanda
-    if not parquet_path.exists() or not tse_json_path.exists():
+    if not parquet_path.exists():
         run_etl_for_year(year=year, turno=turno)
 
-    # 1. Carrega o resultado oficial
-    with open(tse_json_path, encoding="utf-8") as f:
-        tse_dict = json.load(f)
-    tse_result = ResultadoOficialTSESchema(**tse_dict)
+    # 1. Carrega o resultado oficial se disponível e apurado
+    tse_result: ResultadoOficialTSESchema | None = None
+    if tse_json_path.exists():
+        with open(tse_json_path, encoding="utf-8") as f:
+            tse_dict = json.load(f)
+        tse_result = ResultadoOficialTSESchema(**tse_dict)
+    elif Path(
+        repo_root / "data" / "raw" / str(year) / f"resultado_tse_{year}_t{turno}.json"
+    ).exists():
+        try:
+            tse_extractor = TSEResultsExtractor(year=year, turno=turno)
+            tse_result = tse_extractor.extract_and_transform()
+            tse_extractor.save_processed()
+        except Exception:
+            tse_result = None
 
     # 2. Carrega as pesquisas via Polars Parquet
     df_polls = pl.read_parquet(parquet_path)

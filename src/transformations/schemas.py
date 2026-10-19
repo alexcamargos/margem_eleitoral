@@ -127,6 +127,7 @@ class ResultadoOficialTSESchema(BaseModel):
     total_nulos: int = Field(..., ge=0)
     total_abstencoes: int = Field(..., ge=0)
     resultado_nominal: dict[str, float]
+    apuracao_concluida: bool = True
 
     @model_validator(mode="after")
     def validate_percentages(self) -> Self:

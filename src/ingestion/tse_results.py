@@ -121,7 +121,7 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
 
         return result_obj
 
-    def extract_and_transform(self) -> ResultadoOficialTSESchema:
+    def extract_and_transform(self) -> ResultadoOficialTSESchema | None:
         """Carrega, valida e retorna a totalização oficial do TSE para o ano e turno.
 
         Para 2026 (Turno 1), consulta primeiramente a API oficial do TSE em tempo real
@@ -148,6 +148,8 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
         raw_file = self.raw_dir / json_filename
 
         if not raw_file.exists():
+            if self.year == 2026 and self.turno == 2:
+                return None
             raise FileNotFoundError(
                 f"Arquivo de apuração oficial não encontrado em: {raw_file}. "
                 f"Certifique-se de que o snapshot bruto correspondente exista em data/raw/{self.year}/."
@@ -158,7 +160,7 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
 
         return ResultadoOficialTSESchema(**raw_data)
 
-    def save_processed(self, dest_path: Path | None = None) -> Path:
+    def save_processed(self, dest_path: Path | None = None) -> Path | None:
         """Exporta o resultado oficial processado para arquivo JSON padronizado.
 
         Args:
@@ -171,6 +173,8 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
             OSError: Se falhar a gravação em disco.
         """
         result = self.extract_and_transform()
+        if result is None:
+            return None
         if dest_path is None:
             repo_root = Path(__file__).resolve().parent.parent.parent
             processed_dir = repo_root / "data" / "processed"

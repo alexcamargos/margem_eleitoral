@@ -14,7 +14,7 @@ from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficia
 
 def run_etl_for_year(
     year: int, turno: int = 1
-) -> tuple[ResultadoOficialTSESchema, list[PesquisaEleitoralSchema]]:
+) -> tuple[ResultadoOficialTSESchema | None, list[PesquisaEleitoralSchema]]:
     """Executa o pipeline de ETL completo para um ano eleitoral e turno especificados.
 
     Args:
@@ -37,9 +37,12 @@ def run_etl_for_year(
     print("1/3 Extraindo e validando apuracao oficial do TSE...")
     tse_extractor = TSEResultsExtractor(year=year, turno=turno)
     tse_result = tse_extractor.extract_and_transform()
-    tse_dest = tse_extractor.save_processed()
-    print(f"   -> Apuracao oficial validada: {len(tse_result.resultado_nominal)} candidatos.")
-    print(f"   -> Salvo em: {tse_dest}")
+    if tse_result is not None:
+        tse_dest = tse_extractor.save_processed()
+        print(f"   -> Apuracao oficial validada: {len(tse_result.resultado_nominal)} candidatos.")
+        print(f"   -> Salvo em: {tse_dest}")
+    else:
+        print("   -> Apuracao oficial ainda nao realizada (pleito futuro / pendente).")
 
     # 2. Extração e validação das pesquisas do PesqEle
     print("2/3 Extraindo, normalizando e validando pesquisas registradas (PesqEle)...")
@@ -50,11 +53,14 @@ def run_etl_for_year(
     print(f"   -> Salvo em formato Parquet em: {polls_dest}")
 
     # 3. Sumário e validação de consistência
-    candidatos_tse = set(tse_result.resultado_nominal.keys())
-    candidatos_pesquisas = {c for p in polls for c in p.votos_validos.keys()}
-    print("3/3 Verificando aderencia semantica dos candidatos...")
-    print(f"   -> Candidatos TSE: {sorted(list(candidatos_tse))}")
-    print(f"   -> Candidatos Pesquisas: {sorted(list(candidatos_pesquisas))}")
+    if tse_result is not None:
+        candidatos_tse = set(tse_result.resultado_nominal.keys())
+        candidatos_pesquisas = {c for p in polls for c in p.votos_validos.keys()}
+        print("3/3 Verificando aderencia semantica dos candidatos...")
+        print(f"   -> Candidatos TSE: {sorted(list(candidatos_tse))}")
+        print(f"   -> Candidatos Pesquisas: {sorted(list(candidatos_pesquisas))}")
+    else:
+        print("3/3 Verificacao semantica TSE suspensa (apuracao pendente).")
 
     print(f"[OK] ETL concluido com sucesso para {year} (Turno {turno})!\n")
     return tse_result, polls

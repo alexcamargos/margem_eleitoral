@@ -336,9 +336,24 @@ def main() -> None:
             render_documentation_modal()
 
     # Placar de Apuração do TSE e Censo do PesqEle
-    votos_str = " | ".join(
-        [f"<b>{k}:</b> {v:.2f}%" for k, v in tse_result.resultado_nominal.items()]
-    )
+    has_concluded = tse_result is not None and getattr(tse_result, "apuracao_concluida", True)
+    if has_concluded and tse_result is not None:
+        votos_str = " | ".join(
+            [f"<b>{k}:</b> {v:.2f}%" for k, v in tse_result.resultado_nominal.items()]
+        )
+        status_line = (
+            f"<b>Votos apurados:</b> 100% &nbsp;&nbsp;|&nbsp;&nbsp; {votos_str}<br>"
+            f"<span style='color: #64748B;'>Disputa com totalização oficial consolidada pelo TSE. "
+            f"Total de votos válidos contabilizados oficialmente: {tse_result.total_votos_validos:,}.</span>"
+        )
+    else:
+        status_line = (
+            "<span style='color: #38BDF8; font-weight: 600;'>🟡 Campanha em Andamento</span> &nbsp;|&nbsp; "
+            "<b>Votação Oficial:</b> 25/10/2026<br>"
+            "<span style='color: #94A3B8;'>Apuração oficial aguardando abertura das urnas. "
+            "Exibindo modo de <b>Projeção Contínua (Nowcasting)</b> baseado nas pesquisas registradas.</span>"
+        )
+
     census_df = get_tse_registration_census(ano_eleicao)
     census_info_html = ""
     if census_df.height > 0:
@@ -350,7 +365,7 @@ def main() -> None:
             f"<br><span style='color: #38BDF8; font-size: 12.5px;'>"
             f"📋 <b>Censo PesqEle/TSE:</b> {tot_reg:,} pesquisas registradas "
             f"({insts_cons} institutos consistentes com &ge; 2 levantamentos) &nbsp;|&nbsp; "
-            f"<b>Base Auditada:</b> {len(all_polls)} pesquisas completas com intenções de voto.</span>"
+            f"<b>Base de Pesquisas:</b> {len(all_polls)} levantamentos com intenções de voto.</span>"
         )
 
     st.markdown(
@@ -358,12 +373,7 @@ def main() -> None:
         <div class="tse-summary-card">
             <div class="tse-summary-title">Presidente — {ano_eleicao} ({turno_label})</div>
             <div class="tse-summary-stats">
-                <b>Votos apurados:</b> 100% &nbsp;&nbsp;|&nbsp;&nbsp; {votos_str}
-                <br>
-                <span style="color: #64748B;">
-                    Disputa com totalização oficial consolidada pelo TSE.
-                    Total de votos válidos contabilizados oficialmente: {tse_result.total_votos_validos:,}.
-                </span>
+                {status_line}
                 {census_info_html}
             </div>
         </div>

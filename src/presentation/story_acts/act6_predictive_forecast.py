@@ -64,7 +64,7 @@ def _compute_simple_poll_average(
 
 def render_act6(
     polls: Sequence[PesquisaEleitoralSchema],
-    tse_result: ResultadoOficialTSESchema,
+    tse_result: ResultadoOficialTSESchema | None,
     election_date: date,
     t1_polls: Sequence[PesquisaEleitoralSchema] | None = None,
     t1_tse_result: ResultadoOficialTSESchema | None = None,
@@ -74,7 +74,7 @@ def render_act6(
 
     Args:
         polls: Pesquisas eleitorais do turno ativo (incluindo escopos Nacional, Estadual e Regional).
-        tse_result: Resultado oficial consolidado pelo TSE para o turno ativo.
+        tse_result: Resultado oficial consolidado pelo TSE para o turno ativo (ou None se pré-eleição).
         election_date: Data oficial de realização do turno ativo.
         t1_polls: Pesquisas do 1º Turno para calibração empírica de institutos no 2º Turno.
         t1_tse_result: Resultado oficial do 1º Turno para calibração de viés e pesos de auditoria.
@@ -209,36 +209,59 @@ def render_act6(
     # 3. Painel Executivo em 3 Cartões Dark Mode (Sem truncamento e com Comparativo Direto)
     leader = forecast.candidatos[0]
     runner_up = forecast.candidatos[1] if len(forecast.candidatos) > 1 else leader
-    oficial_dict = tse_result.resultado_nominal
-    sorted_oficial = sorted(oficial_dict.keys(), key=lambda c: oficial_dict[c], reverse=True)
-    real_winner = sorted_oficial[0]
-
-    # Calcula também a média simples bruta para evidenciar o ganho do modelo
-    simple_avg = _compute_simple_poll_average(
-        active_polls, forecast.cutoff_date, list(oficial_dict.keys())
-    )
-    model_est_map = {cp.candidato: cp.voto_esperado for cp in forecast.candidatos}
-    ep_mod_now = calculate_weighted_poll_error(model_est_map, oficial_dict)["erro_total_ponderado"]
-    ep_sim_now = calculate_weighted_poll_error(simple_avg, oficial_dict)["erro_total_ponderado"]
-    gain_pct = (
-        ((ep_sim_now - ep_mod_now) / max(1e-6, ep_sim_now)) * 100.0 if ep_sim_now > 0 else 0.0
-    )
-
-    acertou_vencedor = forecast.vencedor_previsto == real_winner
-    badge_win_bg = "rgba(16, 185, 129, 0.15)" if acertou_vencedor else "rgba(245, 158, 11, 0.15)"
-    badge_win_color = "#34D399" if acertou_vencedor else "#FBBF24"
-    badge_win_text = (
-        f"Acertou o Vencedor da Urna ({real_winner})"
-        if acertou_vencedor
-        else f"Urna apontou {real_winner} (virada posterior ao corte)"
-    )
-
     c1_name = leader.candidato
     c2_name = runner_up.candidato
-    real_c1 = float(oficial_dict.get(c1_name, 0.0))
-    real_c2 = float(oficial_dict.get(c2_name, 0.0))
-    simp_c1 = float(simple_avg.get(c1_name, 0.0))
-    simp_c2 = float(simple_avg.get(c2_name, 0.0))
+
+    has_official_concluded = tse_result is not None and getattr(
+        tse_result, "apuracao_concluida", True
+    )
+
+    if has_official_concluded and tse_result is not None:
+        oficial_dict = tse_result.resultado_nominal
+        sorted_oficial = sorted(oficial_dict.keys(), key=lambda c: oficial_dict[c], reverse=True)
+        real_winner = sorted_oficial[0]
+
+        simple_avg = _compute_simple_poll_average(
+            active_polls, forecast.cutoff_date, list(oficial_dict.keys())
+        )
+        model_est_map = {cp.candidato: cp.voto_esperado for cp in forecast.candidatos}
+        ep_mod_now = calculate_weighted_poll_error(model_est_map, oficial_dict)[
+            "erro_total_ponderado"
+        ]
+        ep_sim_now = calculate_weighted_poll_error(simple_avg, oficial_dict)["erro_total_ponderado"]
+        gain_pct = (
+            ((ep_sim_now - ep_mod_now) / max(1e-6, ep_sim_now)) * 100.0 if ep_sim_now > 0 else 0.0
+        )
+
+        acertou_vencedor = forecast.vencedor_previsto == real_winner
+        badge_win_bg = (
+            "rgba(16, 185, 129, 0.15)" if acertou_vencedor else "rgba(245, 158, 11, 0.15)"
+        )
+        badge_win_color = "#34D399" if acertou_vencedor else "#FBBF24"
+        badge_win_text = (
+            f"Acertou o Vencedor da Urna ({real_winner})"
+            if acertou_vencedor
+            else f"Urna apontou {real_winner} (virada posterior ao corte)"
+        )
+        real_c1 = float(oficial_dict.get(c1_name, 0.0))
+        real_c2 = float(oficial_dict.get(c2_name, 0.0))
+        simp_c1 = float(simple_avg.get(c1_name, 0.0))
+        simp_c2 = float(simple_avg.get(c2_name, 0.0))
+    else:
+        oficial_dict = {}
+        simple_avg = _compute_simple_poll_average(
+            active_polls, forecast.cutoff_date, [c1_name, c2_name]
+        )
+        simp_c1 = float(simple_avg.get(c1_name, 0.0))
+        simp_c2 = float(simple_avg.get(c2_name, 0.0))
+        real_c1 = 0.0
+        real_c2 = 0.0
+        ep_mod_now = 0.0
+        ep_sim_now = 0.0
+        gain_pct = 0.0
+        badge_win_bg = "rgba(56, 189, 248, 0.15)"
+        badge_win_color = "#38BDF8"
+        badge_win_text = f"Liderança Projetada: {forecast.vencedor_previsto} ({leader.probabilidade_vitoria:.1f}% de chances)"
 
     card_col1, card_col2, card_col3 = st.columns(3)
 
@@ -276,33 +299,60 @@ def render_act6(
         )
 
     with card_col2:
-        gain_color = "#34D399" if gain_pct >= 0 else "#FBBF24"
-        gain_bg = "rgba(16, 185, 129, 0.15)" if gain_pct >= 0 else "rgba(245, 158, 11, 0.15)"
-        st.markdown(
-            f"""
-            <div style="background-color: #181B20; border: 1px solid #282D37; border-radius: 8px; padding: 16px 18px; min-height: 215px;">
-                <div style="color: #94A3B8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
-                    Placar: Média Simples vs. Modelo vs. Urna
+        if has_official_concluded and tse_result is not None:
+            gain_color = "#34D399" if gain_pct >= 0 else "#FBBF24"
+            gain_bg = "rgba(16, 185, 129, 0.15)" if gain_pct >= 0 else "rgba(245, 158, 11, 0.15)"
+            st.markdown(
+                f"""
+                <div style="background-color: #181B20; border: 1px solid #282D37; border-radius: 8px; padding: 16px 18px; min-height: 215px;">
+                    <div style="color: #94A3B8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                        Placar: Média Simples vs. Modelo vs. Urna
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12.5px; padding: 5px 0; border-bottom: 1px solid #242933;">
+                        <span style="color: #94A3B8;">1. Média Simples (Sem Modelo):</span>
+                        <span style="color: #CBD5E1; font-family: monospace;">{c1_name}: {simp_c1:.1f}% | {c2_name}: {simp_c2:.1f}%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid #242933;">
+                        <span style="color: #38BDF8; font-weight: 600;">2. Modelo Preditivo Calibrado:</span>
+                        <span style="color: #F8FAFC; font-weight: 700; font-family: monospace;">{c1_name}: {leader.voto_esperado:.2f}% | {c2_name}: {runner_up.voto_esperado:.2f}%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12.5px; padding: 6px 0; margin-bottom: 10px;">
+                        <span style="color: #FBBF24; font-weight: 600;">3. Resultado Oficial Urna TSE:</span>
+                        <span style="color: #FBBF24; font-weight: 700; font-family: monospace;">{c1_name}: {real_c1:.2f}% | {c2_name}: {real_c2:.2f}%</span>
+                    </div>
+                    <div style="background-color: {gain_bg}; color: {gain_color}; border: 1px solid {gain_color}; border-radius: 4px; padding: 5px 8px; font-size: 11.5px; font-weight: 600; text-align: center;">
+                        Erro Ponderado: Modelo {ep_mod_now:.2f} pp vs. Média Simples {ep_sim_now:.2f} pp ({gain_pct:+.1f}% de redução)
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12.5px; padding: 5px 0; border-bottom: 1px solid #242933;">
-                    <span style="color: #94A3B8;">1. Média Simples (Sem Modelo):</span>
-                    <span style="color: #CBD5E1; font-family: monospace;">{c1_name}: {simp_c1:.1f}% | {c2_name}: {simp_c2:.1f}%</span>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                f"""
+                <div style="background-color: #181B20; border: 1px solid #282D37; border-radius: 8px; padding: 16px 18px; min-height: 215px;">
+                    <div style="color: #94A3B8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                        Placar: Média Simples vs. Modelo Preditivo
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid #242933;">
+                        <span style="color: #94A3B8;">1. Média Simples Bruta:</span>
+                        <span style="color: #CBD5E1; font-family: monospace;">{c1_name}: {simp_c1:.1f}% | {c2_name}: {simp_c2:.1f}%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12.5px; padding: 8px 0; border-bottom: 1px solid #242933;">
+                        <span style="color: #38BDF8; font-weight: 600;">2. Modelo Calibrado:</span>
+                        <span style="color: #F8FAFC; font-weight: 700; font-family: monospace;">{c1_name}: {leader.voto_esperado:.2f}% | {c2_name}: {runner_up.voto_esperado:.2f}%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12.5px; padding: 6px 0; margin-bottom: 10px;">
+                        <span style="color: #64748B;">3. Urna Oficial TSE:</span>
+                        <span style="color: #FBBF24; font-style: italic; font-size: 12px;">Aguardando apuração (25/10)</span>
+                    </div>
+                    <div style="background-color: rgba(56, 189, 248, 0.12); color: #38BDF8; border: 1px solid #0284C7; border-radius: 4px; padding: 5px 8px; font-size: 11.5px; font-weight: 600; text-align: center;">
+                        Nowcasting Ativo: Projeção calculada com {len(active_polls)} pesquisas registradas
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid #242933;">
-                    <span style="color: #38BDF8; font-weight: 600;">2. Modelo Preditivo Calibrado:</span>
-                    <span style="color: #F8FAFC; font-weight: 700; font-family: monospace;">{c1_name}: {leader.voto_esperado:.2f}% | {c2_name}: {runner_up.voto_esperado:.2f}%</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12.5px; padding: 6px 0; margin-bottom: 10px;">
-                    <span style="color: #FBBF24; font-weight: 600;">3. Resultado Oficial Urna TSE:</span>
-                    <span style="color: #FBBF24; font-weight: 700; font-family: monospace;">{c1_name}: {real_c1:.2f}% | {c2_name}: {real_c2:.2f}%</span>
-                </div>
-                <div style="background-color: {gain_bg}; color: {gain_color}; border: 1px solid {gain_color}; border-radius: 4px; padding: 5px 8px; font-size: 11.5px; font-weight: 600; text-align: center;">
-                    Erro Ponderado: Modelo {ep_mod_now:.2f} pp vs. Média Simples {ep_sim_now:.2f} pp ({gain_pct:+.1f}% de redução)
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                """,
+                unsafe_allow_html=True,
+            )
 
     with card_col3:
         cal_badge_txt = (
@@ -358,30 +408,56 @@ def render_act6(
     with col_tbl:
         cand_rows = []
         for cp in forecast.candidatos:
-            real_v = float(oficial_dict.get(cp.candidato, 0.0))
-            in_ci = cp.ic_95_inferior <= real_v <= cp.ic_95_superior
-            cand_rows.append(
-                {
-                    "Candidato": cp.candidato,
-                    "Previsto (%)": round(cp.voto_esperado, 2),
-                    "Urna TSE (%)": round(real_v, 2),
-                    "Erro (pp)": round(cp.voto_esperado - real_v, 2),
-                    "IC 95%": f"[{cp.ic_95_inferior:.1f}%, {cp.ic_95_superior:.1f}%]",
-                    "Chances (%)": round(cp.probabilidade_vitoria, 1),
-                    "Cobriu Urna": "Sim" if in_ci else "Não",
-                }
+            if has_official_concluded and tse_result is not None:
+                real_v = float(oficial_dict.get(cp.candidato, 0.0))
+                in_ci = cp.ic_95_inferior <= real_v <= cp.ic_95_superior
+                cand_rows.append(
+                    {
+                        "Candidato": cp.candidato,
+                        "Previsto (%)": round(cp.voto_esperado, 2),
+                        "Urna TSE (%)": round(real_v, 2),
+                        "Erro (pp)": round(cp.voto_esperado - real_v, 2),
+                        "IC 95%": f"[{cp.ic_95_inferior:.1f}%, {cp.ic_95_superior:.1f}%]",
+                        "Chances (%)": round(cp.probabilidade_vitoria, 1),
+                        "Cobriu Urna": "Sim" if in_ci else "Não",
+                    }
+                )
+            else:
+                cand_rows.append(
+                    {
+                        "Candidato": cp.candidato,
+                        "Previsto (%)": round(cp.voto_esperado, 2),
+                        "IC 95%": f"[{cp.ic_95_inferior:.1f}%, {cp.ic_95_superior:.1f}%]",
+                        "Chances (%)": round(cp.probabilidade_vitoria, 1),
+                        "Tendência (pp/d)": round(cp.tendencia_diaria_pp, 2),
+                        "Status Urna": "Aguardando 25/10",
+                    }
+                )
+        if has_official_concluded:
+            st.dataframe(
+                pl.DataFrame(cand_rows),
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Previsto (%)": st.column_config.NumberColumn("Previsto (%)", format="%.2f%%"),
+                    "Urna TSE (%)": st.column_config.NumberColumn("Urna TSE (%)", format="%.2f%%"),
+                    "Erro (pp)": st.column_config.NumberColumn("Erro (pp)", format="%+.2f"),
+                    "Chances (%)": st.column_config.NumberColumn("Chances (%)", format="%.1f%%"),
+                },
             )
-        st.dataframe(
-            pl.DataFrame(cand_rows),
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Previsto (%)": st.column_config.NumberColumn("Previsto (%)", format="%.2f%%"),
-                "Urna TSE (%)": st.column_config.NumberColumn("Urna TSE (%)", format="%.2f%%"),
-                "Erro (pp)": st.column_config.NumberColumn("Erro (pp)", format="%+.2f"),
-                "Chances (%)": st.column_config.NumberColumn("Chances (%)", format="%.1f%%"),
-            },
-        )
+        else:
+            st.dataframe(
+                pl.DataFrame(cand_rows),
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Previsto (%)": st.column_config.NumberColumn("Previsto (%)", format="%.2f%%"),
+                    "Chances (%)": st.column_config.NumberColumn("Chances (%)", format="%.1f%%"),
+                    "Tendência (pp/d)": st.column_config.NumberColumn(
+                        "Tendência (pp/d)", format="%+.2f"
+                    ),
+                },
+            )
 
     st.markdown("---")
 
@@ -434,88 +510,107 @@ def render_act6(
 
     # 6. Backtesting Point-in-Time e Quality Gates MLE
     st.markdown("### 3. Evolução da Previsão ao Longo da Campanha (Backtesting Point-in-Time)")
-    st.markdown(
-        """
-        <div style="color: #94A3B8; font-size: 13px; margin-bottom: 12px; line-height: 1.5;">
-            O teste abaixo reconstrói o que o modelo previa a <b>30, 21, 14, 7, 3 e 1 dia antes da eleição</b>,
-            comparando o <b>Erro Ponderado do Modelo Calibrado</b> (barras azuis) contra o <b>Erro da Média Simples das Pesquisas</b> (barras cinzas).
-            Quanto menor a barra, mais próxima a previsão ficou do resultado oficial da urna.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    horizons_bt = (30, 21, 14, 7, 3, 1) if turno_ativo == 1 else (15, 10, 7, 3, 1)
-    bt_df = run_point_in_time_backtest(
-        polls=active_polls,
-        tse_result=tse_result,
-        election_date=election_date,
-        horizons_days=horizons_bt,
-        calibration_t1=active_calibration,
-        config=config,
-    )
-    gates_eval = evaluate_promotion_gates(bt_df, config=config)
-
-    if gates_eval["promoted"]:
-        st.success(
-            f"**Validação Científica Aprovada:** Na véspera da eleição, o modelo acertou o vencedor com "
-            f"Brier Score de {gates_eval['metrics']['eve_brier_score']:.4f} (meta ≤ {gates_eval['thresholds']['brier_score_max']:.2f}), "
-            f"cobertura de {gates_eval['metrics']['mean_ci95_coverage']:.1f}% no intervalo de 95% "
-            f"e reduziu o erro ponderado em {max(gates_eval['metrics']['eve_ep_reduction_pct'], gates_eval['metrics']['mean_ep_reduction_pct']):+.1f}% "
-            f"em comparação à média simples das pesquisas."
+    if not has_official_concluded or tse_result is None:
+        st.markdown(
+            """
+            <div style="background-color: #181B20; border-left: 4px solid #38BDF8; padding: 14px 18px; border-radius: 6px; margin-bottom: 20px;">
+                <span style="color: #38BDF8; font-weight: 600; font-size: 13.5px;">Validação Retrospectiva pós-Urna:</span>
+                <span style="color: #CBD5E1; font-size: 13px; line-height: 1.5;">
+                    O gráfico de convergência de backtesting e os <b>Quality Gates formais (Brier Score, Log-Loss e Cobertura)</b>
+                    confrontam as previsões retroativas contra a apuração final do TSE. Para o 2º Turno, essa auditoria será gerada
+                    assim que a apuração for oficializada em 25/10/2026.
+                </span>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
     else:
-        st.warning(
-            f"**Diagnóstico de Validação:** "
-            f"Brier Score Véspera = {gates_eval['metrics']['eve_brier_score']:.4f} | "
-            f"Cobertura IC 95% = {gates_eval['metrics']['mean_ci95_coverage']:.1f}% | "
-            f"Redução de Erro vs. Média Simples = {gates_eval['metrics']['eve_ep_reduction_pct']:+.1f}%."
+        st.markdown(
+            """
+            <div style="color: #94A3B8; font-size: 13px; margin-bottom: 12px; line-height: 1.5;">
+                O teste abaixo reconstrói o que o modelo previa a <b>30, 21, 14, 7, 3 e 1 dia antes da eleição</b>,
+                comparando o <b>Erro Ponderado do Modelo Calibrado</b> (barras azuis) contra o <b>Erro da Média Simples das Pesquisas</b> (barras cinzas).
+                Quanto menor a barra, mais próxima a previsão ficou do resultado oficial da urna.
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
-    fig_bt = create_backtest_convergence_chart(bt_df)
-    st.plotly_chart(fig_bt, use_container_width=True)
-
-    # Formata as datas como string dd/mm/aaaa para evitar timestamps '00:00:00' na tabela
-    bt_rows_formatted = []
-    for r in bt_df.to_dicts():
-        dt_val = r["data_corte"]
-        dt_str = dt_val.strftime("%d/%m/%Y") if hasattr(dt_val, "strftime") else str(dt_val)
-        h_val = int(r["horizonte_dias"])
-        bt_rows_formatted.append(
-            {
-                "Momento": f"T - {h_val}d ({dt_str})",
-                "Pesquisas": int(r["n_pesquisas"]),
-                "Vencedor Previsto": str(r["vencedor_previsto"]),
-                "Chances Vencedor Real (%)": float(r["prob_vitoria_vencedor_real"]),
-                "Previsto 1º (%)": float(r["voto_previsto_lider_real"]),
-                "Urna 1º (%)": float(r["voto_real_lider"]),
-                "Erro Modelo (pp)": float(r["erro_ponderado_modelo"]),
-                "Erro Média Simples (pp)": float(r["erro_ponderado_baseline"]),
-                "Redução de Erro (%)": float(r["reducao_erro_vs_baseline_pct"]),
-                "Brier Score": float(r["brier_score"]),
-            }
+        horizons_bt = (30, 21, 14, 7, 3, 1) if turno_ativo == 1 else (15, 10, 7, 3, 1)
+        bt_df = run_point_in_time_backtest(
+            polls=active_polls,
+            tse_result=tse_result,
+            election_date=election_date,
+            horizons_days=horizons_bt,
+            calibration_t1=active_calibration,
+            config=config,
         )
+        gates_eval = evaluate_promotion_gates(bt_df, config=config)
 
-    st.dataframe(
-        pl.DataFrame(bt_rows_formatted),
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "Chances Vencedor Real (%)": st.column_config.NumberColumn(
-                "Chances Vencedor Real (%)", format="%.1f%%"
-            ),
-            "Previsto 1º (%)": st.column_config.NumberColumn("Previsto 1º (%)", format="%.2f%%"),
-            "Urna 1º (%)": st.column_config.NumberColumn("Urna 1º (%)", format="%.2f%%"),
-            "Erro Modelo (pp)": st.column_config.NumberColumn("Erro Modelo (pp)", format="%.2f"),
-            "Erro Média Simples (pp)": st.column_config.NumberColumn(
-                "Erro Média Simples (pp)", format="%.2f"
-            ),
-            "Redução de Erro (%)": st.column_config.NumberColumn(
-                "Redução de Erro (%)", format="%+.1f%%"
-            ),
-            "Brier Score": st.column_config.NumberColumn("Brier Score", format="%.4f"),
-        },
-    )
+        if gates_eval["promoted"]:
+            st.success(
+                f"**Validação Científica Aprovada:** Na véspera da eleição, o modelo acertou o vencedor com "
+                f"Brier Score de {gates_eval['metrics']['eve_brier_score']:.4f} (meta ≤ {gates_eval['thresholds']['brier_score_max']:.2f}), "
+                f"cobertura de {gates_eval['metrics']['mean_ci95_coverage']:.1f}% no intervalo de 95% "
+                f"e reduziu o erro ponderado em {max(gates_eval['metrics']['eve_ep_reduction_pct'], gates_eval['metrics']['mean_ep_reduction_pct']):+.1f}% "
+                f"em comparação à média simples das pesquisas."
+            )
+        else:
+            st.warning(
+                f"**Diagnóstico de Validação:** "
+                f"Brier Score Véspera = {gates_eval['metrics']['eve_brier_score']:.4f} | "
+                f"Cobertura IC 95% = {gates_eval['metrics']['mean_ci95_coverage']:.1f}% | "
+                f"Redução de Erro vs. Média Simples = {gates_eval['metrics']['eve_ep_reduction_pct']:+.1f}%."
+            )
+
+        fig_bt = create_backtest_convergence_chart(bt_df)
+        st.plotly_chart(fig_bt, use_container_width=True)
+
+        # Formata as datas como string dd/mm/aaaa para evitar timestamps '00:00:00' na tabela
+        bt_rows_formatted = []
+        for r in bt_df.to_dicts():
+            dt_val = r["data_corte"]
+            dt_str = dt_val.strftime("%d/%m/%Y") if hasattr(dt_val, "strftime") else str(dt_val)
+            h_val = int(r["horizonte_dias"])
+            bt_rows_formatted.append(
+                {
+                    "Momento": f"T - {h_val}d ({dt_str})",
+                    "Pesquisas": int(r["n_pesquisas"]),
+                    "Vencedor Previsto": str(r["vencedor_previsto"]),
+                    "Chances Vencedor Real (%)": float(r["prob_vitoria_vencedor_real"]),
+                    "Previsto 1º (%)": float(r["voto_previsto_lider_real"]),
+                    "Urna 1º (%)": float(r["voto_real_lider"]),
+                    "Erro Modelo (pp)": float(r["erro_ponderado_modelo"]),
+                    "Erro Média Simples (pp)": float(r["erro_ponderado_baseline"]),
+                    "Redução de Erro (%)": float(r["reducao_erro_vs_baseline_pct"]),
+                    "Brier Score": float(r["brier_score"]),
+                }
+            )
+
+        st.dataframe(
+            pl.DataFrame(bt_rows_formatted),
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Chances Vencedor Real (%)": st.column_config.NumberColumn(
+                    "Chances Vencedor Real (%)", format="%.1f%%"
+                ),
+                "Previsto 1º (%)": st.column_config.NumberColumn(
+                    "Previsto 1º (%)", format="%.2f%%"
+                ),
+                "Urna 1º (%)": st.column_config.NumberColumn("Urna 1º (%)", format="%.2f%%"),
+                "Erro Modelo (pp)": st.column_config.NumberColumn(
+                    "Erro Modelo (pp)", format="%.2f"
+                ),
+                "Erro Média Simples (pp)": st.column_config.NumberColumn(
+                    "Erro Média Simples (pp)", format="%.2f"
+                ),
+                "Redução de Erro (%)": st.column_config.NumberColumn(
+                    "Redução de Erro (%)", format="%+.1f%%"
+                ),
+                "Brier Score": st.column_config.NumberColumn("Brier Score", format="%.4f"),
+            },
+        )
 
     # 7. Credenciais de Calibração Pós-1º Turno por Instituto
     if calibration_map:

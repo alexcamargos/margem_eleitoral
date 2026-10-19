@@ -64,7 +64,10 @@ def test_get_election_dataset_2022() -> None:
 
 
 def test_get_election_dataset_2026_turno_2() -> None:
-    """Valida o carregamento do dataset do 2º Turno de 2026 com pesquisas de véspera e série completa.
+    """Valida o carregamento do dataset do 2º Turno de 2026 em modo pré-eleição.
+
+    Em 19/10/2026, a apuração do 2º Turno (25/10/2026) ainda não ocorreu, portanto
+    `tse_result` é None e não existem pesquisas na janela de véspera (<= 72h).
 
     Args:
         None.
@@ -77,19 +80,14 @@ def test_get_election_dataset_2026_turno_2() -> None:
     """
     tse_result, eve_polls, all_polls = get_election_dataset(year=2026, turno=2, cutoff_days=3)
 
-    assert isinstance(tse_result, ResultadoOficialTSESchema)
-    assert tse_result.ano == 2026
-    assert tse_result.turno == 2
-    assert "Flávio Bolsonaro" in tse_result.resultado_nominal
-    assert "Lula" in tse_result.resultado_nominal
-    assert len(eve_polls) > 0
-    assert len(all_polls) >= len(eve_polls)
+    assert tse_result is None or not getattr(tse_result, "apuracao_concluida", True)
+    assert len(eve_polls) == 0
+    assert len(all_polls) >= 15
 
-    elec_date = date(2026, 10, 25)
-    for p in eve_polls:
+    for p in all_polls:
         assert isinstance(p, PesquisaEleitoralSchema)
         assert p.turno == 2
-        assert (elec_date - p.data_fim_campo).days <= 3
+        assert p.data_fim_campo <= date(2026, 10, 19)
 
 
 def test_get_second_round_sync_summary() -> None:
@@ -109,6 +107,6 @@ def test_get_second_round_sync_summary() -> None:
     summary = get_second_round_sync_summary(year=2026)
     assert summary["is_synced"] is True
     assert summary["total_polls"] >= 15
-    assert summary["eve_polls_count"] >= 5
+    assert summary["eve_polls_count"] == 0
     assert len(summary["institutes"]) >= 5
     assert summary["latest_field_date"] is not None

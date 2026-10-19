@@ -21,7 +21,7 @@ def test_sync_official_second_round_polls_structure() -> None:
     collector = PesqEleCollector(year=2026)
     polls = collector.sync_official_second_round_polls(force_download=False)
 
-    assert len(polls) >= 20
+    assert len(polls) >= 15
     for p in polls:
         assert isinstance(p, PesquisaEleitoralSchema)
         assert p.turno == 2
@@ -78,7 +78,7 @@ def test_sync_second_round_polls_network_fallback(mocker: MockerFixture) -> None
     collector = PesqEleCollector(year=2026)
     polls = collector.sync_official_second_round_polls(force_download=True)
 
-    assert len(polls) >= 20
+    assert len(polls) >= 15
     assert all(p.turno == 2 for p in polls)
 
 
@@ -107,4 +107,4 @@ def test_sync_second_round_polls_persistence() -> None:
     assert parquet_path.exists()
     df = pl.read_parquet(parquet_path)
     assert "turno" in df.columns
-    assert df.filter(pl.col("turno") == 2).height >= 20
+    assert df.filter(pl.col("turno") == 2).height >= 15

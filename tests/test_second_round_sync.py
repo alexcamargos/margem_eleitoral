@@ -1,5 +1,6 @@
 """Testes unitários para o serviço de sincronização automática de pesquisas do 2º Turno junto ao TSE."""
 
+import httpx
 from pytest_mock import MockerFixture
 
 from src.ingestion.pesqele_collector import PesqEleCollector
@@ -72,7 +73,7 @@ def test_sync_second_round_polls_network_fallback(mocker: MockerFixture) -> None
     """
     mocker.patch(
         "src.ingestion.pesqele_collector.PesqEleCollector.download_official_tse_pesqele_data",
-        side_effect=Exception("Simulação de indisponibilidade no CDN de Dados Abertos do TSE"),
+        side_effect=httpx.ConnectError("Simulação de indisponibilidade no CDN de Dados Abertos do TSE"),
     )
 
     collector = PesqEleCollector(year=2026)

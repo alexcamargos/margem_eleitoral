@@ -9,6 +9,12 @@ ou via servidor Streamlit / Streamlit Community Cloud:
 
 import importlib
 import sys
+from pathlib import Path
+
+# Garante que a raiz do repositório esteja no sys.path para o Streamlit Cloud
+_repo_root = Path(__file__).resolve().parent
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
 
 import streamlit as st
 

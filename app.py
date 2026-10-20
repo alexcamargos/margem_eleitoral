@@ -17,7 +17,12 @@ import src.presentation.app as _app_mod
 if __name__ == "__main__":
     if st.runtime.exists():
         if "pytest" not in sys.modules:
-            importlib.reload(_app_mod)
+            for k, mod in list(sys.modules.items()):
+                if k.startswith("src.") and mod is not None:
+                    try:
+                        importlib.reload(mod)
+                    except (ImportError, ModuleNotFoundError):
+                        pass
         _app_mod.main()
     else:
         _app_mod.run()

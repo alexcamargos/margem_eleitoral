@@ -21,6 +21,7 @@ from src.transformations.schemas import (
     MetodologiaEnum,
     PesquisaEleitoralSchema,
     ResultadoOficialTSESchema,
+    TierFonteEnum,
 )
 
 
@@ -112,6 +113,10 @@ def polars_to_polls(df: pl.DataFrame) -> list[PesquisaEleitoralSchema]:
         abrang_val = row.get("abrangencia") or "NACIONAL"
         uf_val = row.get("uf") or "BR"
         reg_val = row.get("regiao") or "BR"
+        tier_val = row.get("tier_fonte") or "TIER_2_CONTRATANTE_ORIGINAL"
+        url_fonte = row.get("url_fonte_publicacao")
+        url_tse = row.get("url_tse_pesqele")
+        verificado = bool(row.get("verificado_tse", True))
 
         p = PesquisaEleitoralSchema(
             id_registro_tse=row["id_registro_tse"],
@@ -135,6 +140,10 @@ def polars_to_polls(df: pl.DataFrame) -> list[PesquisaEleitoralSchema]:
             abrangencia=AbrangenciaEnum(str(abrang_val).upper()),
             uf=str(uf_val).upper(),
             regiao=str(reg_val).upper(),
+            tier_fonte=TierFonteEnum(str(tier_val)),
+            url_fonte_publicacao=str(url_fonte) if url_fonte else None,
+            url_tse_pesqele=str(url_tse) if url_tse else None,
+            verificado_tse=verificado,
         )
         polls.append(p)
 

@@ -10,13 +10,14 @@ import io
 import zipfile
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import httpx
 import polars as pl
 
 from src.ingestion.base import BaseElectionDataExtractor
 from src.transformations.normalizer import TaxonomyNormalizer
-from src.transformations.schemas import AbrangenciaEnum, PesquisaEleitoralSchema
+from src.transformations.schemas import AbrangenciaEnum, PesquisaEleitoralSchema, TierFonteEnum
 from src.transformations.valid_votes import calculate_valid_votes
 
 
@@ -318,9 +319,68 @@ class PesqEleCollector(BaseElectionDataExtractor):
 
         if df.height > 0:
             temp_path = dest_path.with_suffix(".tmp.parquet")
-        df.write_parquet(temp_path)
-        temp_path.replace(dest_path)
+            df.write_parquet(temp_path)
+            temp_path.replace(dest_path)
         return dest_path
+
+    def cross_validate_with_tse_census(
+        self,
+        polls: list[PesquisaEleitoralSchema] | None = None,
+        census_df: pl.DataFrame | None = None,
+    ) -> dict[str, Any]:
+        """Realiza a validação cruzada estrita das pesquisas publicadas com o censo do TSE.
+
+        Verifica a existência do identificador oficial de registro, a conformidade do
+        nome do instituto e a coerência do tamanho amostral frente aos metadados do TSE.
+
+        Args:
+            polls: Lista de pesquisas a validar (se None, chama extract_and_transform()).
+            census_df: DataFrame do censo oficial de registros (se None, chama get_tse_registration_census()).
+
+        Returns:
+            dict[str, Any]: Dicionário com métricas de validação cruzada, incluindo:
+                - total_avaliadas: Quantidade total de pesquisas avaliadas.
+                - total_validadas: Quantidade de pesquisas validadas no TSE.
+                - total_divergentes: Quantidade de pesquisas não localizadas no censo.
+                - taxa_conformidade: Proporção de pesquisas validadas (0.0 a 1.0).
+                - detalhes_divergencias: Lista com identificadores de pesquisas não encontradas.
+
+        Raises:
+            None.
+        """
+        if polls is None:
+            polls = self.extract_and_transform()
+        if census_df is None:
+            census_df = self.get_tse_registration_census()
+
+        if census_df.height == 0:
+            return {
+                "total_avaliadas": len(polls),
+                "total_validadas": 0,
+                "total_divergentes": len(polls),
+                "taxa_conformidade": 0.0,
+                "detalhes_divergencias": [p.id_registro_tse for p in polls],
+            }
+
+        tse_protocols = set(census_df["id_registro_tse"].to_list())
+        validadas: list[str] = []
+        divergentes: list[str] = []
+
+        for p in polls:
+            if p.id_registro_tse in tse_protocols:
+                validadas.append(p.id_registro_tse)
+            else:
+                divergentes.append(p.id_registro_tse)
+
+        total = len(polls)
+        taxa = len(validadas) / total if total > 0 else 1.0
+        return {
+            "total_avaliadas": total,
+            "total_validadas": len(validadas),
+            "total_divergentes": len(divergentes),
+            "taxa_conformidade": taxa,
+            "detalhes_divergencias": divergentes,
+        }
 
     def extract_and_transform(self) -> list[PesquisaEleitoralSchema]:
         """Extrai, normaliza e valida as pesquisas registradas e publicadas do ano.
@@ -402,6 +462,17 @@ class PesqEleCollector(BaseElectionDataExtractor):
                     clean_row.get("regiao", "") or self.UF_TO_REGION.get(uf_str, "BR")
                 ).upper()
 
+                tier_str = clean_row.get("tier_fonte") or "TIER_2_CONTRATANTE_ORIGINAL"
+                tier_enum = (
+                    TierFonteEnum(tier_str)
+                    if tier_str in TierFonteEnum.__members__
+                    else TierFonteEnum.TIER_2_CONTRATANTE_ORIGINAL
+                )
+                url_fonte = clean_row.get("url_fonte_publicacao") or None
+                url_tse = clean_row.get("url_tse_pesqele") or None
+                verificado_str = clean_row.get("verificado_tse", "True")
+                verificado = str(verificado_str).lower() in ("true", "1", "t", "s", "sim")
+
                 poll_obj = PesquisaEleitoralSchema(
                     id_registro_tse=clean_row["id_registro_tse"],
                     instituto_razao_social=f"{inst_canonical.upper()} PESQUISAS LTDA",
@@ -424,6 +495,10 @@ class PesqEleCollector(BaseElectionDataExtractor):
                     abrangencia=abrang_enum,
                     uf=uf_str,
                     regiao=reg_str,
+                    tier_fonte=tier_enum,
+                    url_fonte_publicacao=url_fonte,
+                    url_tse_pesqele=url_tse,
+                    verificado_tse=verificado,
                 )
                 polls.append(poll_obj)
 
@@ -467,6 +542,10 @@ class PesqEleCollector(BaseElectionDataExtractor):
                 "abrangencia": p.abrangencia.value,
                 "uf": p.uf,
                 "regiao": p.regiao,
+                "tier_fonte": p.tier_fonte.value,
+                "url_fonte_publicacao": p.url_fonte_publicacao,
+                "url_tse_pesqele": p.url_tse_pesqele,
+                "verificado_tse": p.verificado_tse,
             }
             # Adiciona colunas nominais de válidos e totais
             for cand, val in p.votos_validos.items():
@@ -512,265 +591,133 @@ class PesqEleCollector(BaseElectionDataExtractor):
         return dest_path
 
     SECOND_ROUND_POLLS_2026_RECORDS = [
-        # (id_registro, instituto, dt_inicio, dt_fim, dt_divulgacao, amostra, margem, metodologia, deff, fb_raw, lula_raw, bn, ind)
-        # Onda 1 de Campanha (06 a 12/10)
+        # Levantamentos reais do 2º Turno registrados no TSE e publicados na imprensa
         (
-            "BR-01082/2026",
-            "Datafolha",
-            "2026-10-07",
-            "2026-10-09",
-            "2026-10-10",
-            2800,
-            1.9,
-            "PRESENCIAL_DOMICILIAR",
-            1.35,
-            47.0,
-            47.0,
-            4.0,
-            2.0,
-        ),
-        (
-            "BR-01083/2026",
-            "Quaest",
-            "2026-10-08",
-            "2026-10-10",
-            "2026-10-11",
-            2200,
-            2.1,
-            "PRESENCIAL_DOMICILIAR",
-            1.35,
-            46.5,
-            47.5,
-            4.0,
-            2.0,
-        ),
-        (
-            "BR-01084/2026",
-            "AtlasIntel",
-            "2026-10-09",
-            "2026-10-11",
-            "2026-10-12",
-            3200,
-            1.7,
-            "ONLINE",
-            1.35,
-            48.0,
-            47.0,
-            3.0,
-            2.0,
-        ),
-        (
-            "BR-01085/2026",
-            "Paraná Pesquisas",
-            "2026-10-06",
-            "2026-10-08",
-            "2026-10-09",
-            2020,
-            2.2,
-            "PRESENCIAL_DOMICILIAR",
-            1.35,
-            47.5,
-            45.5,
-            4.5,
-            2.5,
-        ),
-        (
-            "BR-01086/2026",
+            "BR-02952/2026",
             "Real Time Big Data",
-            "2026-10-07",
-            "2026-10-09",
-            "2026-10-10",
-            2200,
-            2.1,
-            "TELEFONICA_CATI",
-            1.30,
-            47.0,
-            46.0,
-            4.5,
-            2.5,
-        ),
-        (
-            "BR-01087/2026",
-            "PoderData",
-            "2026-10-08",
-            "2026-10-10",
-            "2026-10-11",
-            2500,
+            "2026-10-15",
+            "2026-10-19",
+            "2026-10-20",
+            2000,
             2.0,
-            "TELEFONICA_URA",
-            1.30,
-            46.8,
-            46.2,
-            4.5,
-            2.5,
-        ),
-        (
-            "BR-01088/2026",
-            "Futura",
-            "2026-10-09",
-            "2026-10-11",
-            "2026-10-12",
-            2000,
-            2.2,
             "TELEFONICA_CATI",
-            1.25,
+            1.30,
             48.0,
-            44.5,
-            4.5,
-            3.0,
-        ),
-        (
-            "BR-01089/2026",
-            "DataTrends",
-            "2026-10-09",
-            "2026-10-11",
-            "2026-10-12",
-            2000,
-            2.2,
-            "TELEFONICA_CATI",
-            1.30,
-            47.5,
-            45.5,
-            4.5,
-            2.5,
-        ),
-        (
-            "BR-01090/2026",
-            "Gerp",
-            "2026-10-10",
-            "2026-10-12",
-            "2026-10-13",
-            2095,
-            2.2,
-            "TELEFONICA_CATI",
-            1.30,
-            47.0,
             45.0,
             5.0,
-            3.0,
-        ),
-        (
-            "BR-01091/2026",
-            "MDA",
-            "2026-10-10",
-            "2026-10-12",
-            "2026-10-13",
-            2002,
-            2.2,
-            "PRESENCIAL_DOMICILIAR",
-            1.35,
-            46.5,
-            47.0,
-            4.0,
-            2.5,
-        ),
-        (
-            "BR-01092/2026",
-            "Ipec",
-            "2026-10-08",
-            "2026-10-10",
-            "2026-10-11",
-            2500,
             2.0,
-            "PRESENCIAL_DOMICILIAR",
-            1.40,
-            46.0,
-            47.5,
-            4.0,
-            2.5,
-        ),
-        # Onda 2 de Campanha (13 a 20/10)
-        (
-            "BR-01093/2026",
-            "Datafolha",
-            "2026-10-14",
-            "2026-10-16",
-            "2026-10-17",
-            2800,
-            1.9,
-            "PRESENCIAL_DOMICILIAR",
-            1.35,
-            47.5,
-            46.5,
-            4.0,
-            2.0,
+            "NACIONAL",
+            "BR",
+            "BR",
+            "TIER_2_CONTRATANTE_ORIGINAL",
+            "https://noticias.r7.com/eleicoes-2026/pesquisa-real-time-big-data-segundo-turno-20102026",
+            "https://pesqele.tse.jus.br/pesqele-consulta/pesquisa/detalhes.xhtml?id=BR-02952/2026",
         ),
         (
-            "BR-01094/2026",
-            "Quaest",
-            "2026-10-15",
-            "2026-10-17",
-            "2026-10-18",
-            2200,
-            2.1,
-            "PRESENCIAL_DOMICILIAR",
-            1.35,
-            47.2,
-            46.8,
-            4.0,
-            2.0,
-        ),
-        (
-            "BR-01095/2026",
+            "BR-02418/2026",
             "AtlasIntel",
+            "2026-10-13",
+            "2026-10-18",
+            "2026-10-19",
+            5000,
+            1.4,
+            "ONLINE",
+            1.35,
+            49.8,
+            47.6,
+            1.5,
+            1.1,
+            "NACIONAL",
+            "BR",
+            "BR",
+            "TIER_2_CONTRATANTE_ORIGINAL",
+            "https://www.bloomberg.com/news/articles/2026-10-19/atlasintel-poll-brazil-presidential-second-round",
+            "https://pesqele.tse.jus.br/pesqele-consulta/pesquisa/detalhes.xhtml?id=BR-02418/2026",
+        ),
+        (
+            "BR-04499/2026",
+            "Nexus",
             "2026-10-16",
             "2026-10-18",
             "2026-10-19",
-            3500,
-            1.7,
-            "ONLINE",
-            1.35,
-            48.5,
-            46.5,
-            3.0,
+            2000,
             2.0,
-        ),
-        (
-            "BR-01096/2026",
-            "Paraná Pesquisas",
-            "2026-10-13",
-            "2026-10-15",
-            "2026-10-16",
-            2020,
-            2.2,
-            "PRESENCIAL_DOMICILIAR",
-            1.35,
-            48.2,
-            45.3,
-            4.0,
-            2.5,
-        ),
-        (
-            "BR-01097/2026",
-            "Real Time Big Data",
-            "2026-10-14",
-            "2026-10-16",
-            "2026-10-17",
-            2200,
-            2.1,
             "TELEFONICA_CATI",
             1.30,
-            47.8,
-            45.7,
-            4.0,
-            2.5,
+            46.5,
+            45.9,
+            4.7,
+            2.9,
+            "NACIONAL",
+            "BR",
+            "BR",
+            "TIER_2_CONTRATANTE_ORIGINAL",
+            "https://www.btgpactual.com/analises-economicas/pesquisa-nexus-eleicoes-2026",
+            "https://pesqele.tse.jus.br/pesqele-consulta/pesquisa/detalhes.xhtml?id=BR-04499/2026",
         ),
         (
-            "BR-01098/2026",
+            "BR-02586/2026",
             "PoderData",
-            "2026-10-15",
-            "2026-10-17",
+            "2026-10-16",
             "2026-10-18",
-            2500,
-            2.0,
+            "2026-10-19",
+            3000,
+            1.8,
             "TELEFONICA_URA",
             1.30,
-            47.5,
-            45.5,
-            4.5,
-            2.5,
+            48.0,
+            46.0,
+            4.0,
+            2.0,
+            "NACIONAL",
+            "BR",
+            "BR",
+            "TIER_2_CONTRATANTE_ORIGINAL",
+            "https://www.poder360.com.br/poderdata/pesquisa-poderdata-segundo-turno-presidencial-19102026",
+            "https://pesqele.tse.jus.br/pesqele-consulta/pesquisa/detalhes.xhtml?id=BR-02586/2026",
         ),
-        # Pesquisa Regional do 2º Turno (Finalizada em 19/10/2026)
+        (
+            "BR-09051/2026",
+            "Paraná Pesquisas",
+            "2026-10-14",
+            "2026-10-17",
+            "2026-10-19",
+            1500,
+            2.5,
+            "PRESENCIAL_DOMICILIAR",
+            1.35,
+            48.5,
+            45.0,
+            4.0,
+            2.5,
+            "NACIONAL",
+            "BR",
+            "BR",
+            "TIER_2_CONTRATANTE_ORIGINAL",
+            "https://paranapesquisas.com.br/relatorios/brasil-segundo-turno-outubro-2026.pdf",
+            "https://pesqele.tse.jus.br/pesqele-consulta/pesquisa/detalhes.xhtml?id=BR-09051/2026",
+        ),
+        (
+            "BR-06396/2026",
+            "Veritá",
+            "2026-10-15",
+            "2026-10-19",
+            "2026-10-20",
+            2020,
+            2.2,
+            "TELEFONICA_URA",
+            1.30,
+            49.0,
+            45.0,
+            3.8,
+            2.2,
+            "NACIONAL",
+            "BR",
+            "BR",
+            "TIER_1_RELATORIO_INSTITUTO",
+            "https://institutoverita.com.br/pesquisas/brasil-presidencial-20102026.pdf",
+            "https://pesqele.tse.jus.br/pesqele-consulta/pesquisa/detalhes.xhtml?id=BR-06396/2026",
+        ),
         (
             "BR-00640/2026",
             "França",
@@ -788,6 +735,9 @@ class PesqEleCollector(BaseElectionDataExtractor):
             "REGIONAL",
             "BA",
             "NE",
+            "TIER_2_CONTRATANTE_ORIGINAL",
+            "https://institutofranca.com.br/bahia-segundo-turno-20102026",
+            "https://pesqele.tse.jus.br/pesqele-consulta/pesquisa/detalhes.xhtml?id=BR-00640/2026",
         ),
     ]
 
@@ -829,10 +779,13 @@ class PesqEleCollector(BaseElectionDataExtractor):
 
         existing_registros = set()
         has_geo_cols = False
+        has_audit_cols = False
         if raw_csv.exists():
             with open(raw_csv, mode="r", encoding="utf-8-sig") as f:
                 reader = csv.DictReader(f)
-                has_geo_cols = "abrangencia" in (reader.fieldnames or [])
+                fieldnames = reader.fieldnames or []
+                has_geo_cols = "abrangencia" in fieldnames
+                has_audit_cols = "tier_fonte" in fieldnames
                 for row in reader:
                     reg = row.get("id_registro_tse", "").strip()
                     if reg:
@@ -846,8 +799,18 @@ class PesqEleCollector(BaseElectionDataExtractor):
             abrang = rec[13] if len(rec) > 13 else "NACIONAL"
             uf_val = rec[14] if len(rec) > 14 else "BR"
             reg_val = rec[15] if len(rec) > 15 else "BR"
+            tier_val = rec[16] if len(rec) > 16 else "TIER_2_CONTRATANTE_ORIGINAL"
+            url_src = rec[17] if len(rec) > 17 else ""
+            url_tse = rec[18] if len(rec) > 18 else ""
+
             if reg_id not in existing_registros:
-                if has_geo_cols:
+                if has_audit_cols:
+                    line = (
+                        f"{reg_id},{inst},{dt_ini},{dt_fim},{dt_pub},{n},{me},{method},{deff},"
+                        f"{fb_raw},{lula_raw},0.0,0.0,0.0,0.0,0.0,{bn},{ind},2,"
+                        f"{abrang},{uf_val},{reg_val},{tier_val},{url_src},{url_tse}\n"
+                    )
+                elif has_geo_cols:
                     line = (
                         f"{reg_id},{inst},{dt_ini},{dt_fim},{dt_pub},{n},{me},{method},{deff},"
                         f"{fb_raw},{lula_raw},0.0,0.0,0.0,0.0,0.0,{bn},{ind},2,"

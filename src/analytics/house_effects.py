@@ -7,6 +7,7 @@ se desvios observados são sistemáticos de determinados institutos ou metodolog
 
 from typing import Any, Sequence
 
+import numpy as np
 import pandas as pd
 import polars as pl
 import scipy.stats as stats
@@ -91,7 +92,7 @@ def fit_house_effects_model(
             if "C(metodologia)" in anova_table.index:
                 p_val_raw = anova_table.loc["C(metodologia)", "PR(>F)"]
                 p_meth_f = float(p_val_raw) if pd.notna(p_val_raw) else 1.0
-        except Exception:
+        except (np.linalg.LinAlgError, ValueError, KeyError):
             # Fallback seguro caso a matriz de covariância apresente singularidade
             pass
 
@@ -146,7 +147,7 @@ def fit_house_effects_model(
                         "coeficiente": round(float(coef), 2),
                         "p_valor": round(pval, 4),
                     }
-        except Exception:
+        except (np.linalg.LinAlgError, ValueError, KeyError):
             pass
 
     r2_val = float(model.rsquared) if pd.notna(model.rsquared) else 0.0

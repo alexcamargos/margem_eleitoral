@@ -144,7 +144,7 @@ class PredictiveModelConfig:
         try:
             with open(settings_path, encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
-        except Exception:
+        except (OSError, yaml.YAMLError):
             return cls()
 
         pm = data.get("predictive_model", {})

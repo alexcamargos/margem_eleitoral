@@ -142,6 +142,8 @@ class ResultadoOficialTSESchema(BaseModel):
         Raises:
             ValueError: Se a soma dos percentuais nominais divergir de 100%.
         """
+        if not self.apuracao_concluida:
+            return self
         soma = sum(self.resultado_nominal.values())
         if not (99.8 <= soma <= 100.2):
             raise ValueError(

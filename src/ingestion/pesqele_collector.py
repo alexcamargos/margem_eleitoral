@@ -232,7 +232,7 @@ class PesqEleCollector(BaseElectionDataExtractor):
         if not raw_csv.exists():
             try:
                 raw_csv = self.download_official_tse_pesqele_data()
-            except Exception:
+            except (httpx.HTTPError, OSError):
                 # Se falhar o download do TSE, prossegue sem o censo se não estiver em disco
                 return pl.DataFrame()
 
@@ -506,7 +506,7 @@ class PesqEleCollector(BaseElectionDataExtractor):
         # Também persiste o censo de registros oficiais do TSE se disponível
         try:
             self.save_tse_registration_census()
-        except Exception:
+        except (OSError, FileNotFoundError, httpx.HTTPError):
             pass
 
         return dest_path
@@ -819,7 +819,7 @@ class PesqEleCollector(BaseElectionDataExtractor):
         # 1. Tenta baixar a versão mais recente dos registros do TSE PesqEle (com fallback transparente)
         try:
             self.download_official_tse_pesqele_data(force=force_download)
-        except Exception:
+        except (httpx.HTTPError, OSError):
             # Fallback seguro para o censo de registros já disponível localmente
             pass
 

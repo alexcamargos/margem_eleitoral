@@ -76,54 +76,6 @@ def test_main_render_flow(mocker: MockerFixture) -> None:
     main()
 
 
-def test_main_sync_button_clicked(mocker: MockerFixture) -> None:
-    """Verifica a reação ao clique no botão de sincronização oficial do TSE.
-
-    Args:
-        mocker: Fixture do pytest-mock.
-
-    Returns:
-        None.
-
-    Raises:
-        None.
-    """
-    mocker.patch("streamlit.set_page_config")
-    mocker.patch("streamlit.session_state", {})
-    mocker.patch("streamlit.sidebar.markdown")
-    mocker.patch("streamlit.sidebar.selectbox", return_value=2026)
-    mocker.patch("streamlit.sidebar.radio", return_value="2º Turno (Contínuo)")
-    mocker.patch(
-        "streamlit.sidebar.button",
-        side_effect=lambda label, **kwargs: "Sincronizar" in label,
-    )
-    mocker.patch("streamlit.button", return_value=False)
-    mocker.patch("streamlit.markdown")
-    mocker.patch("src.presentation.app.render_documentation_modal")
-    mocker.patch(
-        "streamlit.tabs",
-        side_effect=lambda tabs_list: [mocker.MagicMock() for _ in tabs_list],
-    )
-    mocker.patch("streamlit.spinner")
-    mocker.patch("streamlit.success")
-    mocker.patch("streamlit.rerun")
-
-    mocker.patch("src.presentation.app.render_act1")
-    mocker.patch("src.presentation.app.render_act2")
-    mocker.patch("src.presentation.app.render_act3")
-    mocker.patch("src.presentation.app.render_act4")
-    mocker.patch("src.presentation.app.render_act5")
-    mocker.patch("src.presentation.app.render_act6")
-
-    mock_sync = mocker.patch(
-        "src.ingestion.pesqele_collector.PesqEleCollector.sync_official_second_round_polls",
-        return_value=[],
-    )
-
-    main()
-    assert mock_sync.called
-
-
 def test_run(mocker: MockerFixture) -> None:
     """Verifica se a função run configura os argumentos e invoca a CLI do Streamlit quando o runtime não existe.
 

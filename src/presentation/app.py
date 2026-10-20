@@ -5,10 +5,8 @@ no padrão dark mode da referência (Plano Político), e atualização contínua
 """
 
 import sys
-from datetime import date
 from pathlib import Path
 
-import httpx
 import polars as pl
 import streamlit as st
 from streamlit.web import cli as stcli
@@ -16,10 +14,8 @@ from streamlit.web import cli as stcli
 from src.ingestion.data_loader import (
     get_election_dataset,
     get_election_date,
-    get_second_round_sync_summary,
     get_tse_registration_census,
 )
-from src.ingestion.pesqele_collector import PesqEleCollector
 from src.presentation.components.documentation_modal import render_documentation_modal
 from src.presentation.story_acts.act1_uncertainty import render_act1
 from src.presentation.story_acts.act2_election_film import render_act2
@@ -248,64 +244,6 @@ def main() -> None:
 
     # Carrega resultado oficial e pesquisas do turno selecionado via data_loader
     tse_result, eve_polls, all_polls = get_election_dataset(year=ano_eleicao, turno=turno_num)
-
-    st.sidebar.markdown("---")
-    st.sidebar.markdown(f"### 📥 Sincronização Oficial TSE (2º Turno - {ano_eleicao})")
-    st.sidebar.markdown(
-        "<span style='font-size: 12.5px; color: #94A3B8;'>"
-        "Conecte-se diretamente à base do <b>PesqEle / Dados Abertos do TSE</b> para baixar "
-        "automaticamente todas as pesquisas registradas e divulgadas do 2º Turno.</span>",
-        unsafe_allow_html=True,
-    )
-
-    btn_sync = st.sidebar.button(
-        "🔄 Sincronizar Pesquisas do TSE",
-        type="primary",
-        width="stretch",
-        help="Dispara a ingestão automatizada do pacote oficial de pesquisas eleitorais registradas no TSE.",
-    )
-
-    if btn_sync:
-        with st.sidebar:
-            with st.spinner("Conectando ao TSE e sincronizando pesquisas do 2º Turno..."):
-                try:
-                    collector = PesqEleCollector(year=ano_eleicao)
-                    synced_polls = collector.sync_official_second_round_polls(force_download=True)
-                    st.session_state["polls_synced_r2"] = True
-                    st.session_state["last_sync_time"] = date.today().strftime("%d/%m/%Y")
-                    st.success(
-                        f"✅ {len(synced_polls)} pesquisas do 2º Turno sincronizadas com sucesso do TSE!"
-                    )
-                    st.rerun()
-                except (httpx.HTTPError, OSError, ValueError) as e:
-                    st.error(f"Erro ao sincronizar dados com o TSE: {e}")
-
-    # Exibe cartão de status da sincronização
-    sync_summary = get_second_round_sync_summary(ano_eleicao)
-    if sync_summary["is_synced"]:
-        st.sidebar.markdown(
-            f"""
-            <div style="background-color: #181B20; border: 1px solid #282D37; border-radius: 6px; padding: 10px 12px; margin-top: 10px;">
-                <span style="font-size: 11.5px; color: #38BDF8; font-weight: 600;">● SINCRONIZADO COM O TSE</span><br>
-                <span style="font-size: 12px; color: #E2E8F0;"><b>Total 2º Turno:</b> {sync_summary["total_polls"]} levantamentos</span><br>
-                <span style="font-size: 12px; color: #94A3B8;"><b>Pesquisas de Véspera:</b> {sync_summary["eve_polls_count"]}</span><br>
-                <span style="font-size: 12px; color: #94A3B8;"><b>Institutos Ativos:</b> {len(sync_summary["institutes"])}</span><br>
-                <span style="font-size: 11.5px; color: #64748B;">Último campo: {sync_summary["latest_field_date"].strftime("%d/%m/%Y") if sync_summary["latest_field_date"] else "N/D"}</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    else:
-        st.sidebar.markdown(
-            """
-            <div style="background-color: #181B20; border: 1px dashed #475569; border-radius: 6px; padding: 10px 12px; margin-top: 10px;">
-                <span style="font-size: 12px; color: #94A3B8;">
-                    Nenhuma pesquisa de 2º Turno carregada ainda. Clique no botão acima para sincronizar automaticamente da fonte oficial.
-                </span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
     st.sidebar.markdown("---")
     st.sidebar.markdown("### 📚 Guia e Metodologia")

@@ -10,6 +10,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import httpx
 import polars as pl
 
 from src.analytics.aggregator_model import compute_poll_aggregation_series
@@ -92,7 +93,7 @@ def cmd_status(args: argparse.Namespace) -> None:
             print(
                 f"   * Levantamento mais recente: {latest_poll.instituto_nome_fantasia} (Fim: {latest_poll.data_fim_campo.strftime('%d/%m/%Y')})"
             )
-    except Exception as e:
+    except (FileNotFoundError, OSError, ValueError, KeyError) as e:
         print(f"[!] Alerta ao carregar dataset: {e}")
 
     if turno == 2:
@@ -127,7 +128,7 @@ def cmd_sync(args: argparse.Namespace) -> None:
         synced = collector.sync_official_second_round_polls(force_download=args.force)
         print("[OK] Sincronização concluída com sucesso!")
         print(f"-> Foram integradas e validadas {len(synced)} pesquisas de 2º Turno.")
-    except Exception as e:
+    except (httpx.HTTPError, OSError, ValueError) as e:
         print(f"[ERRO] Falha ao sincronizar com o TSE: {e}", file=sys.stderr)
         sys.exit(1)
 
@@ -258,7 +259,7 @@ def cmd_process(args: argparse.Namespace) -> None:
     try:
         run_etl_for_year(year=year, turno=turno)
         print("[OK] Processamento concluído com sucesso!")
-    except Exception as e:
+    except (FileNotFoundError, OSError, ValueError, KeyError) as e:
         print(f"[ERRO] Falha no processamento: {e}", file=sys.stderr)
         sys.exit(1)
 
@@ -350,7 +351,7 @@ def cmd_predict(args: argparse.Namespace) -> None:
             print(
                 f"   -> Calibração empírica do 1º Turno ativa: {len(calib_t1)} institutos calibrados."
             )
-        except Exception as e:
+        except (FileNotFoundError, OSError, ValueError, KeyError) as e:
             print(f"   -> Aviso: Não foi possível carregar calibração do 1º Turno: {e}")
 
     try:
@@ -382,7 +383,7 @@ def cmd_predict(args: argparse.Namespace) -> None:
                 f"      * {s.nome_regiao} (Peso: {s.peso_eleitorado * 100:.1f}%, Pesquisas: {s.n_pesquisas}): {s.votos_projetados} | Margem Líder: {s.margem_lider:+.2f} pp"
             )
 
-    except Exception as e:
+    except (ValueError, KeyError, RuntimeError, TypeError) as e:
         print(f"[ERRO] Falha ao ajustar modelo preditivo: {e}", file=sys.stderr)
         sys.exit(1)
 

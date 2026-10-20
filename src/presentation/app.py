@@ -8,6 +8,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import httpx
 import polars as pl
 import streamlit as st
 from streamlit.web import cli as stcli
@@ -260,7 +261,7 @@ def main() -> None:
     btn_sync = st.sidebar.button(
         "🔄 Sincronizar Pesquisas do TSE",
         type="primary",
-        use_container_width=True,
+        width="stretch",
         help="Dispara a ingestão automatizada do pacote oficial de pesquisas eleitorais registradas no TSE.",
     )
 
@@ -276,7 +277,7 @@ def main() -> None:
                         f"✅ {len(synced_polls)} pesquisas do 2º Turno sincronizadas com sucesso do TSE!"
                     )
                     st.rerun()
-                except Exception as e:
+                except (httpx.HTTPError, OSError, ValueError) as e:
                     st.error(f"Erro ao sincronizar dados com o TSE: {e}")
 
     # Exibe cartão de status da sincronização
@@ -310,7 +311,7 @@ def main() -> None:
     st.sidebar.markdown("### 📚 Guia e Metodologia")
     if st.sidebar.button(
         "📖 Consultar Metodologia",
-        use_container_width=True,
+        width="stretch",
         help="Abre o modal com o resumo estratégico não-técnico e o memorial estatístico avançado.",
     ):
         render_documentation_modal()
@@ -330,7 +331,7 @@ def main() -> None:
         st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
         if st.button(
             "📖 Metodologia & Guia",
-            use_container_width=True,
+            width="stretch",
             help="Clique para abrir o modal com o resumo estratégico não-técnico e o memorial estatístico avançado.",
         ):
             render_documentation_modal()

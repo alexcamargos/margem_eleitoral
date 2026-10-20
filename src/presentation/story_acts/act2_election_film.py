@@ -4,6 +4,7 @@ Demonstra a dinâmica longitudinal da corrida eleitoral, confrontando a falácia
 pesquisas passadas falharam quando na realidade capturaram uma dinâmica volátil de campanha.
 """
 
+from datetime import date, timedelta
 from typing import Sequence
 
 import streamlit as st
@@ -46,7 +47,7 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
     }
 
     ano_pleito = polls[0].ano if polls else 2026
-    col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([1.2, 1.2, 1.0])
+    col_ctrl1, col_ctrl2, col_ctrl3, col_ctrl4 = st.columns([1.1, 1.1, 0.9, 0.9])
     with col_ctrl1:
         available_cands = sorted(
             list({c for p in polls for c in p.votos_validos.keys() if c != "Outros"})
@@ -82,8 +83,26 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
             help="Alterne entre votos válidos (sem brancos/nulos) e cenário estimulado bruto.",
         )
         use_valid = "Válidos" in tipo_metrica
+    with col_ctrl4:
+        filtro_horizonte = st.selectbox(
+            "Horizonte Temporal:",
+            ["Ciclo Completo (Jul-Out)", "Campanha Oficial (Ago-Out)", "Reta Final (14 dias)"],
+            index=0,
+            help="Alterne entre a visão macro longitudinal e o foco nos períodos críticos da reta final.",
+            key=f"act2_horizon_{ano_pleito}",
+        )
 
     filtered_polls = [p for p in polls if p.metodologia.value in filtro_metodologia]
+
+    if filtered_polls:
+        max_date = max(p.data_fim_campo for p in filtered_polls)
+        if "Campanha Oficial" in filtro_horizonte:
+            # 16 de agosto é o marco legal de início da campanha eleitoral no Brasil
+            data_corte_campanha = date(ano_pleito, 8, 16)
+            filtered_polls = [p for p in filtered_polls if p.data_fim_campo >= data_corte_campanha]
+        elif "Reta Final" in filtro_horizonte:
+            data_corte_reta_final = max_date - timedelta(days=14)
+            filtered_polls = [p for p in filtered_polls if p.data_fim_campo >= data_corte_reta_final]
 
     if not filtered_polls:
         st.warning("Nenhuma pesquisa encontrada para os filtros selecionados.")

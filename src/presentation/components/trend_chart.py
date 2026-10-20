@@ -147,6 +147,7 @@ def create_trend_aggregator_chart(
 
         ano = polls[0].ano if (hasattr(polls[0], "ano") and polls[0].ano) else min_date.year
         milestones = [
+            (f"{ano}-07-20", "Convenções"),
             (f"{ano}-08-16", "Início Propaganda"),
             (f"{ano}-08-26" if ano == 2022 else f"{ano}-08-28", "Horário Eleitoral"),
             (f"{ano}-09-29", "Debate na TV"),
@@ -170,6 +171,9 @@ def create_trend_aggregator_chart(
             except ValueError:
                 pass
 
+    is_wide_range = (max_date - min_date).days > 60 if polls else False
+    date_tick_format = "%d/%b" if is_wide_range else "%d/%m"
+
     fig.update_layout(
         title=dict(
             text="Agregador Dinâmico de Pesquisas (Trajetória Latente com Fitas de 95%)",
@@ -183,7 +187,7 @@ def create_trend_aggregator_chart(
         xaxis=dict(
             gridcolor="#282D37",
             zerolinecolor="#3D4452",
-            tickformat="%d/%m",
+            tickformat=date_tick_format,
         ),
         yaxis=dict(
             title="Intenção de Votos (%)",

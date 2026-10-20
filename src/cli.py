@@ -27,6 +27,7 @@ from src.ingestion.data_loader import (
 )
 from src.ingestion.pesqele_collector import PesqEleCollector
 from src.ingestion.pipeline import run_etl_for_year
+from src.ingestion.web_poll_extractor import WebPollExtractor
 from src.transformations.normalizer import TaxonomyNormalizer
 from src.transformations.valid_votes import calculate_valid_votes
 
@@ -144,10 +145,10 @@ def cmd_audit(args: argparse.Namespace) -> None:
 
 
 def cmd_sync(args: argparse.Namespace) -> None:
-    """Dispara a sincronização automática de pesquisas do 2º Turno junto ao TSE.
+    """Dispara a sincronização automática de pesquisas do 2º Turno junto ao TSE ou feed web.
 
     Args:
-        args: Argumentos parseados do terminal (ano, force).
+        args: Argumentos parseados do terminal (ano, force, feed_url).
 
     Returns:
         None.
@@ -156,6 +157,27 @@ def cmd_sync(args: argparse.Namespace) -> None:
         None.
     """
     year = int(args.year)
+    feed_url = getattr(args, "feed_url", None)
+    if feed_url:
+        format_header(f"Sincronizando Pesquisas via Feed Web ({year})")
+        try:
+            extractor = WebPollExtractor(year=year, feed_url=feed_url)
+            res = extractor.sync(feed_url=feed_url)
+            print("[OK] Sincronização via feed web concluída com sucesso!")
+            print(f"-> Total de pesquisas verificadas no feed: {res['total_extraidas']}")
+            print(f"-> Novos levantamentos incorporados ao dataset: {res['novas_incorporadas']}")
+            audit = res.get("tse_audit", {})
+            print(
+                f"-> Auditoria cadastral TSE: {audit.get('total_validadas', 0)}/{audit.get('total_avaliadas', 0)} "
+                f"validadas ({audit.get('taxa_conformidade', 0.0) * 100:.1f}%)"
+            )
+            print(f"-> Dataset Parquet atualizado: {res.get('parquet_path')}")
+        except (httpx.HTTPError, OSError, ValueError) as e:
+            print(f"[ERRO] Falha ao sincronizar via feed web: {e}", file=sys.stderr)
+            sys.exit(1)
+        print("=" * 70 + "\n")
+        return
+
     format_header(f"Sincronizando Pesquisas Oficiais do TSE ({year})")
     try:
         collector = PesqEleCollector(year=year)
@@ -165,6 +187,7 @@ def cmd_sync(args: argparse.Namespace) -> None:
     except (httpx.HTTPError, OSError, ValueError) as e:
         print(f"[ERRO] Falha ao sincronizar com o TSE: {e}", file=sys.stderr)
         sys.exit(1)
+    print("=" * 70 + "\n")
 
 
 def cmd_add_poll(args: argparse.Namespace) -> None:
@@ -464,9 +487,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_status.set_defaults(func=cmd_status)
 
     # 2. sync
-    p_sync = subparsers.add_parser("sync", help="Sincroniza as pesquisas eleitorais junto ao TSE")
+    p_sync = subparsers.add_parser(
+        "sync", help="Sincroniza as pesquisas eleitorais junto ao TSE ou feed web"
+    )
     p_sync.add_argument("--year", type=int, default=2026, help="Ano eleitoral (default: 2026)")
     p_sync.add_argument("--force", action="store_true", help="Força novo download do CDN do TSE")
+    p_sync.add_argument(
+        "--feed-url",
+        type=str,
+        default=None,
+        help="URL opcional do feed de pesquisas abertas para sincronização direta",
+    )
     p_sync.set_defaults(func=cmd_sync)
 
     # 3. add-poll

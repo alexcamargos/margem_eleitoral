@@ -109,6 +109,40 @@ def cmd_status(args: argparse.Namespace) -> None:
     print("=" * 70 + "\n")
 
 
+def cmd_audit(args: argparse.Namespace) -> None:
+    """Audita a integridade e conformidade de 100% das pesquisas com o censo do TSE.
+
+    Args:
+        args: Argumentos parseados do terminal (ano).
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    year = int(args.year)
+    format_header(f"Auditoria Técnica e Validação Cruzada TSE ({year})")
+    try:
+        collector = PesqEleCollector(year=year)
+        census_df = get_tse_registration_census(year=year)
+        res = collector.cross_validate_with_tse_census(census_df=census_df)
+        print(f"-> Total de pesquisas analisadas: {res['total_avaliadas']}")
+        print(f"-> Pesquisas validadas no censo TSE: {res['total_validadas']}")
+        print(f"-> Pesquisas divergentes/fictícias: {res['total_divergentes']}")
+        print(f"-> Taxa de autenticidade comprovada: {res['taxa_conformidade'] * 100:.1f}%")
+        if res["detalhes_divergencias"]:
+            print(
+                f"   [!] Protocolos não encontrados no TSE: {', '.join(res['detalhes_divergencias'])}"
+            )
+        else:
+            print("   [OK] 100% dos levantamentos coincidem com registros oficiais do TSE.")
+    except (FileNotFoundError, OSError, ValueError, KeyError) as e:
+        print(f"[ERRO] Falha durante a auditoria: {e}", file=sys.stderr)
+        sys.exit(1)
+    print("=" * 70 + "\n")
+
+
 def cmd_sync(args: argparse.Namespace) -> None:
     """Dispara a sincronização automática de pesquisas do 2º Turno junto ao TSE.
 
@@ -227,6 +261,17 @@ def cmd_add_poll(args: argparse.Namespace) -> None:
         col_name = f"voto_bruto_{cand}"
         if col_name in row_dict:
             row_dict[col_name] = str(pct)
+
+    if "tier_fonte" in headers:
+        row_dict["tier_fonte"] = getattr(args, "tier", None) or "TIER_3_AGREGADOR_PUBLICO"
+    if "url_fonte_publicacao" in headers:
+        row_dict["url_fonte_publicacao"] = getattr(args, "url_fonte", None) or ""
+    if "url_tse_pesqele" in headers:
+        digits = "".join(c for c in args.registro if c.isdigit())
+        row_dict["url_tse_pesqele"] = (
+            getattr(args, "url_tse", None)
+            or f"https://pesqele-divulgacao.tse.jus.br/app/pesquisa/detalhar.xhtml?p={digits}"
+        )
 
     # Escreve linha formatada no CSV
     line_to_write = ",".join(row_dict[h] for h in headers) + "\n"
@@ -490,7 +535,32 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["BR", "SE", "NE", "S", "N", "CO"],
         help="Sigla da Região (default: BR)",
     )
+    p_add.add_argument(
+        "--tier",
+        type=str,
+        default="TIER_3_AGREGADOR_PUBLICO",
+        help="Classificação na hierarquia de fontes (ex: TIER_1_RELATORIO_INSTITUTO, TIER_2_CONTRATANTE_ORIGINAL)",
+    )
+    p_add.add_argument(
+        "--url-fonte",
+        type=str,
+        default="",
+        help="URL pública da divulgação/laudo técnico",
+    )
+    p_add.add_argument(
+        "--url-tse",
+        type=str,
+        default="",
+        help="URL oficial de detalhamento no PesqEle do TSE",
+    )
     p_add.set_defaults(func=cmd_add_poll)
+
+    # 4. audit
+    p_audit = subparsers.add_parser(
+        "audit", help="Audita a autenticidade cruzando pesquisas publicadas com o censo do TSE"
+    )
+    p_audit.add_argument("--year", type=int, default=2026, help="Ano eleitoral (default: 2026)")
+    p_audit.set_defaults(func=cmd_audit)
 
     # 4. process
     p_process = subparsers.add_parser(

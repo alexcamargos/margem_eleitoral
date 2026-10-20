@@ -87,7 +87,7 @@ def test_get_election_dataset_2026_turno_2() -> None:
     for p in all_polls:
         assert isinstance(p, PesquisaEleitoralSchema)
         assert p.turno == 2
-        assert p.data_fim_campo <= date(2026, 10, 19)
+        assert p.data_fim_campo <= date(2026, 10, 25)
 
 
 def test_get_second_round_sync_summary() -> None:

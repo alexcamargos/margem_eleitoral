@@ -47,6 +47,7 @@ def test_render_act2(
         side_effect=[["Lula", "Flávio Bolsonaro"], ["TELEFONICA_CATI", "PRESENCIAL_DOMICILIAR"]],
     )
     mocker.patch("streamlit.radio", return_value="Votos Válidos (Oficial)")
+    mocker.patch("streamlit.selectbox", return_value="Ciclo Completo (Jul-Out)")
     mocker.patch("streamlit.plotly_chart")
     mocker.patch("streamlit.spinner")
 

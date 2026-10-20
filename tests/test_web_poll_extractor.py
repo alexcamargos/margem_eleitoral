@@ -96,6 +96,26 @@ def _build_mock_feed_data() -> dict[str, Any]:
                 "elegivel": False,
             },
         ],
+        "primeiro_turno": {
+            "pesquisas": [
+                {
+                    "data": "2026-07-06",
+                    "instituto": "Ideia",
+                    "lula": 40.4,
+                    "flavio": 32.0,
+                    "n": 1500,
+                    "fracao_flavio": 0.4419889502762431,
+                },
+                {
+                    "data": "2026-07-11",
+                    "instituto": "Futura",
+                    "lula": 40.1,
+                    "flavio": 36.8,
+                    "n": 2000,
+                    "fracao_flavio": 0.4785435630689206,
+                },
+            ]
+        },
     }
 
 
@@ -145,11 +165,13 @@ def test_web_poll_extractor_filters_unverified() -> None:
     """
     mock_data = _build_mock_feed_data()
     extractor = WebPollExtractor(year=2026)
-    polls = extractor.extract_and_transform(feed_data=mock_data, only_verified=True, only_eligible=True)
+    polls_2t = extractor.extract_and_transform(
+        feed_data=mock_data, only_verified=True, only_eligible=True, include_first_round_history=False
+    )
 
-    # Das 3 pesquisas no mock, 1 é não-verificada e deve ser filtrada
-    assert len(polls) == 2
-    for p in polls:
+    # Das 3 pesquisas de 2T no mock, 1 é não-verificada e deve ser filtrada
+    assert len(polls_2t) == 2
+    for p in polls_2t:
         assert isinstance(p, PesquisaEleitoralSchema)
         assert p.id_registro_tse != "BR-99999/2026"
         assert p.turno == 2
@@ -157,6 +179,10 @@ def test_web_poll_extractor_filters_unverified() -> None:
         assert "Lula" in p.votos_validos
         soma_validos = sum(p.votos_validos.values())
         assert 99.8 <= soma_validos <= 100.2
+
+    # Quando incluído o histórico do 1º turno (2 de 1T + 2 de 2T = 4)
+    polls_all = extractor.extract_and_transform(feed_data=mock_data, only_verified=True)
+    assert len(polls_all) == 4
 
 
 def test_web_poll_extractor_cross_validation_with_census() -> None:
@@ -176,9 +202,9 @@ def test_web_poll_extractor_cross_validation_with_census() -> None:
     polls = extractor.extract_and_transform(feed_data=mock_data, only_verified=True)
 
     res = extractor.cross_validate_with_tse_census(polls=polls)
-    assert res["total_avaliadas"] == 2
-    # Ambos os protocolos existem no censo real de 2026
-    assert res["total_validadas"] == 2
+    assert res["total_avaliadas"] == 4
+    # Todos os protocolos existem no censo real de 2026
+    assert res["total_validadas"] == 4
     assert res["total_divergentes"] == 0
     assert res["taxa_conformidade"] == 1.0
 
@@ -199,14 +225,14 @@ def test_web_poll_extractor_update_published_polls_csv(tmp_path: Path) -> None:
     extractor = WebPollExtractor(year=2026, raw_base_dir=tmp_path)
     polls = extractor.extract_and_transform(feed_data=mock_data, only_verified=True)
 
-    # 1ª execução: cria e insere
+    # 1ª execução: cria e insere 4 levantamentos (2 do 1T e 2 do 2T)
     count1 = extractor.update_published_polls_csv(polls=polls)
-    assert count1 == 2
+    assert count1 == 4
     csv_file = tmp_path / "pesquisas_publicadas_2026.csv"
     assert csv_file.exists()
 
     df_csv1 = pl.read_csv(csv_file)
-    assert df_csv1.height == 2
+    assert df_csv1.height == 4
     assert "voto_bruto_Flávio Bolsonaro" in df_csv1.columns
     assert "voto_bruto_Lula" in df_csv1.columns
 
@@ -214,7 +240,7 @@ def test_web_poll_extractor_update_published_polls_csv(tmp_path: Path) -> None:
     count2 = extractor.update_published_polls_csv(polls=polls)
     assert count2 == 0
     df_csv2 = pl.read_csv(csv_file)
-    assert df_csv2.height == 2
+    assert df_csv2.height == 4
 
 
 def test_web_poll_extractor_network_error_without_cache(mocker: MockerFixture, tmp_path: Path) -> None:
@@ -240,3 +266,33 @@ def test_web_poll_extractor_network_error_without_cache(mocker: MockerFixture, t
         assert False, "Deveria ter levantado httpx.ConnectError"
     except httpx.ConnectError:
         pass
+
+
+def test_web_poll_extractor_first_round_history() -> None:
+    """Valida a extração e conversão de pesquisas históricas do 1º Turno desde julho.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    mock_data = _build_mock_feed_data()
+    extractor = WebPollExtractor(year=2026)
+    pt_polls = extractor.extract_and_transform_first_round(feed_data=mock_data)
+
+    assert len(pt_polls) == 2
+    for p in pt_polls:
+        assert isinstance(p, PesquisaEleitoralSchema)
+        assert p.turno == 1
+        assert p.ano == 2026
+        assert p.data_fim_campo.month == 7
+        assert "Flávio Bolsonaro" in p.votos_validos
+        assert "Lula" in p.votos_validos
+        soma = sum(p.votos_validos.values())
+        assert 99.8 <= soma <= 100.2
+        assert p.id_registro_tse.startswith("BR-")
+

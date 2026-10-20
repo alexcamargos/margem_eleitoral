@@ -1,0 +1,11 @@
+{
+  "cargo": "PRESIDENTE",
+  "turno": 2,
+  "ano": 2026,
+  "total_votos_validos": 0,
+  "total_brancos": 0,
+  "total_nulos": 0,
+  "total_abstencoes": 0,
+  "resultado_nominal": {},
+  "apuracao_concluida": false
+}

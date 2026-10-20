@@ -29,6 +29,24 @@ class AbrangenciaEnum(str, Enum):
     ESTADUAL = "ESTADUAL"
 
 
+class TierFonteEnum(str, Enum):
+    """Classificação hierárquica da fonte de dados da pesquisa eleitoral.
+
+    Define os níveis de autoridade e confiabilidade da informação coletada:
+    - TIER_1_OFICIAL_TSE: Metadados e relatórios do Portal de Dados Abertos ou PesqEle do TSE.
+    - TIER_1_RELATORIO_INSTITUTO: Relatório técnico oficial em PDF emitido diretamente pelo instituto.
+    - TIER_2_CONTRATANTE_ORIGINAL: Matéria jornalística do veículo contratante formal da pesquisa.
+    - TIER_3_AGREGADOR_PUBLICO: Base aberta consolidada (ex.: Repositório Poder360, FGV CEPESP).
+    - TIER_4_IMPRENSA_SECUNDARIA: Repercussão geral (utilizado apenas para alerta/descoberta).
+    """
+
+    TIER_1_OFICIAL_TSE = "TIER_1_OFICIAL_TSE"
+    TIER_1_RELATORIO_INSTITUTO = "TIER_1_RELATORIO_INSTITUTO"
+    TIER_2_CONTRATANTE_ORIGINAL = "TIER_2_CONTRATANTE_ORIGINAL"
+    TIER_3_AGREGADOR_PUBLICO = "TIER_3_AGREGADOR_PUBLICO"
+    TIER_4_IMPRENSA_SECUNDARIA = "TIER_4_IMPRENSA_SECUNDARIA"
+
+
 class PesquisaEleitoralSchema(BaseModel):
     """Contrato de dados para um levantamento de pesquisa eleitoral registrado.
 
@@ -54,6 +72,10 @@ class PesquisaEleitoralSchema(BaseModel):
         abrangencia: Escopo geográfico da coleta (NACIONAL, REGIONAL ou ESTADUAL).
         uf: Sigla da Unidade da Federação ou recorte territorial (padrão: 'BR').
         regiao: Sigla da macrorregião geográfica correspondente (padrão: 'BR').
+        tier_fonte: Nível hierárquico de autoridade da fonte primária do resultado.
+        url_fonte_publicacao: Link público para a publicação oficial na imprensa ou relatório.
+        url_tse_pesqele: Link direto da consulta pública do registro no portal PesqEle do TSE.
+        verificado_tse: Indicador booleano de confirmação cruzada com o censo oficial do TSE.
     """
 
     id_registro_tse: str = Field(..., pattern=r"^[A-Z]{2}-\d{5}/\d{4}$")
@@ -77,6 +99,22 @@ class PesquisaEleitoralSchema(BaseModel):
     abrangencia: AbrangenciaEnum = Field(default=AbrangenciaEnum.NACIONAL)
     uf: str = Field(default="BR", min_length=2, max_length=5)
     regiao: str = Field(default="BR", min_length=1, max_length=5)
+    tier_fonte: TierFonteEnum = Field(
+        default=TierFonteEnum.TIER_2_CONTRATANTE_ORIGINAL,
+        description="Nível hierárquico da autoridade da fonte",
+    )
+    url_fonte_publicacao: str | None = Field(
+        default=None,
+        description="Link da matéria de divulgação original ou relatório técnico",
+    )
+    url_tse_pesqele: str | None = Field(
+        default=None,
+        description="Link da consulta pública de registro no TSE",
+    )
+    verificado_tse: bool = Field(
+        default=True,
+        description="Flag indicando conformidade cadastral estrita com o TSE",
+    )
 
     @model_validator(mode="after")
     def validate_chronology(self) -> Self:

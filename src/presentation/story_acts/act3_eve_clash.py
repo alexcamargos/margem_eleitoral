@@ -128,7 +128,7 @@ def render_act3(
         candidate_name=cand_focus,
         official_vote_percent=p_true,
     )
-    st.plotly_chart(fig_forest, use_container_width=True)
+    st.plotly_chart(fig_forest, width="stretch")
 
     if coverage_rate >= 80.0:
         st.success(

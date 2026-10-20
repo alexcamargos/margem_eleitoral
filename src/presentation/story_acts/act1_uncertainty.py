@@ -82,7 +82,7 @@ def render_act1() -> None:
         num_simulations=num_sims,
         deff=deff_val,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     margem_calculada = 1.96 * (((deff_val * 0.5 * 0.5) / sample_size) ** 0.5) * 100
     st.markdown(

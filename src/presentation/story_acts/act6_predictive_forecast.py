@@ -403,7 +403,7 @@ def render_act6(
             forecast=forecast,
             official_result=oficial_dict,
         )
-        st.plotly_chart(fig_dist, use_container_width=True)
+        st.plotly_chart(fig_dist, width="stretch")
 
     with col_tbl:
         cand_rows = []
@@ -436,7 +436,7 @@ def render_act6(
         if has_official_concluded:
             st.dataframe(
                 pl.DataFrame(cand_rows),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
                 column_config={
                     "Previsto (%)": st.column_config.NumberColumn("Previsto (%)", format="%.2f%%"),
@@ -448,7 +448,7 @@ def render_act6(
         else:
             st.dataframe(
                 pl.DataFrame(cand_rows),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
                 column_config={
                     "Previsto (%)": st.column_config.NumberColumn("Previsto (%)", format="%.2f%%"),
@@ -482,7 +482,7 @@ def render_act6(
             regional_slices=forecast.agregacao_regional,
             top_candidates=top2_names,
         )
-        st.plotly_chart(fig_reg, use_container_width=True)
+        st.plotly_chart(fig_reg, width="stretch")
 
     with col_reg_tbl:
         reg_rows = []
@@ -498,7 +498,7 @@ def render_act6(
             reg_rows.append(row_d)
         st.dataframe(
             pl.DataFrame(reg_rows),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "Peso TSE (%)": st.column_config.NumberColumn("Peso TSE (%)", format="%.1f%%"),
@@ -564,7 +564,7 @@ def render_act6(
             )
 
         fig_bt = create_backtest_convergence_chart(bt_df)
-        st.plotly_chart(fig_bt, use_container_width=True)
+        st.plotly_chart(fig_bt, width="stretch")
 
         # Formata as datas como string dd/mm/aaaa para evitar timestamps '00:00:00' na tabela
         bt_rows_formatted = []
@@ -589,7 +589,7 @@ def render_act6(
 
         st.dataframe(
             pl.DataFrame(bt_rows_formatted),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "Chances Vencedor Real (%)": st.column_config.NumberColumn(
@@ -638,7 +638,7 @@ def render_act6(
                 )
             st.dataframe(
                 pl.DataFrame(cal_rows),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
                 column_config={
                     "Erro Ponderado no 1º Turno (EP_T1)": st.column_config.NumberColumn(

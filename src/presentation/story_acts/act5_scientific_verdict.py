@@ -269,7 +269,7 @@ def render_act5(
         for p in eve_polls
     ]
     fig_bias = create_directional_bias_chart(bias_evals, candidate_name=c1)
-    st.plotly_chart(fig_bias, use_container_width=True)
+    st.plotly_chart(fig_bias, width="stretch")
 
     # 4. Conclusão Científica Dinâmica Baseada em Dados
     st.markdown("### 4. Conclusão e Auditoria Técnica")

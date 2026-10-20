@@ -219,7 +219,7 @@ def render_act4(
             unsafe_allow_html=True,
         )
         fig_bar = create_weighted_error_bar_chart(eval_records, faixa_acaso_p90=p90)
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width="stretch")
 
         st.markdown(
             "### Pesquisas consideradas *(organize a coluna para ordenar pelos componentes)*"
@@ -230,7 +230,7 @@ def render_act4(
         df_table = pl.DataFrame(table_rows_sorted).to_pandas()
         st.dataframe(
             df_table,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "Erro Ponderado (EP)": st.column_config.NumberColumn(
@@ -264,7 +264,7 @@ def render_act4(
         df_formal = pl.DataFrame(table_rows_formal).to_pandas()
         st.dataframe(
             df_formal,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "Erro Líder (M3)": st.column_config.NumberColumn("Erro Líder (M3)", format="%.2f"),
@@ -312,7 +312,7 @@ def render_act4(
             candidate_1=c1,
             candidate_2=c2,
         )
-        st.plotly_chart(fig_grid, use_container_width=True)
+        st.plotly_chart(fig_grid, width="stretch")
 
         excluded_list = house_effects_data.get("excluded_institutes", [])
         excluded_str = ", ".join(excluded_list) if excluded_list else "nenhum"
@@ -325,7 +325,7 @@ def render_act4(
             """,
             unsafe_allow_html=True,
         )
-    except Exception as exc:
+    except (ValueError, KeyError, ZeroDivisionError) as exc:
         st.warning(f"Não foi possível calcular o comparativo de inclinação longitudinal: {exc}")
 
     # 6. Caixa Metodológica

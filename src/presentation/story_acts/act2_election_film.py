@@ -104,7 +104,7 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
         polls=filtered_polls,
         candidates=selected_candidates,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     st.markdown(
         """

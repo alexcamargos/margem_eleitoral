@@ -47,8 +47,10 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
     }
 
     ano_pleito = polls[0].ano if polls else 2026
-    col_ctrl1, col_ctrl2, col_ctrl3, col_ctrl4 = st.columns([1.1, 1.1, 0.9, 0.9])
-    with col_ctrl1:
+
+    # Linha 1: Seleção de Candidatos e Metodologias (espaço amplo para tags/pills sem truncamento)
+    row1_col1, row1_col2 = st.columns([1.0, 1.0])
+    with row1_col1:
         available_cands = sorted(
             list({c for p in polls for c in p.votos_validos.keys() if c != "Outros"})
         )
@@ -65,7 +67,7 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
         )
         # Sanitiza candidatos caso haja resíduos de estados anteriores
         selected_candidates = [c for c in selected_candidates if c in available_cands]
-    with col_ctrl2:
+    with row1_col2:
         metodologias_disponiveis = sorted(list({p.metodologia.value for p in polls}))
         filtro_metodologia = st.multiselect(
             "Filtrar por Metodologia de Coleta:",
@@ -74,23 +76,28 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
             format_func=lambda m: METHODOLOGY_LABELS.get(m, m),
             key=f"act2_methods_{ano_pleito}",
         )
-    with col_ctrl3:
+
+    # Linha 2: Controles Horizontais de Escopo (Horizonte Temporal e Base de Votação)
+    row2_col1, row2_col2 = st.columns([1.2, 0.8])
+    with row2_col1:
+        filtro_horizonte = st.radio(
+            "Horizonte Temporal:",
+            ["Ciclo Completo (Jul-Out)", "Campanha Oficial (Ago-Out)", "Reta Final (14 dias)"],
+            index=0,
+            horizontal=True,
+            help="Alterne entre a visão macro longitudinal e o foco nos períodos críticos da reta final.",
+            key=f"act2_horizon_{ano_pleito}",
+        )
+    with row2_col2:
         tipo_metrica = st.radio(
             "Base de Votação:",
             ["Votos Válidos (Oficial)", "Votos Totais (Bruto)"],
             index=0,
-            horizontal=False,
+            horizontal=True,
             help="Alterne entre votos válidos (sem brancos/nulos) e cenário estimulado bruto.",
+            key=f"act2_metric_{ano_pleito}",
         )
         use_valid = "Válidos" in tipo_metrica
-    with col_ctrl4:
-        filtro_horizonte = st.selectbox(
-            "Horizonte Temporal:",
-            ["Ciclo Completo (Jul-Out)", "Campanha Oficial (Ago-Out)", "Reta Final (14 dias)"],
-            index=0,
-            help="Alterne entre a visão macro longitudinal e o foco nos períodos críticos da reta final.",
-            key=f"act2_horizon_{ano_pleito}",
-        )
 
     filtered_polls = [p for p in polls if p.metodologia.value in filtro_metodologia]
 

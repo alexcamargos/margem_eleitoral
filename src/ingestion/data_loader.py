@@ -11,6 +11,7 @@ from typing import Any
 
 import polars as pl
 import yaml
+from pydantic import ValidationError
 
 from src.ingestion.pesqele_collector import PesqEleCollector
 from src.ingestion.pipeline import run_etl_for_year
@@ -178,17 +179,21 @@ def get_election_dataset(
     # 1. Carrega o resultado oficial se disponível e apurado
     tse_result: ResultadoOficialTSESchema | None = None
     if tse_json_path.exists():
-        with open(tse_json_path, encoding="utf-8") as f:
-            tse_dict = json.load(f)
-        tse_result = ResultadoOficialTSESchema(**tse_dict)
+        try:
+            with open(tse_json_path, encoding="utf-8") as f:
+                tse_dict = json.load(f)
+            tse_result = ResultadoOficialTSESchema(**tse_dict)
+        except (OSError, json.JSONDecodeError, ValidationError, ValueError):
+            tse_result = None
     elif Path(
         repo_root / "data" / "raw" / str(year) / f"resultado_tse_{year}_t{turno}.json"
     ).exists():
         try:
             tse_extractor = TSEResultsExtractor(year=year, turno=turno)
             tse_result = tse_extractor.extract_and_transform()
-            tse_extractor.save_processed()
-        except Exception:
+            if tse_result is not None and getattr(tse_result, "apuracao_concluida", True):
+                tse_extractor.save_processed()
+        except (FileNotFoundError, OSError, json.JSONDecodeError, ValidationError, ValueError):
             tse_result = None
 
     # 2. Carrega as pesquisas via Polars Parquet

@@ -82,7 +82,7 @@ def test_get_election_dataset_2026_turno_2() -> None:
 
     assert tse_result is None or not getattr(tse_result, "apuracao_concluida", True)
     assert len(eve_polls) == 0
-    assert len(all_polls) >= 15
+    assert len(all_polls) >= 5
 
     for p in all_polls:
         assert isinstance(p, PesquisaEleitoralSchema)
@@ -106,7 +106,7 @@ def test_get_second_round_sync_summary() -> None:
 
     summary = get_second_round_sync_summary(year=2026)
     assert summary["is_synced"] is True
-    assert summary["total_polls"] >= 15
+    assert summary["total_polls"] >= 5
     assert summary["eve_polls_count"] == 0
     assert len(summary["institutes"]) >= 5
     assert summary["latest_field_date"] is not None

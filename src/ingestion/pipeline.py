@@ -35,9 +35,9 @@ def run_etl_for_year(
 
     # 1. Extração e validação do Resultado Oficial do TSE
     print("1/3 Extraindo e validando apuracao oficial do TSE...")
-    tse_extractor = TSEResultsExtractor(year=year, turno=turno)
+    tse_extractor = TSEResultsExtractor(year=int(year), turno=int(turno))
     tse_result = tse_extractor.extract_and_transform()
-    if tse_result is not None:
+    if tse_result is not None and getattr(tse_result, "apuracao_concluida", True):
         tse_dest = tse_extractor.save_processed()
         print(f"   -> Apuracao oficial validada: {len(tse_result.resultado_nominal)} candidatos.")
         print(f"   -> Salvo em: {tse_dest}")
@@ -53,7 +53,7 @@ def run_etl_for_year(
     print(f"   -> Salvo em formato Parquet em: {polls_dest}")
 
     # 3. Sumário e validação de consistência
-    if tse_result is not None:
+    if tse_result is not None and getattr(tse_result, "apuracao_concluida", True):
         candidatos_tse = set(tse_result.resultado_nominal.keys())
         candidatos_pesquisas = {c for p in polls for c in p.votos_validos.keys()}
         print("3/3 Verificando aderencia semantica dos candidatos...")
@@ -102,7 +102,7 @@ def main() -> None:
     for yr in years_to_process:
         try:
             run_etl_for_year(year=yr, turno=args.turno)
-        except Exception as e:
+        except (FileNotFoundError, OSError, ValueError, KeyError) as e:
             print(f"[ERRO] Falha ao executar ETL para o ano {yr}: {e}", file=sys.stderr)
             sys.exit(1)
 

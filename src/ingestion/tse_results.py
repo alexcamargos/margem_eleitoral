@@ -33,10 +33,11 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
         Raises:
             ValueError: Se o turno for inválido.
         """
-        super().__init__(year=year, raw_base_dir=raw_base_dir)
-        if turno not in (1, 2):
+        super().__init__(year=int(year), raw_base_dir=raw_base_dir)
+        turno_val = int(turno)
+        if turno_val not in (1, 2):
             raise ValueError(f"Turno eleitoral inválido: {turno}. Esperado 1 ou 2.")
-        self.turno = turno
+        self.turno = turno_val
         self.normalizer = TaxonomyNormalizer()
 
     def fetch_from_tse_api(self) -> ResultadoOficialTSESchema:
@@ -140,7 +141,7 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
         if self.year == 2026 and self.turno == 1:
             try:
                 return self.fetch_from_tse_api()
-            except Exception:
+            except (httpx.HTTPError, json.JSONDecodeError, ValueError, OSError):
                 # Fallback para snapshot local se a requisição à API falhar
                 pass
 
@@ -148,8 +149,18 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
         raw_file = self.raw_dir / json_filename
 
         if not raw_file.exists():
-            if self.year == 2026 and self.turno == 2:
-                return None
+            if int(self.year) == 2026 and int(self.turno) == 2:
+                return ResultadoOficialTSESchema(
+                    cargo="PRESIDENTE",
+                    turno=2,
+                    ano=2026,
+                    total_votos_validos=0,
+                    total_brancos=0,
+                    total_nulos=0,
+                    total_abstencoes=0,
+                    resultado_nominal={},
+                    apuracao_concluida=False,
+                )
             raise FileNotFoundError(
                 f"Arquivo de apuração oficial não encontrado em: {raw_file}. "
                 f"Certifique-se de que o snapshot bruto correspondente exista em data/raw/{self.year}/."

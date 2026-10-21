@@ -1,4 +1,4 @@
-"""Ato 6: Modelo Preditivo & Previsão Eleitoral (Estado-Espaço Hierárquico Calibrado).
+"""Ato 7: Modelo Preditivo & Previsão Eleitoral (Estado-Espaço Hierárquico Calibrado).
 
 Renderiza o painel executivo de Nowcasting e Previsão Eleitoral Probabilística:
 1. Narrativa contextualizada dinamicamente para o 1º Turno (validação retroativa antes da urna)
@@ -62,7 +62,7 @@ def _compute_simple_poll_average(
     return {c: round((v / tot) * 100.0, 2) for c, v in raw.items()}
 
 
-def render_act6(
+def render_act7(
     polls: Sequence[PesquisaEleitoralSchema],
     tse_result: ResultadoOficialTSESchema | None,
     election_date: date,
@@ -70,7 +70,7 @@ def render_act6(
     t1_tse_result: ResultadoOficialTSESchema | None = None,
     t1_election_date: date | None = None,
 ) -> None:
-    """Renderiza a tela do Ato 6: Modelo Preditivo & Previsão Eleitoral.
+    """Renderiza a tela do Ato 7: Modelo Preditivo & Previsão Eleitoral.
 
     Args:
         polls: Pesquisas eleitorais do turno ativo (incluindo escopos Nacional, Estadual e Regional).
@@ -86,7 +86,7 @@ def render_act6(
     Raises:
         None.
     """
-    st.markdown("## Ato 6: Modelo Preditivo & Previsão Eleitoral (Agregado Multi-Escopo Calibrado)")
+    st.markdown("## Ato 7: Modelo Preditivo & Previsão Eleitoral (Agregado Multi-Escopo Calibrado)")
 
     if not polls:
         st.info(
@@ -674,3 +674,8 @@ def render_act6(
                $$P(\text{Vitória}_A) = \frac{1}{N_{\text{sim}}} \sum_{s=1}^{N_{\text{sim}}} \mathbb{I}\left(\tilde{P}_A^{(s)} > \max_{B \neq A} \tilde{P}_B^{(s)}\right), \quad N_{\text{sim}} = 10.000$$
             """
         )
+
+
+# Alias para retrocompatibilidade
+render_act6 = render_act7
+

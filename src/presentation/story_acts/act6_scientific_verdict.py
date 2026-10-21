@@ -1,4 +1,4 @@
-"""Ato 5: O Veredito Científico (Inferência Formal e Auditoria Antifraude).
+"""Ato 6: O Veredito Científico (Inferência Formal e Auditoria Antifraude).
 
 Submete as divergências das pesquisas de véspera aos testes formais de hipótese estatística
 (t-Student, Wilcoxon, Binomial de cobertura e ANOVA de efeitos de casa) e sintetiza
@@ -32,12 +32,12 @@ from src.presentation.components.bias_chart import create_directional_bias_chart
 from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficialTSESchema
 
 
-def render_act5(
+def render_act6(
     eve_polls: Sequence[PesquisaEleitoralSchema],
     tse_result: ResultadoOficialTSESchema | None,
     all_polls: Sequence[PesquisaEleitoralSchema] | None = None,
 ) -> None:
-    """Renderiza a narrativa e os testes estatísticos do Ato 5.
+    """Renderiza a narrativa e os testes estatísticos do Ato 6.
 
     Args:
         eve_polls: Lista das pesquisas de véspera avaliadas (campo até 72h).
@@ -50,7 +50,7 @@ def render_act5(
     Raises:
         None.
     """
-    st.markdown("## Ato 5: O Veredito Científico (Diagnóstico do Total Survey Error)")
+    st.markdown("## Ato 6: O Veredito Científico (Diagnóstico do Total Survey Error)")
 
     if tse_result is None or not getattr(tse_result, "apuracao_concluida", True):
         st.markdown(
@@ -310,3 +310,8 @@ def render_act5(
             """,
             unsafe_allow_html=True,
         )
+
+
+# Alias para retrocompatibilidade
+render_act5 = render_act6
+

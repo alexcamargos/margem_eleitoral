@@ -1,4 +1,4 @@
-"""Ato 3: A Prova dos Fatos (Pesquisas de Véspera vs. Urna).
+"""Ato 4: A Prova dos Fatos (Pesquisas de Véspera vs. Urna).
 
 Apresenta o confronto formal entre as últimas estimativas divulgadas e a apuração
 oficial do TSE por meio do Forest Plot e medição da Taxa de Cobertura Empírica.
@@ -16,11 +16,11 @@ from src.presentation.components.forest_plot import create_forest_plot
 from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficialTSESchema
 
 
-def render_act3(
+def render_act4(
     eve_polls: Sequence[PesquisaEleitoralSchema],
     tse_result: ResultadoOficialTSESchema | None,
 ) -> None:
-    """Renderiza a narrativa e os componentes do Forest Plot no Ato 3.
+    """Renderiza a narrativa e os componentes do Forest Plot no Ato 4.
 
     Args:
         eve_polls: Lista das pesquisas que cumpriram o critério de véspera (<= 72h).
@@ -32,7 +32,7 @@ def render_act3(
     Raises:
         None.
     """
-    st.markdown("## Ato 3: A Prova dos Fatos (Pesquisas de Véspera vs. Urna)")
+    st.markdown("## Ato 4: A Prova dos Fatos (Pesquisas de Véspera vs. Urna)")
 
     if tse_result is None or not getattr(tse_result, "apuracao_concluida", True):
         st.markdown(
@@ -142,3 +142,8 @@ def render_act3(
             "abaixo da meta teórica de 95%. Isso indica presença de fatores não-amostrais adicionais "
             "(como abstenção diferencial e decisão de última hora)."
         )
+
+
+# Alias para retrocompatibilidade
+render_act3 = render_act4
+

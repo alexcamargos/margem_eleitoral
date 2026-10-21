@@ -1,4 +1,4 @@
-"""Ato 4: Anatomia do Erro e Auditoria (Painel de Desempenho de Pesquisas).
+"""Ato 5: Anatomia do Erro e Auditoria (Painel de Desempenho de Pesquisas).
 
 Implementa a visualização refinada em duas camadas complementares:
 1. Camada de Impacto Eleitoral & Decisão Pública: Erro Ponderado multivariado (D, F, X)
@@ -29,12 +29,12 @@ from src.presentation.components.small_multiples import create_small_multiples_g
 from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficialTSESchema
 
 
-def render_act4(
+def render_act5(
     eve_polls: Sequence[PesquisaEleitoralSchema],
     all_polls: Sequence[PesquisaEleitoralSchema],
     tse_result: ResultadoOficialTSESchema | None,
 ) -> None:
-    """Renderiza a tela de Auditoria e Desempenho de Pesquisas em duas camadas.
+    """Renderiza a tela de Auditoria e Desempenho de Pesquisas em duas camadas no Ato 5.
 
     Args:
         eve_polls: Lista das pesquisas de véspera avaliadas (campo até 72h).
@@ -48,7 +48,7 @@ def render_act4(
         None.
     """
     if tse_result is None or not getattr(tse_result, "apuracao_concluida", True):
-        st.markdown("## Ato 4: Anatomia do Erro e Auditoria de Institutos")
+        st.markdown("## Ato 5: Anatomia do Erro e Auditoria de Institutos")
         st.markdown(
             """
             <div style="background-color: #1A202C; border-left: 4px solid #F59E0B; padding: 18px 20px; border-radius: 8px; margin-top: 15px; margin-bottom: 25px;">
@@ -360,3 +360,8 @@ def render_act4(
             $$\\hat{p}_{v,i} = \\frac{\\hat{p}_i}{1 - (\\hat{p}_{\\text{branco}} + \\hat{p}_{\\text{nulo}} + \\hat{p}_{\\text{indeciso}})}$$
             """
         )
+
+
+# Alias para retrocompatibilidade
+render_act4 = render_act5
+

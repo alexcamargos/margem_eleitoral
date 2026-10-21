@@ -149,58 +149,125 @@ def render_act3(year: int = 2026, turno: int = 1) -> None:
             unsafe_allow_html=True,
         )
 
-    # 4. Seção 2: Depois do 1º Turno (Tracking de 2º Turno)
+    # 4. Seção 2: Depois do 1º Turno (Última pesquisa de cada instituto)
     segundo_turno_data = data.get("segundo_turno", {})
     pesquisas_feed = segundo_turno_data.get("pesquisas_feed", [])
+    t2_polls = data.get("t2_pesquisas_instituto", [])
 
-    if pesquisas_feed:
+    if t2_polls:
         st.markdown("### Depois do 1º turno")
 
-        # Container estilizado de pesquisas do 2º turno
-        feed_items_html = []
-        for p in pesquisas_feed:
-            inst = p.get("instituto", "")
-            inicio = p.get("campo_inicio", "")
-            fim = p.get("campo_fim", "")
-            rejeicao = p.get("rejeicao", {})
-            v1 = rejeicao.get(c1, 0.0)
-            v2 = rejeicao.get(c2, 0.0)
-            veredito = p.get("veredito", "")
-            tipo_v = p.get("tipo_veredito", "")
-
-            # Cores para cada elemento
-            campo_str = f"(campo {inicio} a {fim}):" if inicio and fim else ":"
-            if "empate" in tipo_v.lower():
-                verdict_color = "#94A3B8"
-            elif c1_disp.lower() in tipo_v.lower() or c1.lower() in tipo_v.lower():
-                verdict_color = c1_color
-            else:
-                verdict_color = c2_color
-
-            item_html = (
-                f"<div style='padding: 6px 0; border-bottom: 1px solid #1F242D; font-size: 13.5px;'>"
-                f"<b>{inst}</b> <span style='color: #94A3B8;'>{campo_str}</span> "
-                f"<span style='color: {c1_color}; font-weight: 600;'>{c1_disp} {v1:.0f}%</span>, "
-                f"<span style='color: {c2_color}; font-weight: 600;'>{c2_disp} {v2:.0f}%</span> "
-                f"&rarr; <span style='color: {verdict_color}; font-weight: 500;'>{veredito}</span>"
-                f"</div>"
+        # Texto diagnóstico do 2º turno
+        if data.get("t2_texto_diagnostico"):
+            st.markdown(
+                f"""
+                <div style="font-size: 14px; color: #E2E8F0; margin-bottom: 16px; line-height: 1.5;">
+                    {data["t2_texto_diagnostico"]}
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
-            feed_items_html.append(item_html)
 
-        st.markdown(
-            f"""
-            <div style="background-color: #15181E; border: 1px solid #282D37; border-radius: 8px; padding: 14px 18px; margin-bottom: 14px;">
-                {"".join(feed_items_html)}
-            </div>
-            """,
-            unsafe_allow_html=True,
+        # Dois cartões métricos KPI destacados lado a lado para o 2º turno
+        t2_med_c1 = data["t2_media_rejeicao"].get(c1, 0.0)
+        t2_med_c2 = data["t2_media_rejeicao"].get(c2, 0.0)
+        t2_tot_inst = data["t2_total_institutos"]
+
+        col1_t2, col2_t2 = st.columns(2)
+        with col1_t2:
+            st.markdown(
+                f"""
+                <div style="background-color: #2D1517; border-left: 4px solid {c1_color}; border-radius: 6px; padding: 14px 18px; margin-bottom: 16px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #FCA5A5; text-transform: uppercase; letter-spacing: 0.5px;">{c1_disp} (2º Turno)</div>
+                    <div style="font-size: 32px; font-weight: 700; color: #FFFFFF; line-height: 1.2; margin: 4px 0;">{t2_med_c1:.1f}%</div>
+                    <div style="font-size: 12px; color: #FDA4AF;">rejeição média, {t2_tot_inst} institutos (último campo)</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with col2_t2:
+            st.markdown(
+                f"""
+                <div style="background-color: #172554; border-left: 4px solid {c2_color}; border-radius: 6px; padding: 14px 18px; margin-bottom: 16px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #93C5FD; text-transform: uppercase; letter-spacing: 0.5px;">{c2_disp} (2º Turno)</div>
+                    <div style="font-size: 32px; font-weight: 700; color: #FFFFFF; line-height: 1.2; margin: 4px 0;">{t2_med_c2:.1f}%</div>
+                    <div style="font-size: 12px; color: #BFDBFE;">rejeição média, {t2_tot_inst} institutos (último campo)</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        # Texto do Placar do 2º Turno
+        if data.get("t2_texto_placar"):
+            st.markdown(
+                f"""
+                <div style="font-size: 13.5px; color: #94A3B8; margin-bottom: 12px; line-height: 1.5;">
+                    {data["t2_texto_placar"]}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        # Gráfico Dumbbell Plot do 2º Turno (última pesquisa de cada instituto)
+        fig_dumbbell_t2 = create_rejection_dumbbell_chart(
+            polls=t2_polls,
+            candidate_1=c1,
+            candidate_2=c2,
+            display_names=data["display_names"],
+            candidate_colors=data["cores"],
+            chart_title="% que não votaria de jeito nenhum no 2º turno — quanto mais à esquerda, menos rejeitado",
+            include_dates_in_label=True,
         )
+        st.plotly_chart(fig_dumbbell_t2, use_container_width=True)
+
+        # Histórico detalhado cronológico das pesquisas em container colapsável
+        if pesquisas_feed:
+            with st.expander(
+                f"📋 Ver histórico cronológico completo de pesquisas publicadas no 2º turno ({len(pesquisas_feed)} levantamentos)"
+            ):
+                feed_items_html = []
+                for p in pesquisas_feed:
+                    inst = p.get("instituto", "")
+                    inicio = p.get("campo_inicio", "")
+                    fim = p.get("campo_fim", "")
+                    rejeicao = p.get("rejeicao", {})
+                    v1 = rejeicao.get(c1, 0.0)
+                    v2 = rejeicao.get(c2, 0.0)
+                    veredito = p.get("veredito", "")
+                    tipo_v = p.get("tipo_veredito", "")
+
+                    campo_str = f"(campo {inicio} a {fim}):" if inicio and fim else ":"
+                    if "empate" in tipo_v.lower():
+                        verdict_color = "#94A3B8"
+                    elif c1_disp.lower() in tipo_v.lower() or c1.lower() in tipo_v.lower():
+                        verdict_color = c1_color
+                    else:
+                        verdict_color = c2_color
+
+                    item_html = (
+                        f"<div style='padding: 6px 0; border-bottom: 1px solid #1F242D; font-size: 13.5px;'>"
+                        f"<b>{inst}</b> <span style='color: #94A3B8;'>{campo_str}</span> "
+                        f"<span style='color: {c1_color}; font-weight: 600;'>{c1_disp} {v1:.0f}%</span>, "
+                        f"<span style='color: {c2_color}; font-weight: 600;'>{c2_disp} {v2:.0f}%</span> "
+                        f"&rarr; <span style='color: {verdict_color}; font-weight: 500;'>{veredito}</span>"
+                        f"</div>"
+                    )
+                    feed_items_html.append(item_html)
+
+                st.markdown(
+                    f"""
+                    <div style="background-color: #15181E; border: 1px solid #282D37; border-radius: 8px; padding: 14px 18px; margin-top: 8px;">
+                        {"".join(feed_items_html)}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
         nota_projecao = segundo_turno_data.get("nota_projecao", "")
         if nota_projecao:
             st.markdown(
                 f"""
-                <div style="font-size: 12.5px; color: #64748B; line-height: 1.5; margin-bottom: 24px;">
+                <div style="font-size: 12.5px; color: #64748B; line-height: 1.5; margin-top: 10px; margin-bottom: 24px;">
                     {nota_projecao}
                 </div>
                 """,

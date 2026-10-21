@@ -6,10 +6,11 @@ from src.analytics.aggregator_model import compute_poll_aggregation_series
 from src.presentation.components.bar_error_chart import create_weighted_error_bar_chart
 from src.presentation.components.bias_chart import create_directional_bias_chart
 from src.presentation.components.forest_plot import create_forest_plot
+from src.presentation.components.institute_temporal_chart import create_institute_temporal_chart
 from src.presentation.components.simulator import create_sampling_simulator_figure
 from src.presentation.components.small_multiples import create_small_multiples_grid
 from src.presentation.components.trend_chart import create_trend_aggregator_chart
-from src.transformations.schemas import PesquisaEleitoralSchema
+from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficialTSESchema
 
 
 def test_create_weighted_error_bar_chart() -> None:
@@ -146,3 +147,98 @@ def test_create_sampling_simulator_figure() -> None:
     """Verifica o simulador do Teorema Central do Limite."""
     fig = create_sampling_simulator_figure(p_true=50.0, sample_size=1000, num_simulations=100)
     assert fig is not None
+
+
+def test_create_institute_temporal_chart(
+    sample_eve_polls_2026: list[PesquisaEleitoralSchema],
+    sample_tse_result_2026: ResultadoOficialTSESchema,
+) -> None:
+    """Verifica a renderização completa da série temporal do instituto auditado.
+
+    Args:
+        sample_eve_polls_2026: Fixture com pesquisas eleitorais.
+        sample_tse_result_2026: Fixture com apuração do TSE.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    polls = sample_eve_polls_2026
+    tse_res = sample_tse_result_2026
+    el_date = date(2026, 10, 4)
+
+    fig = create_institute_temporal_chart(
+        institute_name="Datafolha",
+        all_polls=polls,
+        tse_result=tse_res,
+        election_date=el_date,
+    )
+    assert fig is not None
+    # Deve conter nuvem dos demais institutos, linha do instituto e triângulos de resultado
+    assert len(fig.data) > 0
+    # Verifica a existência da linha divisória de eleição
+    assert len(fig.layout.shapes) >= 1
+    assert fig.layout.shapes[0].x0 == el_date
+
+
+def test_create_institute_temporal_chart_without_tse_result(
+    sample_eve_polls_2026: list[PesquisaEleitoralSchema],
+) -> None:
+    """Verifica o comportamento seguro quando a eleição ainda não possui totalização oficial.
+
+    Args:
+        sample_eve_polls_2026: Fixture com pesquisas eleitorais.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    polls = sample_eve_polls_2026
+    el_date = date(2026, 10, 4)
+
+    fig = create_institute_temporal_chart(
+        institute_name="Quaest",
+        all_polls=polls,
+        tse_result=None,
+        election_date=el_date,
+        candidates=["Flávio Bolsonaro", "Lula"],
+    )
+    assert fig is not None
+    assert len(fig.data) > 0
+
+
+def test_create_institute_temporal_chart_custom_candidates(
+    sample_eve_polls_2026: list[PesquisaEleitoralSchema],
+    sample_tse_result_2026: ResultadoOficialTSESchema,
+) -> None:
+    """Verifica a filtragem de candidatos customizados no gráfico temporal do instituto.
+
+    Args:
+        sample_eve_polls_2026: Fixture com pesquisas eleitorais.
+        sample_tse_result_2026: Fixture com apuração do TSE.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    polls = sample_eve_polls_2026
+    tse_res = sample_tse_result_2026
+    el_date = date(2026, 10, 4)
+
+    fig = create_institute_temporal_chart(
+        institute_name="AtlasIntel",
+        all_polls=polls,
+        tse_result=tse_res,
+        election_date=el_date,
+        candidates=["Lula"],
+    )
+    assert fig is not None
+    # Deve conter a linha de Lula e marcador do TSE para Lula
+    trace_names = [t.name for t in fig.data if t.name]
+    assert any("Lula" in name for name in trace_names)

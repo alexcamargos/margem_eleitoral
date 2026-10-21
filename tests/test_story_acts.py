@@ -97,9 +97,12 @@ def test_render_act3(mocker: MockerFixture) -> None:
     mocker.patch("streamlit.plotly_chart")
     mocker.patch("streamlit.expander", return_value=mocker.MagicMock())
     mocker.patch("streamlit.warning")
+    mock_df = mocker.patch("streamlit.dataframe")
 
     # Ciclo 2026
     render_act3(year=2026, turno=1)
+    assert mock_df.called
+
     # Ciclo 2022
     render_act3(year=2022, turno=1)
     # Ano inexistente (deve acionar st.warning com segurança)
@@ -146,6 +149,50 @@ def test_render_act5(
     mocker.patch("streamlit.expander", return_value=mocker.MagicMock())
 
     render_act5(eve_polls, all_polls, tse_result)
+
+
+def test_render_act5_with_institute_selection(
+    mocker: MockerFixture,
+    sample_eve_polls_2026: list[PesquisaEleitoralSchema],
+    sample_historical_campaign_polls_2026: list[PesquisaEleitoralSchema],
+    sample_tse_result_2026: ResultadoOficialTSESchema,
+) -> None:
+    """Valida a renderização do Ato 5 quando o usuário seleciona uma linha de instituto na tabela.
+
+    Args:
+        mocker: Fixture do pytest-mock.
+        sample_eve_polls_2026: Fixture com pesquisas eleitorais de véspera.
+        sample_historical_campaign_polls_2026: Fixture com pesquisas históricas.
+        sample_tse_result_2026: Fixture com apuração oficial do TSE.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    eve_polls = sample_eve_polls_2026
+    all_polls = sample_historical_campaign_polls_2026 + eve_polls
+    tse_result = sample_tse_result_2026
+
+    mocker.patch("streamlit.markdown")
+    mocker.patch("streamlit.columns", side_effect=lambda arg: mock_columns(mocker, arg))
+    mocker.patch("streamlit.metric")
+    mocker.patch("streamlit.tabs", return_value=[mocker.MagicMock(), mocker.MagicMock()])
+    mock_chart = mocker.patch("streamlit.plotly_chart")
+    mocker.patch("streamlit.multiselect", return_value=["Flávio Bolsonaro", "Lula"])
+    mocker.patch("streamlit.button", return_value=False)
+    mocker.patch("streamlit.expander", return_value=mocker.MagicMock())
+
+    # Mock de seleção de linha no st.dataframe
+    mock_selection = mocker.MagicMock()
+    mock_selection.selection.rows = [0]
+    mocker.patch("streamlit.dataframe", return_value=mock_selection)
+
+    render_act5(eve_polls, all_polls, tse_result)
+
+    # Deve ter chamado plotly_chart para o gráfico de barras, o gráfico do instituto selecionado e o grid de inclinação
+    assert mock_chart.call_count >= 3
 
 
 def test_render_act6(

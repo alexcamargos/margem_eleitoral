@@ -7,6 +7,7 @@ from src.analytics.rejection_analysis import (
     calculate_rejection_averages,
     classify_institute_rejection,
     compute_rejection_scoreboard,
+    extract_latest_polls_by_institute,
     structure_rejection_metrics,
 )
 from src.ingestion.data_loader import get_rejection_dataset
@@ -179,3 +180,149 @@ def test_create_rejection_dumbbell_chart_empty_raises() -> None:
     """Verifica erro ao tentar gerar o gráfico de halteres com pesquisas vazias."""
     with pytest.raises(ValueError, match="não pode estar vazia"):
         create_rejection_dumbbell_chart([])
+
+
+def test_extract_latest_polls_by_institute() -> None:
+    """Verifica a deduplicação cronológica e a ordenação por grupos de veredito.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    feed = [
+        # Mais recente de Quaest (Lula menos rejeitado)
+        {
+            "instituto": "Quaest",
+            "campo_inicio": "2026-10-14",
+            "campo_fim": "2026-10-15",
+            "rejeicao": {"Lula": 44.0, "Flávio Bolsonaro": 49.0},
+        },
+        # Mais recente de Real Time (Flávio menos rejeitado)
+        {
+            "instituto": "Real Time Big Data",
+            "campo_inicio": "2026-10-13",
+            "campo_fim": "2026-10-14",
+            "rejeicao": {"Lula": 35.0, "Flávio Bolsonaro": 33.0},
+        },
+        # Mais recente de Nexus (Empate técnico)
+        {
+            "instituto": "Nexus",
+            "campo_inicio": "2026-10-13",
+            "campo_fim": "2026-10-14",
+            "rejeicao": {"Lula": 48.0, "Flávio Bolsonaro": 48.0},
+        },
+        # Pesquisa anterior de Quaest (deve ser ignorada na deduplicação)
+        {
+            "instituto": "Quaest",
+            "campo_inicio": "2026-10-06",
+            "campo_fim": "2026-10-08",
+            "rejeicao": {"Lula": 46.0, "Flávio Bolsonaro": 47.0},
+        },
+    ]
+
+    latest = extract_latest_polls_by_institute(
+        feed_polls=feed,
+        candidate_1="Lula",
+        candidate_2="Flávio Bolsonaro",
+        tie_threshold=1.0,
+    )
+
+    assert len(latest) == 3
+    institutos = [p["instituto"] for p in latest]
+    # Quaest (Lula menos) deve estar primeiro, Nexus (empate) no meio, Real Time (Flávio menos) por último
+    assert institutos[0] == "Quaest"
+    assert institutos[1] == "Nexus"
+    assert institutos[2] == "Real Time Big Data"
+
+    assert latest[0]["diferenca_pontos"] == 5.0
+    assert latest[1]["diferenca_pontos"] == 0.0
+    assert latest[2]["diferenca_pontos"] == 2.0
+
+
+def test_extract_latest_polls_by_institute_empty() -> None:
+    """Verifica que lista vazia de feed retorna lista vazia.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    assert extract_latest_polls_by_institute([]) == []
+
+
+def test_structure_rejection_metrics_second_round_2026() -> None:
+    """Verifica métricas consolidadas do 2º turno estruturadas para o dataset de 2026.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    dataset = get_rejection_dataset(2026)
+    metrics = structure_rejection_metrics(dataset)
+
+    assert metrics["t2_total_institutos"] == 10
+    assert metrics["t2_media_rejeicao"]["Lula"] == 47.0
+    assert metrics["t2_media_rejeicao"]["Flávio Bolsonaro"] == 45.7
+
+    assert metrics["t2_placar"]["candidato_1_menos"] == 2
+    assert metrics["t2_placar"]["candidato_2_menos"] == 7
+    assert metrics["t2_placar"]["empate"] == 1
+
+    assert metrics["t2_tetos_eleitorais"]["Lula"] == 53.0
+    assert metrics["t2_tetos_eleitorais"]["Flávio Bolsonaro"] == 54.3
+
+    assert "Flávio é o menos rejeitado em 7" in metrics["t2_texto_placar"]
+    assert "Na média das últimas pesquisas de 10 institutos" in metrics["t2_texto_diagnostico"]
+    assert "pontos percentuais" in metrics["t2_texto_diagnostico"]
+
+
+def test_create_rejection_dumbbell_chart_options() -> None:
+    """Verifica renderização com customização de título e datas no rótulo vertical.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    dataset = get_rejection_dataset(2026)
+    feed_polls = dataset["segundo_turno"]["pesquisas_feed"]
+    latest_polls = extract_latest_polls_by_institute(
+        feed_polls=feed_polls,
+        candidate_1="Lula",
+        candidate_2="Flávio Bolsonaro",
+    )
+
+    custom_title = "Última Pesquisa por Instituto no 2º Turno"
+    fig = create_rejection_dumbbell_chart(
+        polls=latest_polls,
+        candidate_1="Lula",
+        candidate_2="Flávio Bolsonaro",
+        display_names=dataset["candidatos_nomes_exibicao"],
+        candidate_colors=dataset["cores_candidatos"],
+        chart_title=custom_title,
+        include_dates_in_label=True,
+    )
+
+    assert fig.layout.title.text == custom_title
+    # Verifica que os rótulos do eixo Y nos traços contêm datas formatadas (ex: "(14 a 15/10)")
+    y_labels = list(fig.data[1].y)
+    assert any(" a " in str(label) for label in y_labels)
+

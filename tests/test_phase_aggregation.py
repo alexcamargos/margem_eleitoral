@@ -4,13 +4,13 @@ Valida a segmentação temporal, contagem de pesquisas, cálculo de densidade e
 estimativas agregadas dinâmicas para o 1º e 2º Turnos.
 """
 
-from datetime import date, timedelta
+from datetime import date
 
-from src.analytics.aggregator_model import (
-    CandidatePhaseEstimate,
-    PhaseAggregationSummary,
-    compute_phase_aggregation_metrics,
-)
+import pytest
+
+from src.analytics.aggregator_model import compute_phase_aggregation_metrics
+from src.ingestion.data_loader import get_election_dataset
+from src.presentation.components.phase_story_chart import create_phases_comparison_chart
 from src.transformations.schemas import MetodologiaEnum, PesquisaEleitoralSchema
 
 
@@ -285,10 +285,6 @@ def test_create_phases_comparison_chart() -> None:
     Raises:
         None.
     """
-    import pytest
-    from src.ingestion.data_loader import get_election_dataset
-    from src.presentation.components.phase_story_chart import create_phases_comparison_chart
-
     _, _, polls = get_election_dataset(2026, 1)
     candidates = ["Lula", "Flávio Bolsonaro"]
     summaries = compute_phase_aggregation_metrics(
@@ -307,5 +303,3 @@ def test_create_phases_comparison_chart() -> None:
     # Testa validação de lista vazia
     with pytest.raises(ValueError, match="não pode estar vazia"):
         create_phases_comparison_chart(summaries=[])
-
-

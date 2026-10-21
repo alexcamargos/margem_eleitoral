@@ -304,3 +304,27 @@ def get_second_round_sync_summary(year: int = 2026) -> dict[str, Any]:
         "latest_field_date": latest_date,
         "is_synced": True,
     }
+
+
+def get_rejection_dataset(year: int = 2026) -> dict[str, Any]:
+    """Carrega os dados estruturados de rejeição eleitoral para o ano especificado.
+
+    Args:
+        year: Ano eleitoral analisado (ex.: 2026, 2022).
+
+    Returns:
+        dict[str, Any]: Estrutura com dados de 1º e 2º turnos, notas metodológicas e médias.
+
+    Raises:
+        FileNotFoundError: Se o arquivo de rejeição para o ano não for localizado.
+    """
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    rejeicao_file = repo_root / "data" / "processed" / f"rejeicao_{year}.json"
+    if not rejeicao_file.exists():
+        raise FileNotFoundError(
+            f"Arquivo de rejeição não encontrado para o ano {year}: {rejeicao_file}"
+        )
+
+    with open(rejeicao_file, encoding="utf-8") as f:
+        return json.load(f)
+

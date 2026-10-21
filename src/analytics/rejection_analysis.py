@@ -180,6 +180,74 @@ def calculate_electoral_ceiling(rejection_pct: float) -> float:
     return round(100.0 - rejection_pct, 1)
 
 
+def extract_latest_polls_by_institute(
+    feed_polls: Sequence[dict[str, Any]],
+    candidate_1: str = "Lula",
+    candidate_2: str = "Flávio Bolsonaro",
+    tie_threshold: float = 1.0,
+) -> list[dict[str, Any]]:
+    """Extrai a pesquisa mais recente de cada instituto a partir do feed cronológico do 2º turno.
+
+    Preserva a primeira ocorrência de cada instituto (a mais recente), normaliza os campos
+    e ordena os institutos por grupo de veredito (C1 menos no topo, empates no centro,
+    C2 menos na base) para visualização consistente no Dumbbell Plot.
+
+    Args:
+        feed_polls: Lista cronológica de pesquisas do 2º turno (mais recentes primeiro).
+        candidate_1: Nome do primeiro candidato.
+        candidate_2: Nome do segundo candidato.
+        tie_threshold: Limiar para determinação de empate técnico.
+
+    Returns:
+        list[dict[str, Any]]: Lista das últimas pesquisas de cada instituto único.
+
+    Raises:
+        None.
+    """
+    seen: set[str] = set()
+    latest: list[dict[str, Any]] = []
+
+    for p in feed_polls:
+        inst = p.get("instituto", "")
+        if not inst or inst in seen:
+            continue
+        seen.add(inst)
+
+        rejeicao = p.get("rejeicao", {})
+        veredito_str = p.get("tipo_veredito") or p.get("veredito")
+        if not veredito_str and candidate_1 in rejeicao and candidate_2 in rejeicao:
+            v_calc, _ = classify_institute_rejection(
+                rejection_nominal=rejeicao,
+                candidate_1=candidate_1,
+                candidate_2=candidate_2,
+                tie_threshold=tie_threshold,
+            )
+            veredito_str = v_calc
+
+        diff_pts = 0.0
+        if candidate_1 in rejeicao and candidate_2 in rejeicao:
+            diff_pts = round(abs(float(rejeicao[candidate_1]) - float(rejeicao[candidate_2])), 1)
+
+        poll_entry = dict(p)
+        poll_entry["veredito"] = veredito_str
+        poll_entry["diferenca_pontos"] = diff_pts
+        latest.append(poll_entry)
+
+    def _sort_key(item: dict[str, Any]) -> tuple[int, float, str]:
+        v = str(item.get("veredito", "")).lower()
+        diff = float(item.get("diferenca_pontos", 0.0))
+        c1_key = candidate_1.lower().split()[0]
+
+        if c1_key in v:
+            return (0, -diff, item.get("instituto", ""))
+        elif "empate" in v:
+            return (1, 0.0, item.get("instituto", ""))
+        return (2, diff, item.get("instituto", ""))
+
+    latest.sort(key=_sort_key)
+    return latest
+
+
 def structure_rejection_metrics(dataset: dict[str, Any]) -> dict[str, Any]:
     """Estrutura e valida as métricas consolidadas do módulo de rejeição a partir do dataset.
 
@@ -215,6 +283,57 @@ def structure_rejection_metrics(dataset: dict[str, Any]) -> dict[str, Any]:
     teto_c1 = calculate_electoral_ceiling(averages.get(c1, 50.0))
     teto_c2 = calculate_electoral_ceiling(averages.get(c2, 50.0))
 
+    # Análise das pesquisas do 2º turno (última pesquisa de cada instituto)
+    t2_data = dataset.get("segundo_turno", {})
+    feed_polls = t2_data.get("pesquisas_feed", [])
+    t2_latest_polls = extract_latest_polls_by_institute(
+        feed_polls=feed_polls,
+        candidate_1=c1,
+        candidate_2=c2,
+        tie_threshold=1.0,
+    )
+
+    t2_averages: dict[str, float] = {}
+    t2_scoreboard: dict[str, int] = {"candidato_1_menos": 0, "candidato_2_menos": 0, "empate": 0}
+    t2_teto_c1 = 50.0
+    t2_teto_c2 = 50.0
+    t2_diag_text = ""
+    t2_placar_text = ""
+
+    if t2_latest_polls:
+        t2_averages = calculate_rejection_averages(polls=t2_latest_polls, candidates=[c1, c2])
+        t2_scoreboard = compute_rejection_scoreboard(
+            polls=t2_latest_polls,
+            candidate_1=c1,
+            candidate_2=c2,
+            tie_threshold=1.0,
+        )
+        t2_teto_c1 = calculate_electoral_ceiling(t2_averages.get(c1, 50.0))
+        t2_teto_c2 = calculate_electoral_ceiling(t2_averages.get(c2, 50.0))
+
+        v1 = t2_averages.get(c1, 0.0)
+        v2 = t2_averages.get(c2, 0.0)
+        delta = round(abs(v1 - v2), 1)
+        tot_t2 = len(t2_latest_polls)
+
+        if delta <= 0.6:
+            lead_summary = "empate técnico"
+        elif v1 < v2:
+            lead_summary = f"{c1_display} menos rejeitado"
+        else:
+            lead_summary = f"{c2_display} menos rejeitado"
+
+        t2_diag_text = (
+            f"Resposta: {lead_summary}. Na média das últimas pesquisas de {tot_t2} institutos que foram a campo no 2º turno, "
+            f"a rejeição de {c1_display} é {v1:.1f}% e a de {c2_display} é {v2:.1f}%, "
+            f"uma diferença de {delta:.1f} {'pontos percentuais' if delta != 1.0 else 'ponto percentual'}."
+        )
+        t2_placar_text = (
+            f"Instituto por instituto: {c2_display} é o menos rejeitado em {t2_scoreboard['candidato_2_menos']}, "
+            f"{c1_display} em {t2_scoreboard['candidato_1_menos']}, e há empate em {t2_scoreboard['empate']}. "
+            f"Esses números consideram o levantamento mais recente divulgado por cada instituto ativo no 2º turno."
+        )
+
     return {
         "ano": dataset.get("ano", 2026),
         "cargo": dataset.get("cargo", "PRESIDENTE"),
@@ -231,6 +350,14 @@ def structure_rejection_metrics(dataset: dict[str, Any]) -> dict[str, Any]:
         "texto_placar": t1_data.get("texto_placar", ""),
         "pesquisas_instituto": polls,
         "notas_metodologicas": t1_data.get("notas_metodologicas", []),
-        "segundo_turno": dataset.get("segundo_turno", {}),
+        "segundo_turno": t2_data,
         "tetos_eleitorais": {c1: teto_c1, c2: teto_c2},
+        # Campos estruturados para a última pesquisa de cada instituto no 2º turno
+        "t2_pesquisas_instituto": t2_latest_polls,
+        "t2_total_institutos": len(t2_latest_polls),
+        "t2_media_rejeicao": t2_averages,
+        "t2_placar": t2_scoreboard,
+        "t2_texto_diagnostico": t2_diag_text,
+        "t2_texto_placar": t2_placar_text,
+        "t2_tetos_eleitorais": {c1: t2_teto_c1, c2: t2_teto_c2},
     }

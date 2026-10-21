@@ -4,6 +4,7 @@ Renderiza a comparação visual das taxas de rejeição entre os dois concorrent
 por instituto, conectando os pontos por segmento horizontal e rotulando o veredito lateral.
 """
 
+import math
 from typing import Any, Sequence
 
 import plotly.graph_objects as go
@@ -15,12 +16,16 @@ def create_rejection_dumbbell_chart(
     candidate_2: str = "Flávio Bolsonaro",
     display_names: dict[str, str] | None = None,
     candidate_colors: dict[str, str] | None = None,
+    chart_title: str | None = None,
+    include_dates_in_label: bool = False,
 ) -> go.Figure:
     """Gera o Dumbbell Plot interativo para comparação de taxas de rejeição por instituto.
 
     Args:
-        polls: Sequência de dicionários com os levantamentos de 1º turno, contendo:
+        polls: Sequência de dicionários com os levantamentos avaliados, contendo:
             - 'instituto': Nome do instituto
+            - 'campo_inicio': Opcional, data inicial de campo
+            - 'campo_fim': Opcional, data final de campo
             - 'onda_anterior': Booleano indicando se é da onda anterior
             - 'rejeicao': Dicionário com percentuais de rejeição por candidato
             - 'veredito': String do veredito ('Lula menos', 'Flávio menos', 'empate')
@@ -28,6 +33,8 @@ def create_rejection_dumbbell_chart(
         candidate_2: Nome chave do segundo candidato.
         display_names: Dicionário de nomes de exibição (ex.: {'Flávio Bolsonaro': 'Flávio'}).
         candidate_colors: Dicionário de cores hexadecimais por candidato.
+        chart_title: Título customizado opcional no topo do gráfico.
+        include_dates_in_label: Se True, anexa as datas de campo ao rótulo do instituto.
 
     Returns:
         go.Figure: Figura interativa Plotly no padrão dark mode.
@@ -54,6 +61,11 @@ def create_rejection_dumbbell_chart(
 
     for poll in polls:
         inst = str(poll.get("instituto", ""))
+        c_ini = poll.get("campo_inicio")
+        c_fim = poll.get("campo_fim")
+        if include_dates_in_label and c_ini and c_fim:
+            inst = f"{inst} ({c_ini} a {c_fim})"
+
         if poll.get("onda_anterior"):
             inst = f"{inst}*"
 
@@ -64,6 +76,19 @@ def create_rejection_dumbbell_chart(
         c1_vals.append(val1)
         c2_vals.append(val2)
         vereditos.append(str(poll.get("veredito", "empate")))
+
+    # Determinação dinâmica dos limites do eixo X para acomodar variações como 30% a 65%
+    all_vals = c1_vals + c2_vals
+    min_v = min(all_vals) if all_vals else 40.0
+    max_v = max(all_vals) if all_vals else 60.0
+    x_min = min(30.0, math.floor(min_v / 5.0) * 5.0 - 2.0)
+    x_max = max(68.0, math.ceil(max_v / 5.0) * 5.0 + 8.0)
+    annot_x = x_max - 6.0
+
+    # Ticks em intervalos regulares de 5%
+    tick_start = int(math.ceil(x_min / 5.0) * 5)
+    tick_end = int(math.floor((x_max - 7.0) / 5.0) * 5)
+    tickvals = list(range(tick_start, tick_end + 1, 5))
 
     fig = go.Figure()
 
@@ -139,7 +164,7 @@ def create_rejection_dumbbell_chart(
             dict(
                 xref="x",
                 yref="y",
-                x=62.0,
+                x=annot_x,
                 y=inst,
                 text=f"<b>{veredito}</b>",
                 showarrow=False,
@@ -149,9 +174,12 @@ def create_rejection_dumbbell_chart(
             )
         )
 
+    title_text = chart_title or "% que não votaria de jeito nenhum — quanto mais à esquerda, menos rejeitado"
+    left_margin = 210 if include_dates_in_label else 140
+
     fig.update_layout(
         title=dict(
-            text="% que não votaria de jeito nenhum — quanto mais à esquerda, menos rejeitado",
+            text=title_text,
             font=dict(size=12.5, color="#94A3B8"),
             x=0.0,
             xanchor="left",
@@ -160,10 +188,10 @@ def create_rejection_dumbbell_chart(
         paper_bgcolor="#181B20",
         plot_bgcolor="#181B20",
         height=max(450, len(institutos_labels) * 35),
-        margin=dict(l=140, r=130, t=50, b=45),
+        margin=dict(l=left_margin, r=130, t=50, b=45),
         xaxis=dict(
-            range=[38.0, 68.0],
-            tickvals=[40, 45, 50, 55, 60],
+            range=[x_min, x_max],
+            tickvals=tickvals,
             ticksuffix="%",
             gridcolor="#282D37",
             zeroline=False,
@@ -186,3 +214,4 @@ def create_rejection_dumbbell_chart(
     )
 
     return fig
+

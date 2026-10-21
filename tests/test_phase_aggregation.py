@@ -272,3 +272,40 @@ def test_compute_phase_aggregation_metrics_real_dataset() -> None:
     assert summaries_22[0].total_pesquisas == len(polls_2022)
     assert "Bolsonaro" in summaries_22[2].estimativas
 
+
+def test_create_phases_comparison_chart() -> None:
+    """Verifica a geração da figura Plotly com dois subplots e múltiplos candidatos.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    import pytest
+    from src.ingestion.data_loader import get_election_dataset
+    from src.presentation.components.phase_story_chart import create_phases_comparison_chart
+
+    _, _, polls = get_election_dataset(2026, 1)
+    candidates = ["Lula", "Flávio Bolsonaro"]
+    summaries = compute_phase_aggregation_metrics(
+        polls=polls,
+        candidates=candidates,
+        ano_pleito=2026,
+        turno=1,
+    )
+
+    fig = create_phases_comparison_chart(summaries=summaries, candidates=candidates)
+    assert fig is not None
+    # 2 traços de scatter (1 por candidato) + 1 traço de barra = 3 traces
+    assert len(fig.data) == 3
+    assert fig.layout.paper_bgcolor == "#181B20"
+
+    # Testa validação de lista vazia
+    with pytest.raises(ValueError, match="não pode estar vazia"):
+        create_phases_comparison_chart(summaries=[])
+
+

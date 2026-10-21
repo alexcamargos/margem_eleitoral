@@ -130,128 +130,13 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
         )
         use_valid = "Válidos" in tipo_metrica
 
-    # Pesquisas filtradas por metodologia (base comum para análise de fases e gráfico contínuo)
+    # Pesquisas filtradas por metodologia
     methodology_polls = [p for p in polls if p.metodologia.value in filtro_metodologia]
 
-    # 1. Narrativa Visual das 3 Fases: Cards de Volume e Posição Agregada
-    phase_summaries = compute_phase_aggregation_metrics(
-        polls=methodology_polls,
-        candidates=selected_candidates,
-        ano_pleito=ano_pleito,
-        turno=turno_atual,
-        use_valid_votes=use_valid,
-    )
-
-    st.markdown("### 🎬 A História das Fases: Volume de Pesquisas e Posição dos Candidatos")
-    st.markdown(
-        """
-        Ao longo do processo eleitoral, o ritmo de pesquisas se intensifica dramaticamente e a intenção de voto
-        cristaliza. Os cartões abaixo comparam as **3 fases do pleito**, sintetizando **quantas pesquisas saíram**
-        e **onde cada candidato se posicionava** segundo a estimativa agregada.
-        """
-    )
-
-    # Renderiza os 3 Cards KPI em colunas
-    card_cols = st.columns(3)
-    for i, s in enumerate(phase_summaries):
-        with card_cols[i]:
-            is_active = (s.rotulo_curto in filtro_horizonte) or (s.nome_fase in filtro_horizonte)
-            border_style = "2px solid #38BDF8" if is_active else "1px solid #282D37"
-            bg_card = "#1C2128" if is_active else "#181B20"
-            badge_active = (
-                "<span style='background-color: #0284C7; color: #FFFFFF; font-size: 10px; "
-                "font-weight: 700; padding: 2px 7px; border-radius: 4px; float: right; "
-                "letter-spacing: 0.5px;'>SELEÇÃO ATIVA</span>"
-                if is_active
-                else ""
-            )
-
-            cands_html_list: list[str] = []
-            for cand in selected_candidates:
-                est = s.estimativas.get(cand)
-                c_color = CANDIDATE_COLORS.get(cand, "#94A3B8")
-                bullet = (
-                    f"<span style='display:inline-block; width:9px; height:9px; border-radius:50%; "
-                    f"background-color:{c_color}; margin-right:6px;'></span>"
-                )
-
-                if est and est.media_ponderada > 0:
-                    delta_str = ""
-                    if est.delta_anterior is not None:
-                        d_col = (
-                            "#10B981"
-                            if est.delta_anterior > 0
-                            else ("#EF4444" if est.delta_anterior < 0 else "#94A3B8")
-                        )
-                        delta_str = (
-                            f" <span style='color:{d_col}; font-size:11px; font-weight:700;'>"
-                            f"({est.delta_anterior:+.1f} pp)</span>"
-                        )
-                    cands_html_list.append(
-                        f"<div style='margin-bottom: 4px; font-size: 13px;'>"
-                        f"{bullet}<b>{cand}:</b> "
-                        f"<span style='font-weight:700; font-size:14.5px; color:#F8FAFC;'>{est.media_ponderada:.1f}%</span> "
-                        f"<span style='color:#94A3B8; font-size:11px;'>[{est.ic_95_inf:.1f}%–{est.ic_95_sup:.1f}%]</span>"
-                        f"{delta_str}"
-                        f"</div>"
-                    )
-                else:
-                    cands_html_list.append(
-                        f"<div style='margin-bottom: 4px; font-size: 12.5px; color:#64748B;'>"
-                        f"{bullet}{cand}: Sem dados nesta fase</div>"
-                    )
-
-            cands_html = (
-                "".join(cands_html_list)
-                if cands_html_list
-                else "<div style='color:#64748B;'>Nenhum candidato selecionado</div>"
-            )
-
-            lider_html = ""
-            if s.lider and s.margem_lider_vice is not None:
-                lider_html = (
-                    f"<div style='margin-top: 8px; padding-top: 6px; border-top: 1px dashed #282D37; "
-                    f"font-size: 11.5px; color: #94A3B8;'>"
-                    f"🏆 Liderança: <b style='color:#F1F5F9;'>{s.lider}</b> "
-                    f"(<span style='color:#38BDF8; font-weight:700;'>+{s.margem_lider_vice:.1f} pp</span>)"
-                    f"</div>"
-                )
-
-            st.markdown(
-                f"""
-                <div style="background-color: {bg_card}; border: {border_style}; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; height: 100%;">
-                    <div style="margin-bottom: 6px;">
-                        <span style="font-size: 17px; margin-right: 4px;">{s.icone}</span>
-                        <b style="color: #F1F5F9; font-size: 14px;">{s.nome_fase}</b>
-                        {badge_active}
-                    </div>
-                    <div style="color: #94A3B8; font-size: 11.5px; margin-bottom: 10px;">
-                        📅 {s.descricao_periodo} • {s.dias_duracao} dias
-                    </div>
-                    <div style="background-color: #121417; border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; font-size: 12.5px;">
-                        <span style="color: #F8FAFC; font-weight: 700;">{s.total_pesquisas} pesquisas</span>
-                        <span style="color: #94A3B8;">({s.percentual_total_pesquisas:.1f}% da base)</span><br>
-                        <span style="color: #38BDF8; font-weight: 600;">⚡ {s.pesquisas_por_dia:.1f}</span>
-                        <span style="color: #94A3B8;">pesquisas/dia</span>
-                    </div>
-                    {cands_html}
-                    {lider_html}
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-    # Gráfico Plotly Comparativo das 3 Fases (Trajetória + Volume)
-    if any(s.total_pesquisas > 0 for s in phase_summaries):
-        fig_phases = create_phases_comparison_chart(
-            summaries=phase_summaries,
-            candidates=selected_candidates,
-            candidate_colors=CANDIDATE_COLORS,
-        )
-        st.plotly_chart(fig_phases, width="stretch")
-
-    st.markdown("---")
-    st.markdown("### 📈 Trajetória Contínua do Agregador (Série Diária)")
+    # =========================================================================
+    # Seção 1: Trajetória Contínua do Agregador (Série Diária) - Exibida primeiro
+    # =========================================================================
+    st.markdown("### Trajetória Contínua do Agregador (Série Diária)")
 
     # Filtra pesquisas de acordo com o Horizonte Temporal selecionado no rádio
     filtered_polls = list(methodology_polls)
@@ -297,31 +182,159 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
 
     if not filtered_polls:
         st.warning("Nenhuma pesquisa encontrada para os filtros selecionados.")
-        return
+    else:
+        # Computa agregação dinâmica da série diária
+        with st.spinner("Computando trajetória latente e envelopes de credibilidade..."):
+            df_agg = compute_poll_aggregation_series(
+                polls=filtered_polls,
+                candidates=selected_candidates,
+                half_life_days=14.0,
+                deff=1.3,
+                use_valid_votes=use_valid,
+            )
 
-    # Computa agregação dinâmica da série diária
-    with st.spinner("Computando trajetória latente e envelopes de credibilidade..."):
-        df_agg = compute_poll_aggregation_series(
+        fig = create_trend_aggregator_chart(
+            df_agg=df_agg,
             polls=filtered_polls,
             candidates=selected_candidates,
-            half_life_days=14.0,
-            deff=1.3,
-            use_valid_votes=use_valid,
+        )
+        st.plotly_chart(fig, width="stretch")
+
+        st.markdown(
+            """
+            #### Entendendo as Fitas de Incerteza
+            As faixas sombreadas representam o **Envelope de Credibilidade de 95%**. Elas combinam
+            duas fontes de incerteza:
+            1. **Variância Amostral ($deff$):** O erro estocástico intrínseco a cada tamanho amostral.
+            2. **Variância Inter-Institutos:** A dispersão observada entre levantamentos realizados no mesmo período por diferentes metodologias.
+            """
         )
 
-    fig = create_trend_aggregator_chart(
-        df_agg=df_agg,
-        polls=filtered_polls,
-        candidates=selected_candidates,
-    )
-    st.plotly_chart(fig, width="stretch")
-
+    # =========================================================================
+    # Seção 2: A História das Fases - Volume e Posição dos Candidatos
+    # =========================================================================
+    st.markdown("---")
+    st.markdown("### A História das Fases: Volume de Pesquisas e Posição dos Candidatos")
     st.markdown(
         """
-        ### Entendendo as Fitas de Incerteza
-        As faixas sombreadas representam o **Envelope de Credibilidade de 95%**. Elas combinam
-        duas fontes de incerteza:
-        1. **Variância Amostral ($deff$):** O erro estocástico intrínseco a cada tamanho amostral.
-        2. **Variância Inter-Institutos:** A dispersão observada entre levantamentos realizados no mesmo período por diferentes metodologias.
+        Ao longo do processo eleitoral, o ritmo de pesquisas se intensifica dramaticamente e a intenção de voto
+        cristaliza. Os cartões abaixo comparam as **3 fases do pleito**, sintetizando **quantas pesquisas saíram**
+        e **onde cada candidato se posicionava** segundo a estimativa agregada.
         """
     )
+
+    phase_summaries = compute_phase_aggregation_metrics(
+        polls=methodology_polls,
+        candidates=selected_candidates,
+        ano_pleito=ano_pleito,
+        turno=turno_atual,
+        use_valid_votes=use_valid,
+    )
+
+    # Renderiza os 3 Cards KPI em colunas
+    card_cols = st.columns(3)
+    for i, s in enumerate(phase_summaries):
+        with card_cols[i]:
+            is_active = (s.rotulo_curto in filtro_horizonte) or (s.nome_fase in filtro_horizonte)
+            border_style = "2px solid #38BDF8" if is_active else "1px solid #282D37"
+            bg_card = "#1C2128" if is_active else "#181B20"
+            badge_active = (
+                "<span style='background-color:#0284C7; color:#FFFFFF; font-size:10px; "
+                "font-weight:700; padding:2px 7px; border-radius:4px; letter-spacing:0.5px;'>SELEÇÃO ATIVA</span>"
+                if is_active
+                else ""
+            )
+
+            cands_html_list: list[str] = []
+            for cand in selected_candidates:
+                est = s.estimativas.get(cand)
+                c_color = CANDIDATE_COLORS.get(cand, "#94A3B8")
+                bullet = (
+                    f"<span style='display:inline-block; width:9px; height:9px; border-radius:50%; "
+                    f"background-color:{c_color}; margin-right:6px;'></span>"
+                )
+
+                if est and est.media_ponderada > 0:
+                    delta_str = ""
+                    if est.delta_anterior is not None:
+                        d_col = (
+                            "#10B981"
+                            if est.delta_anterior > 0
+                            else ("#EF4444" if est.delta_anterior < 0 else "#94A3B8")
+                        )
+                        delta_str = (
+                            f" <span style='color:{d_col}; font-size:11px; font-weight:700;'>"
+                            f"({est.delta_anterior:+.1f} pp)</span>"
+                        )
+                    cands_html_list.append(
+                        f"<div style='margin-bottom:4px; font-size:13px;'>"
+                        f"{bullet}<b>{cand}:</b> "
+                        f"<span style='font-weight:700; font-size:14.5px; color:#F8FAFC;'>{est.media_ponderada:.1f}%</span> "
+                        f"<span style='color:#94A3B8; font-size:11px;'>[{est.ic_95_inf:.1f}%–{est.ic_95_sup:.1f}%]</span>"
+                        f"{delta_str}"
+                        f"</div>"
+                    )
+                else:
+                    cands_html_list.append(
+                        f"<div style='margin-bottom:4px; font-size:12.5px; color:#64748B;'>"
+                        f"{bullet}{cand}: Sem dados nesta fase</div>"
+                    )
+
+            cands_html = (
+                "".join(cands_html_list)
+                if cands_html_list
+                else "<div style='color:#64748B;'>Nenhum candidato selecionado</div>"
+            )
+
+            lider_html = ""
+            if s.lider and s.margem_lider_vice is not None:
+                lider_html = (
+                    f"<div style='margin-top:8px; padding-top:6px; border-top:1px dashed #282D37; "
+                    f"font-size:11.5px; color:#94A3B8;'>"
+                    f"🏆 Liderança: <b style='color:#F1F5F9;'>{s.lider}</b> "
+                    f"(<span style='color:#38BDF8; font-weight:700;'>+{s.margem_lider_vice:.1f} pp</span>)"
+                    f"</div>"
+                )
+
+            card_header = (
+                f"<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;'>"
+                f"<div><span style='font-size:16px; margin-right:5px;'>{s.icone}</span>"
+                f"<b style='color:#F1F5F9; font-size:14px;'>{s.nome_fase}</b></div>"
+                f"{badge_active}"
+                f"</div>"
+            )
+
+            period_info = (
+                f"<div style='color:#94A3B8; font-size:11.5px; margin-bottom:10px;'>"
+                f"📅 {s.descricao_periodo} • {s.dias_duracao} dias"
+                f"</div>"
+            )
+
+            volume_box = (
+                f"<div style='background-color:#121417; border-radius:6px; padding:8px 10px; margin-bottom:10px; font-size:12.5px;'>"
+                f"<span style='color:#F8FAFC; font-weight:700;'>{s.total_pesquisas} pesquisas</span> "
+                f"<span style='color:#94A3B8;'>({s.percentual_total_pesquisas:.1f}% da base)</span><br>"
+                f"<span style='color:#38BDF8; font-weight:600;'>⚡ {s.pesquisas_por_dia:.1f}</span> "
+                f"<span style='color:#94A3B8;'>pesquisas/dia</span>"
+                f"</div>"
+            )
+
+            card_html = (
+                f"<div style='background-color:{bg_card}; border:{border_style}; border-radius:8px; padding:14px 16px; margin-bottom:12px; height:100%;'>"
+                f"{card_header}"
+                f"{period_info}"
+                f"{volume_box}"
+                f"{cands_html}"
+                f"{lider_html}"
+                f"</div>"
+            )
+            st.markdown(card_html, unsafe_allow_html=True)
+
+    # Gráfico Plotly Comparativo das 3 Fases (Trajetória + Volume)
+    if any(s.total_pesquisas > 0 for s in phase_summaries):
+        fig_phases = create_phases_comparison_chart(
+            summaries=phase_summaries,
+            candidates=selected_candidates,
+            candidate_colors=CANDIDATE_COLORS,
+        )
+        st.plotly_chart(fig_phases, width="stretch")

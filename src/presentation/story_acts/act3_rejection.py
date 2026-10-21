@@ -136,11 +136,13 @@ def render_act3(year: int = 2026, turno: int = 1) -> None:
         display_names=data["display_names"],
         candidate_colors=data["cores"],
     )
-    st.plotly_chart(fig_dumbbell, use_container_width=True)
+    st.plotly_chart(fig_dumbbell, width="stretch")
 
     # Notas metodológicas de rodapé do 1º turno
     if data["notas_metodologicas"]:
-        notas_html = "".join([f"<p style='margin: 4px 0;'>{n}</p>" for n in data["notas_metodologicas"]])
+        notas_html = "".join(
+            [f"<p style='margin: 4px 0;'>{n}</p>" for n in data["notas_metodologicas"]]
+        )
         st.markdown(
             f"""
             <div style="font-size: 12px; color: #64748B; margin-top: 6px; margin-bottom: 28px; line-height: 1.5;">
@@ -219,7 +221,7 @@ def render_act3(year: int = 2026, turno: int = 1) -> None:
             chart_title="% que não votaria de jeito nenhum no 2º turno — quanto mais à esquerda, menos rejeitado",
             include_dates_in_label=True,
         )
-        st.plotly_chart(fig_dumbbell_t2, use_container_width=True)
+        st.plotly_chart(fig_dumbbell_t2, width="stretch")
 
         # Histórico detalhado cronológico das pesquisas em container colapsável com Tabela Interativa
         if pesquisas_feed:

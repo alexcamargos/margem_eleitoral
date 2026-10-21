@@ -57,6 +57,39 @@ def test_render_act2(
     render_act2(polls)
 
 
+def test_render_act2_turno2(
+    mocker: MockerFixture, sample_eve_polls_2026: list[PesquisaEleitoralSchema]
+) -> None:
+    """Valida a renderização do Ato 2 no 2º Turno com divisão em 3 semanas.
+
+    Args:
+        mocker: Fixture do pytest-mock.
+        sample_eve_polls_2026: Fixture com pesquisas.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    # Adapta as pesquisas para turno 2
+    t2_polls = [p.model_copy(update={"turno": 2}) for p in sample_eve_polls_2026]
+    mocker.patch("streamlit.markdown")
+    mocker.patch("streamlit.columns", side_effect=lambda arg: mock_columns(mocker, arg))
+    mocker.patch(
+        "streamlit.multiselect",
+        side_effect=[["Lula", "Flávio Bolsonaro"], ["TELEFONICA_CATI", "PRESENCIAL_DOMICILIAR"]],
+    )
+    mocker.patch(
+        "streamlit.radio",
+        side_effect=["Ciclo Completo (2º Turno)", "Votos Válidos (Oficial)"],
+    )
+    mocker.patch("streamlit.plotly_chart")
+    mocker.patch("streamlit.spinner")
+
+    render_act2(t2_polls)
+
+
 def test_render_act3(mocker: MockerFixture) -> None:
     """Valida a renderização do Ato 3 com Termômetro da Rejeição e Dumbbell Plot."""
     mocker.patch("streamlit.markdown")

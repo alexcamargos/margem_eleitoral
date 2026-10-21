@@ -66,6 +66,7 @@ class PesquisaEleitoralSchema(BaseModel):
         votos_validos: Mapeamento de candidato para percentual recalculado de votos válidos.
         percentual_indecisos: Percentual de indecisos / não sabe / não respondeu.
         percentual_brancos_nulos: Percentual de brancos e nulos somados.
+        rejeicao: Mapeamento opcional de candidato para percentual de rejeição ("não votaria de jeito nenhum").
         turno: Turno da eleição auditada (1 ou 2).
         cargo: Cargo eletivo em disputa (padrão: 'PRESIDENTE').
         ano: Ano do ciclo eleitoral (padrão: 2026).
@@ -93,6 +94,10 @@ class PesquisaEleitoralSchema(BaseModel):
     votos_validos: dict[str, float]
     percentual_indecisos: float = Field(..., ge=0.0, le=100.0)
     percentual_brancos_nulos: float = Field(..., ge=0.0, le=100.0)
+    rejeicao: dict[str, float] | None = Field(
+        default=None,
+        description="Mapeamento de candidato para percentual de rejeição declarada",
+    )
     turno: int = Field(default=1, ge=1, le=2)
     cargo: str = Field(default="PRESIDENTE")
     ano: int = Field(default=2026)
@@ -189,3 +194,34 @@ class ResultadoOficialTSESchema(BaseModel):
                 f"mas resultou em {soma:.2f}%."
             )
         return self
+
+
+class RejeicaoPesquisaSchema(BaseModel):
+    """Contrato de dados para levantamentos de rejeição de candidatos.
+
+    Attributes:
+        instituto: Nome de exibição ou marca do instituto.
+        data_inicio_campo: Data inicial de coleta em campo.
+        data_fim_campo: Data final de coleta em campo.
+        data_divulgacao: Data de publicação dos dados.
+        rejeicao_nominal: Mapeamento de candidato para percentual de rejeição declarada.
+        turno: Turno eleitoral analisado (1 ou 2).
+        ano: Ano do ciclo eleitoral (padrão: 2026).
+        tamanho_amostra: Número de eleitores entrevistados.
+        margem_erro: Margem de erro declarada em pontos percentuais.
+        observacao: Ressalva ou anotação metodológica específica.
+        onda_anterior: Flag indicando se utilizou onda anterior por ausência de rejeição na véspera.
+    """
+
+    instituto: str
+    data_inicio_campo: date
+    data_fim_campo: date
+    data_divulgacao: date
+    rejeicao_nominal: dict[str, float]
+    turno: int = Field(default=1, ge=1, le=2)
+    ano: int = Field(default=2026)
+    tamanho_amostra: int | None = Field(default=None, gt=0)
+    margem_erro: float | None = Field(default=None, gt=0.0)
+    observacao: str | None = None
+    onda_anterior: bool = False
+

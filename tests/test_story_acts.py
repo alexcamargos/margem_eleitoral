@@ -195,6 +195,26 @@ def test_render_act5_with_institute_selection(
     assert mock_chart.call_count >= 3
 
 
+def test_on_close_institute_detail_callback() -> None:
+    """Valida que o callback de fechamento incrementa a versão da tabela de forma segura sem erro de estado.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    import streamlit as st
+
+    from src.presentation.story_acts.act5_error_anatomy import _on_close_institute_detail
+
+    st.session_state["act5_eleitoral_table_version"] = 0
+    _on_close_institute_detail("eleitoral")
+    assert st.session_state["act5_eleitoral_table_version"] == 1
+    _on_close_institute_detail("eleitoral")
+    assert st.session_state["act5_eleitoral_table_version"] == 2
+
+
 def test_render_act6(
     mocker: MockerFixture,
     sample_eve_polls_2026: list[PesquisaEleitoralSchema],

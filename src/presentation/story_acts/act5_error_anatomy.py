@@ -34,6 +34,22 @@ from src.presentation.components.small_multiples import create_small_multiples_g
 from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficialTSESchema
 
 
+def _on_close_institute_detail(key_prefix: str) -> None:
+    """Callback para fechar o detalhamento temporal e resetar a seleção da tabela sem conflito de estado.
+
+    Args:
+        key_prefix: Identificador da camada ativa ('eleitoral' ou 'formal').
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    version_key = f"act5_{key_prefix}_table_version"
+    st.session_state[version_key] = st.session_state.get(version_key, 0) + 1
+
+
 def _render_institute_detail(
     institute_name: str,
     all_polls: Sequence[PesquisaEleitoralSchema],
@@ -141,14 +157,14 @@ def _render_institute_detail(
         )
     with col_close:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-        if st.button(
+        st.button(
             "✕ Fechar Detalhe",
             key=f"{key_prefix}_btn_close_{institute_name}",
             width="stretch",
             help="Fecha a visualização temporal deste instituto.",
-        ):
-            st.session_state[f"act5_{key_prefix}_polls_table"] = {"selection": {"rows": []}}
-            st.rerun()
+            on_click=_on_close_institute_detail,
+            args=(key_prefix,),
+        )
 
     fig_inst = create_institute_temporal_chart(
         institute_name=institute_name,
@@ -368,13 +384,14 @@ def render_act5(
             table_rows_eleitoral, key=lambda r: float(r["Erro Ponderado (EP)"])
         )
         df_table = pl.DataFrame(table_rows_sorted).to_pandas()
+        table_version_e = st.session_state.get("act5_eleitoral_table_version", 0)
         selection_eleitoral = st.dataframe(
             df_table,
             width="stretch",
             hide_index=True,
             on_select="rerun",
             selection_mode="single-row",
-            key="act5_eleitoral_polls_table",
+            key=f"act5_eleitoral_polls_table_{table_version_e}",
             column_config={
                 "Erro Ponderado (EP)": st.column_config.NumberColumn(
                     "Erro Ponderado (EP)", format="%.2f"
@@ -438,13 +455,14 @@ def render_act5(
             unsafe_allow_html=True,
         )
         df_formal = pl.DataFrame(table_rows_formal).to_pandas()
+        table_version_f = st.session_state.get("act5_formal_table_version", 0)
         selection_formal = st.dataframe(
             df_formal,
             width="stretch",
             hide_index=True,
             on_select="rerun",
             selection_mode="single-row",
-            key="act5_formal_polls_table",
+            key=f"act5_formal_polls_table_{table_version_f}",
             column_config={
                 "Erro Líder (M3)": st.column_config.NumberColumn("Erro Líder (M3)", format="%.2f"),
                 "Desvio Margem (M5)": st.column_config.NumberColumn(

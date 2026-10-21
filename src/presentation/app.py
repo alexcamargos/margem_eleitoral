@@ -19,10 +19,11 @@ from src.ingestion.data_loader import (
 from src.presentation.components.documentation_modal import render_documentation_modal
 from src.presentation.story_acts.act1_uncertainty import render_act1
 from src.presentation.story_acts.act2_election_film import render_act2
-from src.presentation.story_acts.act3_eve_clash import render_act3
-from src.presentation.story_acts.act4_error_anatomy import render_act4
-from src.presentation.story_acts.act5_scientific_verdict import render_act5
-from src.presentation.story_acts.act6_predictive_forecast import render_act6
+from src.presentation.story_acts.act3_rejection import render_act3
+from src.presentation.story_acts.act4_eve_clash import render_act4
+from src.presentation.story_acts.act5_error_anatomy import render_act5
+from src.presentation.story_acts.act6_scientific_verdict import render_act6
+from src.presentation.story_acts.act7_predictive_forecast import render_act7
 
 
 def init_session_state() -> None:
@@ -320,15 +321,16 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
-    # Navegação por Abas na sequência lógica e pedagógica dos Atos 1 a 6
+    # Navegação por Abas na sequência lógica e pedagógica dos Atos 1 a 7
     tabs = st.tabs(
         [
             "🔬 Princípio da Incerteza (Ato 1)",
             "📈 Agregador Dinâmico (Ato 2)",
-            "🎯 Forest Plot & Véspera (Ato 3)",
-            "📊 Desempenho & Auditoria (Ato 4)",
-            "⚖️ Veredito Científico (Ato 5)",
-            "🔮 Modelo Preditivo & Previsão (Ato 6)",
+            "🚫 Quem é Menos Rejeitado? (Ato 3)",
+            "🎯 Forest Plot & Véspera (Ato 4)",
+            "📊 Desempenho & Auditoria (Ato 5)",
+            "⚖️ Veredito Científico (Ato 6)",
+            "🔮 Modelo Preditivo & Previsão (Ato 7)",
         ]
     )
 
@@ -339,37 +341,40 @@ def main() -> None:
         render_act2(polls=all_polls)
 
     with tabs[2]:
-        render_act3(
-            eve_polls=eve_polls,
-            tse_result=tse_result,
-        )
+        render_act3(year=ano_eleicao, turno=turno_num)
 
     with tabs[3]:
         render_act4(
             eve_polls=eve_polls,
-            all_polls=all_polls,
             tse_result=tse_result,
         )
 
     with tabs[4]:
         render_act5(
             eve_polls=eve_polls,
+            all_polls=all_polls,
+            tse_result=tse_result,
+        )
+
+    with tabs[5]:
+        render_act6(
+            eve_polls=eve_polls,
             tse_result=tse_result,
             all_polls=all_polls,
         )
 
-    with tabs[5]:
+    with tabs[6]:
         if "pytest" not in sys.modules:
             import importlib
 
             import src.presentation.components.predictive_charts as _pc_mod
-            import src.presentation.story_acts.act6_predictive_forecast as _act6_mod
+            import src.presentation.story_acts.act7_predictive_forecast as _act7_mod
 
             importlib.reload(_pc_mod)
-            importlib.reload(_act6_mod)
-            render_act6_fn = _act6_mod.render_act6
+            importlib.reload(_act7_mod)
+            render_act7_fn = _act7_mod.render_act7
         else:
-            render_act6_fn = render_act6
+            render_act7_fn = render_act7
 
         _, _, multiscope_polls = get_election_dataset(
             year=ano_eleicao, turno=turno_num, include_subnational=True
@@ -384,7 +389,7 @@ def main() -> None:
             )
             t1_dt = get_election_date(year=ano_eleicao, turno=1)
 
-        render_act6_fn(
+        render_act7_fn(
             polls=multiscope_polls,
             tse_result=tse_result,
             election_date=election_dt,

@@ -16,9 +16,9 @@ _repo_root = Path(__file__).resolve().parent
 if str(_repo_root) not in sys.path:
     sys.path.insert(0, str(_repo_root))
 
-import streamlit as st
+import streamlit as st  # noqa: E402
 
-import src.presentation.app as _app_mod
+import src.presentation.app as _app_mod  # noqa: E402
 
 if __name__ == "__main__":
     if st.runtime.exists():

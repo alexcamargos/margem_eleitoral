@@ -6,9 +6,10 @@ from pytest_mock import MockerFixture
 
 from src.presentation.story_acts.act1_uncertainty import render_act1
 from src.presentation.story_acts.act2_election_film import render_act2
-from src.presentation.story_acts.act3_eve_clash import render_act3
-from src.presentation.story_acts.act4_error_anatomy import render_act4
-from src.presentation.story_acts.act5_scientific_verdict import render_act5
+from src.presentation.story_acts.act3_rejection import render_act3
+from src.presentation.story_acts.act4_eve_clash import render_act4
+from src.presentation.story_acts.act5_error_anatomy import render_act5
+from src.presentation.story_acts.act6_scientific_verdict import render_act6
 from src.transformations.schemas import (
     MetodologiaEnum,
     PesquisaEleitoralSchema,
@@ -56,12 +57,28 @@ def test_render_act2(
     render_act2(polls)
 
 
-def test_render_act3(
+def test_render_act3(mocker: MockerFixture) -> None:
+    """Valida a renderização do Ato 3 com Termômetro da Rejeição e Dumbbell Plot."""
+    mocker.patch("streamlit.markdown")
+    mocker.patch("streamlit.columns", side_effect=lambda arg: mock_columns(mocker, arg))
+    mocker.patch("streamlit.plotly_chart")
+    mocker.patch("streamlit.expander", return_value=mocker.MagicMock())
+    mocker.patch("streamlit.warning")
+
+    # Ciclo 2026
+    render_act3(year=2026, turno=1)
+    # Ciclo 2022
+    render_act3(year=2022, turno=1)
+    # Ano inexistente (deve acionar st.warning com segurança)
+    render_act3(year=1994, turno=1)
+
+
+def test_render_act4(
     mocker: MockerFixture,
     sample_eve_polls_2026: list[PesquisaEleitoralSchema],
     sample_tse_result_2026: ResultadoOficialTSESchema,
 ) -> None:
-    """Valida a renderização do Ato 3 com Forest Plot e Cobertura."""
+    """Valida a renderização do Ato 4 com Forest Plot e Cobertura."""
     eve_polls = sample_eve_polls_2026
     tse_result = sample_tse_result_2026
 
@@ -73,16 +90,16 @@ def test_render_act3(
     mocker.patch("streamlit.success")
     mocker.patch("streamlit.warning")
 
-    render_act3(eve_polls, tse_result)
+    render_act4(eve_polls, tse_result)
 
 
-def test_render_act4(
+def test_render_act5(
     mocker: MockerFixture,
     sample_eve_polls_2026: list[PesquisaEleitoralSchema],
     sample_historical_campaign_polls_2026: list[PesquisaEleitoralSchema],
     sample_tse_result_2026: ResultadoOficialTSESchema,
 ) -> None:
-    """Valida a renderização do Ato 4 com Barras Segmentadas, Faixa do Acaso e Abas."""
+    """Valida a renderização do Ato 5 com Barras Segmentadas, Faixa do Acaso e Abas."""
     eve_polls = sample_eve_polls_2026
     all_polls = sample_historical_campaign_polls_2026 + eve_polls
     tse_result = sample_tse_result_2026
@@ -95,16 +112,16 @@ def test_render_act4(
     mocker.patch("streamlit.dataframe")
     mocker.patch("streamlit.expander", return_value=mocker.MagicMock())
 
-    render_act4(eve_polls, all_polls, tse_result)
+    render_act5(eve_polls, all_polls, tse_result)
 
 
-def test_render_act5(
+def test_render_act6(
     mocker: MockerFixture,
     sample_eve_polls_2026: list[PesquisaEleitoralSchema],
     sample_historical_campaign_polls_2026: list[PesquisaEleitoralSchema],
     sample_tse_result_2026: ResultadoOficialTSESchema,
 ) -> None:
-    """Valida a renderização do Ato 5 com Testes de Hipótese e TSE.
+    """Valida a renderização do Ato 6 com Testes de Hipótese e TSE.
 
     Args:
         mocker: Fixture de mock do pytest-mock.
@@ -129,7 +146,7 @@ def test_render_act5(
     mocker.patch("streamlit.plotly_chart")
 
     # Renderiza sem all_polls
-    render_act5(eve_polls, tse_result)
+    render_act6(eve_polls, tse_result)
     calls_sem_all = [
         call for call in mock_metric.call_args_list if call[0][0] == "Late Swing Estimado"
     ]
@@ -139,7 +156,7 @@ def test_render_act5(
     mock_metric.reset_mock()
 
     # Renderiza com all_polls onde todas são > 14 dias (deve continuar N/D)
-    render_act5(eve_polls, tse_result, all_polls=all_polls)
+    render_act6(eve_polls, tse_result, all_polls=all_polls)
     calls_com_all = [
         call for call in mock_metric.call_args_list if call[0][0] == "Late Swing Estimado"
     ]
@@ -147,12 +164,12 @@ def test_render_act5(
     assert calls_com_all[0][0][1] == "N/D"
 
 
-def test_render_act5_with_pre_eve_polls(
+def test_render_act6_with_pre_eve_polls(
     mocker: MockerFixture,
     sample_eve_polls_2026: list[PesquisaEleitoralSchema],
     sample_tse_result_2026: ResultadoOficialTSESchema,
 ) -> None:
-    """Valida a renderização do Ato 5 com cálculo de late swing ativo via pré-véspera.
+    """Valida a renderização do Ato 6 com cálculo de late swing ativo via pré-véspera.
 
     Args:
         mocker: Fixture de mock do pytest-mock.
@@ -199,7 +216,7 @@ def test_render_act5_with_pre_eve_polls(
     mock_metric = mocker.patch("streamlit.metric")
     mocker.patch("streamlit.plotly_chart")
 
-    render_act5(eve_polls, sample_tse_result_2026, all_polls=all_polls)
+    render_act6(eve_polls, sample_tse_result_2026, all_polls=all_polls)
 
     calls = [call for call in mock_metric.call_args_list if call[0][0] == "Late Swing Estimado"]
     assert len(calls) == 1
@@ -207,13 +224,13 @@ def test_render_act5_with_pre_eve_polls(
     assert "janela de 14 dias" in calls[0][1]["help"]
 
 
-def test_render_act6(
+def test_render_act7(
     mocker: MockerFixture,
     sample_eve_polls_2026: list[PesquisaEleitoralSchema],
     sample_historical_campaign_polls_2026: list[PesquisaEleitoralSchema],
     sample_tse_result_2026: ResultadoOficialTSESchema,
 ) -> None:
-    """Valida a renderização completa do Ato 6 no 1º Turno e no 2º Turno calibrado.
+    """Valida a renderização completa do Ato 7 no 1º Turno e no 2º Turno calibrado.
 
     Args:
         mocker: Fixture de mock do pytest-mock.
@@ -229,7 +246,7 @@ def test_render_act6(
     """
     from datetime import date
 
-    from src.presentation.story_acts.act6_predictive_forecast import render_act6
+    from src.presentation.story_acts.act7_predictive_forecast import render_act7
 
     all_polls = sample_historical_campaign_polls_2026 + sample_eve_polls_2026
 
@@ -245,7 +262,7 @@ def test_render_act6(
     mocker.patch("streamlit.expander", return_value=mocker.MagicMock())
 
     # 1º Turno (com resultado oficial do TSE para backtest)
-    render_act6(
+    render_act7(
         polls=all_polls,
         tse_result=sample_tse_result_2026,
         election_date=date(2026, 10, 4),
@@ -263,7 +280,7 @@ def test_render_act6(
             "resultado_nominal": {"Flávio Bolsonaro": 0.0, "Lula": 0.0},
         }
     )
-    render_act6(
+    render_act7(
         polls=polls_t2,
         tse_result=tse_t2,
         election_date=date(2026, 10, 25),
@@ -275,11 +292,11 @@ def test_render_act6(
     assert mock_plotly.call_count >= 5
 
 
-def test_render_act6_empty_polls(
+def test_render_act7_empty_polls(
     mocker: MockerFixture,
     sample_tse_result_2026: ResultadoOficialTSESchema,
 ) -> None:
-    """Valida a renderização segura do Ato 6 quando a lista de pesquisas é vazia.
+    """Valida a renderização segura do Ato 7 quando a lista de pesquisas é vazia.
 
     Args:
         mocker: Fixture de mock do pytest-mock.
@@ -293,12 +310,12 @@ def test_render_act6_empty_polls(
     """
     from datetime import date
 
-    from src.presentation.story_acts.act6_predictive_forecast import render_act6
+    from src.presentation.story_acts.act7_predictive_forecast import render_act7
 
     mocker.patch("streamlit.markdown")
     mock_info = mocker.patch("streamlit.info")
 
-    render_act6(
+    render_act7(
         polls=[],
         tse_result=sample_tse_result_2026,
         election_date=date(2026, 10, 25),

@@ -63,7 +63,7 @@ def test_main_render_flow(mocker: MockerFixture) -> None:
     mocker.patch("streamlit.button", return_value=False)
     mocker.patch("streamlit.markdown")
     mocker.patch("src.presentation.app.render_documentation_modal")
-    mock_tabs = [mocker.MagicMock() for _ in range(6)]
+    mock_tabs = [mocker.MagicMock() for _ in range(7)]
     mocker.patch("streamlit.tabs", return_value=mock_tabs)
 
     mocker.patch("src.presentation.app.render_act1")
@@ -72,6 +72,7 @@ def test_main_render_flow(mocker: MockerFixture) -> None:
     mocker.patch("src.presentation.app.render_act4")
     mocker.patch("src.presentation.app.render_act5")
     mocker.patch("src.presentation.app.render_act6")
+    mocker.patch("src.presentation.app.render_act7")
 
     main()
 

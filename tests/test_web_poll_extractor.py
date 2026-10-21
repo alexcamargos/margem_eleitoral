@@ -1,6 +1,5 @@
 """Testes unitários e de integração para o WebPollExtractor."""
 
-from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -9,7 +8,7 @@ import polars as pl
 from pytest_mock import MockerFixture
 
 from src.ingestion.web_poll_extractor import WebPollExtractor
-from src.transformations.schemas import AbrangenciaEnum, MetodologiaEnum, PesquisaEleitoralSchema
+from src.transformations.schemas import PesquisaEleitoralSchema
 
 
 def _build_mock_feed_data() -> dict[str, Any]:

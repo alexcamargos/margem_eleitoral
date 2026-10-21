@@ -305,15 +305,15 @@ def compute_phase_aggregation_metrics(
         hoje = date(ano_pleito, 10, 1)
         fases_vazias = (
             [
-                ("Ciclo Completo (Jul-Out)", "Ciclo Completo", "🌐"),
-                ("Campanha Oficial (Ago-Out)", "Campanha Oficial", "📢"),
-                ("Reta Final (14 dias)", "Reta Final", "⚡"),
+                ("Ciclo Completo (Jul-Out)", "Ciclo Completo", ""),
+                ("Campanha Oficial (Ago-Out)", "Campanha Oficial", ""),
+                ("Reta Final (14 dias)", "Reta Final", ""),
             ]
             if turno == 1
             else [
-                ("1ª Semana (Arranjos & Alianças)", "1ª Semana", "🤝"),
-                ("2ª Semana (Horário Eleitoral & Debates)", "2ª Semana", "📺"),
-                ("3ª Semana (Reta Final)", "3ª Semana", "⚡"),
+                ("1ª Semana (Arranjos & Alianças)", "1ª Semana", ""),
+                ("2ª Semana (Horário Eleitoral & Debates)", "2ª Semana", ""),
+                ("3ª Semana (Reta Final)", "3ª Semana", ""),
             ]
         )
         return [
@@ -357,7 +357,7 @@ def compute_phase_aggregation_metrics(
             (
                 "Ciclo Completo (Jul-Out)",
                 "Ciclo Completo",
-                "🌐",
+                "",
                 min_date,
                 max_date,
                 p_ciclo,
@@ -365,7 +365,7 @@ def compute_phase_aggregation_metrics(
             (
                 "Campanha Oficial (Ago-Out)",
                 "Campanha Oficial",
-                "📢",
+                "",
                 d_ini_campanha,
                 max_date,
                 p_campanha,
@@ -373,7 +373,7 @@ def compute_phase_aggregation_metrics(
             (
                 "Reta Final (14 dias)",
                 "Reta Final",
-                "⚡",
+                "",
                 d_ini_reta_final,
                 max_date,
                 p_reta_final,
@@ -406,7 +406,7 @@ def compute_phase_aggregation_metrics(
             (
                 "1ª Semana (Arranjos & Alianças)",
                 "1ª Semana",
-                "🤝",
+                "",
                 w1_start,
                 w1_end,
                 p_w1,
@@ -414,7 +414,7 @@ def compute_phase_aggregation_metrics(
             (
                 "2ª Semana (Horário Eleitoral & Debates)",
                 "2ª Semana",
-                "📺",
+                "",
                 w2_start,
                 w2_end,
                 p_w2,
@@ -422,7 +422,7 @@ def compute_phase_aggregation_metrics(
             (
                 "3ª Semana (Reta Final)",
                 "3ª Semana",
-                "⚡",
+                "",
                 w3_start,
                 w3_end,
                 p_w3,

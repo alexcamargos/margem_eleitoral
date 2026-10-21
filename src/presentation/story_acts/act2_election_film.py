@@ -298,8 +298,7 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
 
             card_header = (
                 f"<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;'>"
-                f"<div><span style='font-size:16px; margin-right:5px;'>{s.icone}</span>"
-                f"<b style='color:#F1F5F9; font-size:14px;'>{s.nome_fase}</b></div>"
+                f"<div><b style='color:#F1F5F9; font-size:14px;'>{s.nome_fase}</b></div>"
                 f"{badge_active}"
                 f"</div>"
             )

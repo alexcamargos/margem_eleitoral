@@ -8,6 +8,7 @@ Renderiza a análise comparativa de rejeição dos candidatos ("em quem não vot
 5. Formulação pedagógica do Teto Eleitoral e conexão com o Voto Potencial no 2º turno.
 """
 
+import polars as pl
 import streamlit as st
 
 from src.analytics.rejection_analysis import structure_rejection_metrics
@@ -220,47 +221,73 @@ def render_act3(year: int = 2026, turno: int = 1) -> None:
         )
         st.plotly_chart(fig_dumbbell_t2, use_container_width=True)
 
-        # Histórico detalhado cronológico das pesquisas em container colapsável
+        # Histórico detalhado cronológico das pesquisas em container colapsável com Tabela Interativa
         if pesquisas_feed:
             with st.expander(
                 f"📋 Ver histórico cronológico completo de pesquisas publicadas no 2º turno ({len(pesquisas_feed)} levantamentos)"
             ):
-                feed_items_html = []
+                table_rows = []
                 for p in pesquisas_feed:
                     inst = p.get("instituto", "")
                     inicio = p.get("campo_inicio", "")
                     fim = p.get("campo_fim", "")
+                    periodo = f"{inicio} a {fim}" if inicio and fim else "-"
                     rejeicao = p.get("rejeicao", {})
-                    v1 = rejeicao.get(c1, 0.0)
-                    v2 = rejeicao.get(c2, 0.0)
-                    veredito = p.get("veredito", "")
-                    tipo_v = p.get("tipo_veredito", "")
+                    v1 = float(rejeicao.get(c1, 0.0))
+                    v2 = float(rejeicao.get(c2, 0.0))
+                    diff = round(abs(v1 - v2), 1)
 
-                    campo_str = f"(campo {inicio} a {fim}):" if inicio and fim else ":"
-                    if "empate" in tipo_v.lower():
-                        verdict_color = "#94A3B8"
-                    elif c1_disp.lower() in tipo_v.lower() or c1.lower() in tipo_v.lower():
-                        verdict_color = c1_color
+                    v_raw = p.get("veredito", "").strip().rstrip(".")
+                    if not v_raw or v_raw.lower() == "empate":
+                        v_clean = "Empate técnico"
                     else:
-                        verdict_color = c2_color
+                        v_clean = v_raw
 
-                    item_html = (
-                        f"<div style='padding: 6px 0; border-bottom: 1px solid #1F242D; font-size: 13.5px;'>"
-                        f"<b>{inst}</b> <span style='color: #94A3B8;'>{campo_str}</span> "
-                        f"<span style='color: {c1_color}; font-weight: 600;'>{c1_disp} {v1:.0f}%</span>, "
-                        f"<span style='color: {c2_color}; font-weight: 600;'>{c2_disp} {v2:.0f}%</span> "
-                        f"&rarr; <span style='color: {verdict_color}; font-weight: 500;'>{veredito}</span>"
-                        f"</div>"
+                    table_rows.append(
+                        {
+                            "Instituto": inst,
+                            "Período de Campo": periodo,
+                            f"Rejeição {c1_disp}": v1,
+                            f"Rejeição {c2_disp}": v2,
+                            "Diferença": diff,
+                            "Veredito": v_clean,
+                        }
                     )
-                    feed_items_html.append(item_html)
 
-                st.markdown(
-                    f"""
-                    <div style="background-color: #15181E; border: 1px solid #282D37; border-radius: 8px; padding: 14px 18px; margin-top: 8px;">
-                        {"".join(feed_items_html)}
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
+                df_feed = pl.DataFrame(table_rows)
+                st.dataframe(
+                    df_feed,
+                    width="stretch",
+                    hide_index=True,
+                    column_config={
+                        "Instituto": st.column_config.TextColumn(
+                            "Instituto",
+                            help="Instituto responsável pela realização da pesquisa",
+                        ),
+                        "Período de Campo": st.column_config.TextColumn(
+                            "Período de Campo",
+                            help="Datas de início e fim da coleta de campo",
+                        ),
+                        f"Rejeição {c1_disp}": st.column_config.NumberColumn(
+                            f"Rejeição {c1_disp}",
+                            help=f"Percentual de eleitores que não votariam de jeito nenhum em {c1_disp}",
+                            format="%.0f%%",
+                        ),
+                        f"Rejeição {c2_disp}": st.column_config.NumberColumn(
+                            f"Rejeição {c2_disp}",
+                            help=f"Percentual de eleitores que não votariam de jeito nenhum em {c2_disp}",
+                            format="%.0f%%",
+                        ),
+                        "Diferença": st.column_config.NumberColumn(
+                            "Diferença (pp)",
+                            help="Diferença absoluta em pontos percentuais entre os dois candidatos",
+                            format="%.0f pp",
+                        ),
+                        "Veredito": st.column_config.TextColumn(
+                            "Veredito",
+                            help="Veredito analítico da pesquisa sobre qual concorrente tem menor rejeição",
+                        ),
+                    },
                 )
 
         nota_projecao = segundo_turno_data.get("nota_projecao", "")

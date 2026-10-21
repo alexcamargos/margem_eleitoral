@@ -2,8 +2,8 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Package Manager](https://img.shields.io/badge/package%20manager-uv-blueviolet.svg)](https://docs.astral.sh/uv/)
-[![Test Suite](https://img.shields.io/badge/tests-68%20passed-success.svg)](https://pytest.org/)
-[![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](https://pytest-cov.readthedocs.io/)
+[![Test Suite](https://img.shields.io/badge/tests-114%20passed-success.svg)](https://pytest.org/)
+[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://pytest-cov.readthedocs.io/)
 [![Code Style](https://img.shields.io/badge/code%20style-ruff-black.svg)](https://docs.astral.sh/ruff/)
 [![Standards](https://img.shields.io/badge/standards-WAPOR%20%7C%20AAPOR-orange.svg)](https://wapor.org/)
 
@@ -24,9 +24,9 @@ O projeto **Margem Eleitoral** substitui o debate passional por **evidências ma
 
 ---
 
-## Os Cinco Atos do Roteiro de Storytelling
+## Os Sete Atos do Roteiro de Storytelling
 
-A jornada do usuário na aplicação é estruturada pedagogicamente em cinco atos sequenciais:
+A jornada do usuário na aplicação é estruturada pedagogicamente em sete atos sequenciais:
 
 1. **Ato 1: O Princípio da Incerteza:**
    * Desmistificação intuitiva do dilema de amostragem ($n \approx 2{.}000$ entrevistados vs. população de $156$ milhões de eleitores);
@@ -34,17 +34,25 @@ A jornada do usuário na aplicação é estruturada pedagogicamente em cinco ato
 2. **Ato 2: O Filme da Eleição (Agregador Dinâmico):**
    * Curva suavizada diária com fitas de incerteza de 80% e 95% e dispersão pontual com transparência proporcional ao peso da pesquisa;
    * Marcos de campanha destacados sobre a série temporal e alternância entre votos totais e votos válidos.
-3. **Ato 3: A Prova dos Fatos (Pesquisas de Véspera vs. Urna):**
+3. **Ato 3: Quem é Menos Rejeitado? (Termômetro da Rejeição):**
+   * Gráfico de halteres (*Dumbbell / Cleveland Dot Plot*) confrontando as taxas de rejeição declaradas instituto a instituto;
+   * Cartões executivos de rejeição média e placar competitivo de vantagem de rejeição;
+   * Monitoramento contínuo das pesquisas de 2º turno e formulação do teto eleitoral teórico ($\text{Teto}_i = 100\% - \text{Rejeição}_i$).
+4. **Ato 4: A Prova dos Fatos (Pesquisas de Véspera vs. Urna):**
    * *Forest Plot* confrontando estimativas pontuais e intervalos de confiança de 95% (ajustados com $deff$) contra a linha vertical da apuração do TSE;
    * Taxa de Cobertura Empírica calculada em tempo real com teste binomial exato de calibração.
-4. **Ato 4: Anatomia do Erro e Auditoria:**
+5. **Ato 5: Anatomia do Erro e Auditoria:**
    * Gráfico de barras segmentadas por faixas de acerto (*Abaixo do Típico* vs. *Erro Típico*) confrontado com a *Faixa do Acaso ($P_{90}$)* derivada via simulação de Monte Carlo sob a hipótese nula ($H_0$);
    * Tabela classificatória interativa com ordenação por Erro Ponderado (EP), Mosteller $M_3$, $M_5$ e Log-Odds $A$;
    * Grid de *Small Multiples* exibindo a inclinação (*tilt*) de cada instituto frente ao consenso de pares contemporâneos em janelas de $\pm 7$ dias.
-5. **Ato 5: O Veredito Científico:**
+6. **Ato 6: O Veredito Científico:**
    * Diagnóstico inferencial formal: Teste $t$ de Student pareado e Teste de Wilcoxon sobre os resíduos;
    * Decomposição formal do *Total Survey Error* (Groves et al.) em variância teórica, excesso de dispersão, voto útil de última hora (*late swing*) e resíduo estrutural;
    * Parecer técnico demonstrando por que flutuações amostrais e abstenção diferencial explicam os dados sem qualquer evidência de fraude.
+7. **Ato 7: Modelo Preditivo & Previsão Eleitoral:**
+   * Modelo de estado-espaço com pós-estratificação pelo Colégio Eleitoral do TSE e calibração empírica pós-1º Turno;
+   * Simulação de Monte Carlo com caudas pesadas ($t$-Student, $\nu = 5$) para probabilidades de vitória e envelopes de 95%;
+   * Backtesting retroativo (*Point-in-Time*) com portões de qualidade MLE sem vazamento de dados futuros.
 
 ---
 

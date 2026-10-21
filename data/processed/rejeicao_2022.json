@@ -1,0 +1,138 @@
+{
+  "ano": 2022,
+  "cargo": "PRESIDENTE",
+  "candidatos": ["Lula", "Bolsonaro"],
+  "candidatos_nomes_exibicao": {
+    "Lula": "Lula",
+    "Bolsonaro": "Bolsonaro"
+  },
+  "cores_candidatos": {
+    "Lula": "#EF4444",
+    "Bolsonaro": "#3B82F6"
+  },
+  "primeiro_turno": {
+    "data_referencia": "2022-10-02",
+    "titulo_card": "Quem era menos rejeitado em 2022?",
+    "subtitulo_resumo": "Vantagem clara: na reta final do 1º turno de 2022, Bolsonaro acumulava rejeição média superior a 50%, enquanto Lula sustentava rejeição próxima a 41%.",
+    "conceito_pedagogico": "Rejeição é a parcela de eleitores que diz que não votaria de jeito nenhum no candidato. Quanto menor, mais espaço o candidato tem para crescer no 2º turno.",
+    "texto_diagnostico": "Resposta: Lula menos rejeitado. Na média de 8 principais institutos, a rejeição de Lula era 41,6% e a de Bolsonaro 50,2%, uma diferença expressiva de 8,6 pontos favorável a Lula.",
+    "media_rejeicao": {
+      "Lula": 41.6,
+      "Bolsonaro": 50.2
+    },
+    "total_institutos": 8,
+    "placar": {
+      "menos_rejeitado_candidato_1": 8,
+      "menos_rejeitado_candidato_2": 0,
+      "empate": 0
+    },
+    "texto_placar": "Instituto por instituto: Lula era o menos rejeitado em todos os 8 institutos de referência no fechamento do 1º turno de 2022.",
+    "pesquisas_instituto": [
+      {
+        "instituto": "Datafolha",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 40.0, "Bolsonaro": 52.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 12.0
+      },
+      {
+        "instituto": "Ipec",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 38.0, "Bolsonaro": 48.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 10.0
+      },
+      {
+        "instituto": "Quaest",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 41.0, "Bolsonaro": 52.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 11.0
+      },
+      {
+        "instituto": "PoderData",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 42.0, "Bolsonaro": 51.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 9.0
+      },
+      {
+        "instituto": "AtlasIntel",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 44.0, "Bolsonaro": 48.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 4.0
+      },
+      {
+        "instituto": "Paraná Pesquisas",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 44.0, "Bolsonaro": 49.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 5.0
+      },
+      {
+        "instituto": "MDA / CNT",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 41.0, "Bolsonaro": 50.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 9.0
+      },
+      {
+        "instituto": "Ipespe",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 43.0, "Bolsonaro": 50.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 7.0
+      }
+    ],
+    "notas_metodologicas": [
+      "Pesquisas nacionais registradas no TSE realizadas na semana decisiva de véspera do 1º turno de 2022.",
+      "A pergunta estimulada de múltipla escolha permitia ao eleitor apontar todos os candidatos em que 'não votaria de jeito nenhum'."
+    ]
+  },
+  "segundo_turno": {
+    "nota_projecao": "No 2º turno de 2022, a estabilidade da rejeição de Bolsonaro em torno de 50% limitou seu teto de crescimento de votos válidos a 49,1%, confirmando o teto previsto pelo indicador de partidarismo negativo.",
+    "pesquisas_feed": [
+      {
+        "instituto": "Datafolha",
+        "campo_inicio": "28/10",
+        "campo_fim": "29/10",
+        "rejeicao": {"Lula": 45.0, "Bolsonaro": 51.0},
+        "veredito": "Lula menos rejeitado, por 6 pontos.",
+        "tipo_veredito": "Lula menos"
+      },
+      {
+        "instituto": "Ipec",
+        "campo_inicio": "27/10",
+        "campo_fim": "29/10",
+        "rejeicao": {"Lula": 41.0, "Bolsonaro": 48.0},
+        "veredito": "Lula menos rejeitado, por 7 pontos.",
+        "tipo_veredito": "Lula menos"
+      },
+      {
+        "instituto": "Quaest",
+        "campo_inicio": "28/10",
+        "campo_fim": "29/10",
+        "rejeicao": {"Lula": 43.0, "Bolsonaro": 49.0},
+        "veredito": "Lula menos rejeitado, por 6 pontos.",
+        "tipo_veredito": "Lula menos"
+      },
+      {
+        "instituto": "AtlasIntel",
+        "campo_inicio": "26/10",
+        "campo_fim": "29/10",
+        "rejeicao": {"Lula": 46.0, "Bolsonaro": 49.0},
+        "veredito": "Lula menos rejeitado, por 3 pontos.",
+        "tipo_veredito": "Lula menos"
+      },
+      {
+        "instituto": "PoderData",
+        "campo_inicio": "23/10",
+        "campo_fim": "25/10",
+        "rejeicao": {"Lula": 44.0, "Bolsonaro": 50.0},
+        "veredito": "Lula menos rejeitado, por 6 pontos.",
+        "tipo_veredito": "Lula menos"
+      }
+    ]
+  }
+}

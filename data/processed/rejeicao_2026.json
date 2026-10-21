@@ -1,0 +1,278 @@
+{
+  "ano": 2026,
+  "cargo": "PRESIDENTE",
+  "candidatos": ["Lula", "Flávio Bolsonaro"],
+  "candidatos_nomes_exibicao": {
+    "Lula": "Lula",
+    "Flávio Bolsonaro": "Flávio"
+  },
+  "cores_candidatos": {
+    "Lula": "#EF4444",
+    "Flávio Bolsonaro": "#3B82F6"
+  },
+  "primeiro_turno": {
+    "data_referencia": "2026-10-04",
+    "titulo_card": "Quem é menos rejeitado?",
+    "subtitulo_resumo": "Empate: na reta final do 1º turno, Lula e Flávio tinham praticamente a mesma rejeição; depois do 1º turno, Flávio aparece como menos rejeitado.",
+    "conceito_pedagogico": "Rejeição é a parcela de eleitores que diz que não votaria de jeito nenhum no candidato. Quanto menor, mais espaço o candidato tem para crescer no 2º turno.",
+    "texto_diagnostico": "Resposta: empate. Na média de 13 institutos, a rejeição de Lula era 49,3% e a de Flávio 48,7%, uma diferença de só 0,6 ponto, menor que a margem de erro das pesquisas.",
+    "media_rejeicao": {
+      "Lula": 49.3,
+      "Flávio Bolsonaro": 48.7
+    },
+    "total_institutos": 13,
+    "placar": {
+      "menos_rejeitado_candidato_1": 4,
+      "menos_rejeitado_candidato_2": 6,
+      "empate": 3
+    },
+    "texto_placar": "Instituto por instituto: Flávio era o menos rejeitado em 6, Lula em 4, e houve empate em 3. Esses números são das últimas pesquisas antes de 04/10 e não mudam mais.",
+    "pesquisas_instituto": [
+      {
+        "instituto": "MDA",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 48.0, "Flávio Bolsonaro": 51.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 3.0
+      },
+      {
+        "instituto": "Nexus",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 47.0, "Flávio Bolsonaro": 50.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 3.0
+      },
+      {
+        "instituto": "Vox Brasil",
+        "onda_anterior": true,
+        "rejeicao": {"Lula": 49.0, "Flávio Bolsonaro": 52.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 3.0
+      },
+      {
+        "instituto": "Quaest",
+        "onda_anterior": true,
+        "rejeicao": {"Lula": 55.0, "Flávio Bolsonaro": 57.0},
+        "veredito": "Lula menos",
+        "diferenca_pontos": 2.0
+      },
+      {
+        "instituto": "Indexa",
+        "onda_anterior": true,
+        "rejeicao": {"Lula": 49.0, "Flávio Bolsonaro": 49.0},
+        "veredito": "empate",
+        "diferenca_pontos": 0.0
+      },
+      {
+        "instituto": "Real Time Big Data",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 49.0, "Flávio Bolsonaro": 49.0},
+        "veredito": "empate",
+        "diferenca_pontos": 0.0
+      },
+      {
+        "instituto": "Datafolha",
+        "onda_anterior": true,
+        "rejeicao": {"Lula": 46.0, "Flávio Bolsonaro": 46.0},
+        "veredito": "empate",
+        "diferenca_pontos": 0.0
+      },
+      {
+        "instituto": "Ideia",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 48.0, "Flávio Bolsonaro": 47.0},
+        "veredito": "Flávio menos",
+        "diferenca_pontos": 1.0
+      },
+      {
+        "instituto": "PoderData",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 48.0, "Flávio Bolsonaro": 46.0},
+        "veredito": "Flávio menos",
+        "diferenca_pontos": 2.0
+      },
+      {
+        "instituto": "AtlasIntel",
+        "onda_anterior": true,
+        "rejeicao": {"Lula": 52.0, "Flávio Bolsonaro": 49.0},
+        "veredito": "Flávio menos",
+        "diferenca_pontos": 3.0
+      },
+      {
+        "instituto": "Palver",
+        "onda_anterior": true,
+        "rejeicao": {"Lula": 54.0, "Flávio Bolsonaro": 49.0},
+        "veredito": "Flávio menos",
+        "diferenca_pontos": 5.0
+      },
+      {
+        "instituto": "Futura",
+        "onda_anterior": true,
+        "rejeicao": {"Lula": 48.0, "Flávio Bolsonaro": 44.0},
+        "veredito": "Flávio menos",
+        "diferenca_pontos": 4.0
+      },
+      {
+        "instituto": "Gerp",
+        "onda_anterior": false,
+        "rejeicao": {"Lula": 48.0, "Flávio Bolsonaro": 44.0},
+        "veredito": "Flávio menos",
+        "diferenca_pontos": 4.0
+      }
+    ],
+    "notas_metodologicas": [
+      "* Instituto que não divulgou rejeição na última pesquisa antes do 1º turno: vale a onda anterior. A pergunta varia um pouco entre institutos (com ou sem lista de nomes).",
+      "Também fizeram pesquisa de 1º turno, mas não entram nesta conta: Alfa Inteligência, que não divulgou a rejeição de Lula e de Flávio; American Analytics, que divulgou só a rejeição de Flávio, de 50%, e não a de Lula; DataTrends, que não divulgou a rejeição de Lula e de Flávio; Instituto França, que não divulgou a rejeição de Lula e de Flávio; Veritá, que não divulgou rejeição na última onda, e a da onda de 01 a 04/09, de 35% para Lula e 25,8% para Flávio, veio de uma pergunta de resposta única, que não é comparável à das outras pesquisas, em que o eleitor pode rejeitar mais de um candidato.",
+      "JOTA e Ipespe registraram pesquisa de 1º turno no TSE, mas o resultado não foi encontrado em fonte pública."
+    ]
+  },
+  "segundo_turno": {
+    "nota_projecao": "A rejeição do 2º turno é medida a cada pesquisa nova e pode mudar até a véspera. Na projeção, ela entra pelo voto potencial: metade da conta de cada pesquisa vem de quem não rejeita cada candidato.",
+    "pesquisas_feed": [
+      {
+        "instituto": "Real Time Big Data",
+        "campo_inicio": "15/10",
+        "campo_fim": "19/10",
+        "rejeicao": {"Lula": 35.0, "Flávio Bolsonaro": 33.0},
+        "veredito": "Flávio menos rejeitado, por 2 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "Nexus",
+        "campo_inicio": "16/10",
+        "campo_fim": "18/10",
+        "rejeicao": {"Lula": 48.0, "Flávio Bolsonaro": 47.0},
+        "veredito": "Flávio menos rejeitado, por 1 ponto.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "PoderData",
+        "campo_inicio": "16/10",
+        "campo_fim": "18/10",
+        "rejeicao": {"Lula": 48.0, "Flávio Bolsonaro": 44.0},
+        "veredito": "Flávio menos rejeitado, por 4 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "Futura",
+        "campo_inicio": "16/10",
+        "campo_fim": "17/10",
+        "rejeicao": {"Lula": 47.0, "Flávio Bolsonaro": 46.0},
+        "veredito": "Flávio menos rejeitado, por 2 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "Vox Brasil",
+        "campo_inicio": "15/10",
+        "campo_fim": "17/10",
+        "rejeicao": {"Lula": 45.0, "Flávio Bolsonaro": 45.0},
+        "veredito": "empate.",
+        "tipo_veredito": "empate"
+      },
+      {
+        "instituto": "Gerp",
+        "campo_inicio": "14/10",
+        "campo_fim": "16/10",
+        "rejeicao": {"Lula": 49.0, "Flávio Bolsonaro": 46.0},
+        "veredito": "Flávio menos rejeitado, por 3 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "MDA",
+        "campo_inicio": "13/10",
+        "campo_fim": "15/10",
+        "rejeicao": {"Lula": 49.0, "Flávio Bolsonaro": 47.0},
+        "veredito": "Flávio menos rejeitado, por 2 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "PoderData",
+        "campo_inicio": "13/10",
+        "campo_fim": "15/10",
+        "rejeicao": {"Lula": 46.0, "Flávio Bolsonaro": 45.0},
+        "veredito": "Flávio menos rejeitado, por 1 ponto.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "Futura",
+        "campo_inicio": "13/10",
+        "campo_fim": "15/10",
+        "rejeicao": {"Lula": 47.0, "Flávio Bolsonaro": 46.0},
+        "veredito": "Flávio menos rejeitado, por 1 ponto.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "Datafolha",
+        "campo_inicio": "13/10",
+        "campo_fim": "15/10",
+        "rejeicao": {"Lula": 46.0, "Flávio Bolsonaro": 44.0},
+        "veredito": "Flávio menos rejeitado, por 2 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "Indexa Pesquisas",
+        "campo_inicio": "13/10",
+        "campo_fim": "14/10",
+        "rejeicao": {"Lula": 50.0, "Flávio Bolsonaro": 51.0},
+        "veredito": "Lula menos rejeitado, por 1 ponto.",
+        "tipo_veredito": "Lula menos"
+      },
+      {
+        "instituto": "Quaest",
+        "campo_inicio": "10/10",
+        "campo_fim": "13/10",
+        "rejeicao": {"Lula": 53.0, "Flávio Bolsonaro": 54.0},
+        "veredito": "Lula menos rejeitado, por 1 ponto.",
+        "tipo_veredito": "Lula menos"
+      },
+      {
+        "instituto": "Gerp",
+        "campo_inicio": "08/10",
+        "campo_fim": "12/10",
+        "rejeicao": {"Lula": 53.0, "Flávio Bolsonaro": 42.0},
+        "veredito": "Flávio menos rejeitado, por 11 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "Nexus",
+        "campo_inicio": "10/10",
+        "campo_fim": "12/10",
+        "rejeicao": {"Lula": 51.0, "Flávio Bolsonaro": 47.0},
+        "veredito": "Flávio menos rejeitado, por 4 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "PoderData",
+        "campo_inicio": "10/10",
+        "campo_fim": "12/10",
+        "rejeicao": {"Lula": 46.0, "Flávio Bolsonaro": 44.0},
+        "veredito": "Flávio menos rejeitado, por 2 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "Futura",
+        "campo_inicio": "07/10",
+        "campo_fim": "10/10",
+        "rejeicao": {"Lula": 49.0, "Flávio Bolsonaro": 45.0},
+        "veredito": "Flávio menos rejeitado, por 3 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "Datafolha",
+        "campo_inicio": "06/10",
+        "campo_fim": "08/10",
+        "rejeicao": {"Lula": 46.0, "Flávio Bolsonaro": 43.0},
+        "veredito": "Flávio menos rejeitado, por 3 pontos.",
+        "tipo_veredito": "Flávio menos"
+      },
+      {
+        "instituto": "PoderData",
+        "campo_inicio": "05/10",
+        "campo_fim": "07/10",
+        "rejeicao": {"Lula": 46.0, "Flávio Bolsonaro": 43.0},
+        "veredito": "Flávio menos rejeitado, por 3 pontos.",
+        "tipo_veredito": "Flávio menos"
+      }
+    ]
+  }
+}

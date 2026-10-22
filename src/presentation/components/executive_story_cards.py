@@ -107,6 +107,150 @@ CANDIDATE_METADATA_REGISTRY: dict[str, dict[str, str]] = {
         "bg_tint": "rgba(14, 165, 233, 0.15)",
         "initials": "RS",
     },
+    "Tarcísio de Freitas": {
+        "name": "Tarcísio de Freitas",
+        "short_name": "Tarcísio",
+        "party": "Republicanos",
+        "color": "#1D4ED8",
+        "bg_tint": "rgba(29, 78, 216, 0.15)",
+        "initials": "TF",
+    },
+    "Tarcísio": {
+        "name": "Tarcísio de Freitas",
+        "short_name": "Tarcísio",
+        "party": "Republicanos",
+        "color": "#1D4ED8",
+        "bg_tint": "rgba(29, 78, 216, 0.15)",
+        "initials": "TF",
+    },
+    "Fernando Haddad": {
+        "name": "Fernando Haddad",
+        "short_name": "Haddad",
+        "party": "PT",
+        "color": "#EF4444",
+        "bg_tint": "rgba(239, 68, 68, 0.15)",
+        "initials": "FH",
+    },
+    "Raquel Lyra": {
+        "name": "Raquel Lyra",
+        "short_name": "Raquel",
+        "party": "PSDB",
+        "color": "#F59E0B",
+        "bg_tint": "rgba(245, 158, 11, 0.15)",
+        "initials": "RL",
+    },
+    "João Campos": {
+        "name": "João Campos",
+        "short_name": "João",
+        "party": "PSB",
+        "color": "#DC2626",
+        "bg_tint": "rgba(220, 38, 38, 0.15)",
+        "initials": "JC",
+    },
+    "Eduardo Paes": {
+        "name": "Eduardo Paes",
+        "short_name": "Paes",
+        "party": "PSD",
+        "color": "#3B82F6",
+        "bg_tint": "rgba(59, 130, 246, 0.15)",
+        "initials": "EP",
+    },
+    "Douglas Ruas": {
+        "name": "Douglas Ruas",
+        "short_name": "Ruas",
+        "party": "PL",
+        "color": "#1E40AF",
+        "bg_tint": "rgba(30, 64, 175, 0.15)",
+        "initials": "DR",
+    },
+    "Anthony Garotinho": {
+        "name": "Anthony Garotinho",
+        "short_name": "Garotinho",
+        "party": "Republicanos",
+        "color": "#F97316",
+        "bg_tint": "rgba(249, 115, 22, 0.15)",
+        "initials": "AG",
+    },
+    "Elmano de Freitas": {
+        "name": "Elmano de Freitas",
+        "short_name": "Elmano",
+        "party": "PT",
+        "color": "#EF4444",
+        "bg_tint": "rgba(239, 68, 68, 0.15)",
+        "initials": "EF",
+    },
+    "Cleitinho": {
+        "name": "Cleitinho",
+        "short_name": "Cleitinho",
+        "party": "Republicanos",
+        "color": "#10B981",
+        "bg_tint": "rgba(16, 185, 129, 0.15)",
+        "initials": "CL",
+    },
+    "Alexandre Kalil": {
+        "name": "Alexandre Kalil",
+        "short_name": "Kalil",
+        "party": "PDT",
+        "color": "#F59E0B",
+        "bg_tint": "rgba(245, 158, 11, 0.15)",
+        "initials": "AK",
+    },
+    "Kalil": {
+        "name": "Alexandre Kalil",
+        "short_name": "Kalil",
+        "party": "PDT",
+        "color": "#F59E0B",
+        "bg_tint": "rgba(245, 158, 11, 0.15)",
+        "initials": "AK",
+    },
+    "Patrus Ananias": {
+        "name": "Patrus Ananias",
+        "short_name": "Patrus",
+        "party": "PT",
+        "color": "#EF4444",
+        "bg_tint": "rgba(239, 68, 68, 0.15)",
+        "initials": "PA",
+    },
+    "Mateus Simões": {
+        "name": "Mateus Simões",
+        "short_name": "Simões",
+        "party": "NOVO",
+        "color": "#F97316",
+        "bg_tint": "rgba(249, 115, 22, 0.15)",
+        "initials": "MS",
+    },
+    "ACM Neto": {
+        "name": "ACM Neto",
+        "short_name": "Neto",
+        "party": "UNIÃO",
+        "color": "#3B82F6",
+        "bg_tint": "rgba(59, 130, 246, 0.15)",
+        "initials": "AN",
+    },
+    "Jerônimo Rodrigues": {
+        "name": "Jerônimo Rodrigues",
+        "short_name": "Jerônimo",
+        "party": "PT",
+        "color": "#EF4444",
+        "bg_tint": "rgba(239, 68, 68, 0.15)",
+        "initials": "JR",
+    },
+    "Jerônimo": {
+        "name": "Jerônimo Rodrigues",
+        "short_name": "Jerônimo",
+        "party": "PT",
+        "color": "#EF4444",
+        "bg_tint": "rgba(239, 68, 68, 0.15)",
+        "initials": "JR",
+    },
+    "Ronaldo Caiado": {
+        "name": "Ronaldo Caiado",
+        "short_name": "Caiado",
+        "party": "UNIÃO",
+        "color": "#3B82F6",
+        "bg_tint": "rgba(59, 130, 246, 0.15)",
+        "initials": "RC",
+    },
 }
 
 HERO_CARDS_CSS = """
@@ -356,16 +500,16 @@ def render_avatar_svg(meta: dict[str, str], size: int = 44) -> str:
     return (
         f'<svg width="{size}" height="{size}" viewBox="0 0 44 44" fill="none" '
         f'xmlns="http://www.w3.org/2000/svg" style="border-radius: 50%; vertical-align: middle;">'
-        f'<defs>'
+        f"<defs>"
         f'<linearGradient id="grad_{initials}" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">'
         f'<stop stop-color="#242933"/>'
         f'<stop offset="1" stop-color="#181B20"/>'
-        f'</linearGradient>'
-        f'</defs>'
+        f"</linearGradient>"
+        f"</defs>"
         f'<circle cx="22" cy="22" r="21" fill="url(#grad_{initials})" stroke="{color}" stroke-width="2"/>'
         f'<text x="22" y="27" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="700" '
         f'font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif">{initials}</text>'
-        f'</svg>'
+        f"</svg>"
     )
 
 
@@ -393,9 +537,9 @@ def render_candidate_avatar(meta: dict[str, str], size: int = 46) -> str:
     return (
         f'<img src="{foto_url}" width="{size}" height="{size}" alt="{meta["name"]}" '
         f'style="width: {size}px; height: {size}px; border-radius: 50%; object-fit: cover; '
-        f'object-position: top center; border: 2px solid {color}; box-shadow: 0 2px 8px rgba(0,0,0,0.4); '
+        f"object-position: top center; border: 2px solid {color}; box-shadow: 0 2px 8px rgba(0,0,0,0.4); "
         f'vertical-align: middle; display: inline-block;" '
-        f'onerror="this.style.display=\'none\'; if(this.nextElementSibling) this.nextElementSibling.style.display=\'inline-block\';" />'
+        f"onerror=\"this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';\" />"
         f'<span style="display: none; vertical-align: middle;">{svg_fallback}</span>'
     )
 
@@ -446,7 +590,7 @@ def render_gauge_svg(
         f'<line x1="80" y1="13" x2="80" y2="25" stroke="#F8FAFC" stroke-width="2" stroke-dasharray="2,2"/>'
         f'<text x="80" y="70" text-anchor="middle" font-size="26" font-weight="800" fill="#F8FAFC" '
         f'font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif">{leader_prob:.0f}%</text>'
-        f'</svg>'
+        f"</svg>"
     )
 
 
@@ -486,9 +630,7 @@ def compute_executive_snapshot(
     # 1. Executa o Modelo Preditivo com as pesquisas multi-escopo
     calib = None
     if turno_num == 2 and t1_polls and t1_tse_result and t1_election_date:
-        calib = compute_first_round_institute_calibration(
-            t1_polls, t1_tse_result, t1_election_date
-        )
+        calib = compute_first_round_institute_calibration(t1_polls, t1_tse_result, t1_election_date)
 
     config = PredictiveModelConfig.load_from_settings()
     forecast = predict_election_outcome(
@@ -511,6 +653,8 @@ def compute_executive_snapshot(
 
     meta1 = get_candidate_metadata(c1_name)
     meta2 = get_candidate_metadata(c2_name)
+    if meta1.get("color") == meta2.get("color"):
+        meta2["color"] = "#EF4444" if meta1.get("color") != "#EF4444" else "#3B82F6"
 
     # 2. Calcula Agregação Dinâmica das Pesquisas
     df_agg = compute_poll_aggregation_series(
@@ -567,9 +711,7 @@ def compute_executive_snapshot(
     if is_empate:
         headline = f"Empate técnico, com {leader_agg_meta['short_name']} {diff_str} p.p. à frente"
     else:
-        headline = (
-            f"{leader_agg_meta['short_name']} lidera isolado com {diff_str} p.p. à frente"
-        )
+        headline = f"{leader_agg_meta['short_name']} lidera isolado com {diff_str} p.p. à frente"
 
     subheadline = f"Média ponderada de todas as pesquisas de {turno_str} registradas no TSE."
 
@@ -581,9 +723,7 @@ def compute_executive_snapshot(
         p2_t1 = res_t1.get(c2_name, 0.0)
         p1_str = _format_ptbr_num(p1_t1, 2)
         p2_str = _format_ptbr_num(p2_t1, 2)
-        t1_info = (
-            f"1º turno: {meta1['short_name']} {p1_str}% x {meta2['short_name']} {p2_str}%"
-        )
+        t1_info = f"1º turno: {meta1['short_name']} {p1_str}% x {meta2['short_name']} {p2_str}%"
 
     return {
         "headline": headline,
@@ -731,9 +871,7 @@ def render_executive_story_cards(
     )
     pill_tie_text = "Empate técnico" if snapshot["is_empate"] else "Liderança fora da margem"
     pill_diff_text = f"{leader_meta['short_name']} à frente por {diff_str} p.p."
-    pill_t1 = (
-        f'<span class="hero-pill">{snapshot["t1_info"]}</span>' if snapshot["t1_info"] else ""
-    )
+    pill_t1 = f'<span class="hero-pill">{snapshot["t1_info"]}</span>' if snapshot["t1_info"] else ""
     pill_polls_count = (
         f'<span class="hero-pill">{snapshot["total_polls"]} pesquisas registradas</span>'
     )

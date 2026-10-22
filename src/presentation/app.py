@@ -18,6 +18,7 @@ from src.ingestion.data_loader import (
 )
 from src.presentation.components.documentation_modal import render_documentation_modal
 from src.presentation.components.executive_story_cards import render_executive_story_cards
+from src.presentation.components.polls_list_modal import render_polls_modal
 from src.presentation.story_acts.act1_uncertainty import render_act1
 from src.presentation.story_acts.act2_election_film import render_act2
 from src.presentation.story_acts.act3_rejection import render_act3
@@ -369,7 +370,7 @@ def main() -> None:
     )
     ano_eleicao = int(ano_opcao)
 
-    st.sidebar.selectbox(
+    cargo_selecionado = st.sidebar.selectbox(
         "Cargo em Auditoria:",
         ["Presidente da República", "Governadores (Em breve)", "Senado (Em breve)"],
         index=0,
@@ -384,7 +385,18 @@ def main() -> None:
     tse_result, eve_polls, all_polls = get_election_dataset(year=ano_eleicao, turno=turno_num)
 
     st.sidebar.markdown("---")
-    st.sidebar.markdown("### 📚 Guia e Metodologia")
+    st.sidebar.markdown("### 📚 Guia e Auditoria")
+    if st.sidebar.button(
+        "🗳️ Consultar Pesquisas",
+        width="stretch",
+        help="Abre o painel com a lista detalhada e colapsável de todas as pesquisas analisadas no ciclo atual.",
+    ):
+        render_polls_modal(
+            polls=all_polls,
+            ano_eleicao=ano_eleicao,
+            turno_num=turno_num,
+            cargo=cargo_selecionado,
+        )
     if st.sidebar.button(
         "📖 Consultar Metodologia",
         width="stretch",
@@ -397,12 +409,25 @@ def main() -> None:
         '<div class="breadcrumb-text">Início &gt; Margem Eleitoral &gt; Auditoria e Storytelling de Pesquisas</div>',
         unsafe_allow_html=True,
     )
-    col_title, col_doc = st.columns([3, 1])
+    col_title, col_polls, col_doc = st.columns([2.4, 1.3, 1.3])
     with col_title:
         st.markdown(
             '<div class="main-header-title">Auditoria e Desempenho de Pesquisas Eleitorais</div>',
             unsafe_allow_html=True,
         )
+    with col_polls:
+        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+        if st.button(
+            "🗳️ Consultar Pesquisas",
+            width="stretch",
+            help="Clique para ver a lista de todas as pesquisas auditadas com detalhes de registro, amostra, votos e metodologia.",
+        ):
+            render_polls_modal(
+                polls=all_polls,
+                ano_eleicao=ano_eleicao,
+                turno_num=turno_num,
+                cargo=cargo_selecionado,
+            )
     with col_doc:
         st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
         if st.button(

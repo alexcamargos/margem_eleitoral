@@ -554,7 +554,7 @@ class PesqEleCollector(BaseElectionDataExtractor):
                 base_dict[f"totais_{cand}"] = tot
             rows.append(base_dict)
 
-        return pl.DataFrame(rows)
+        return pl.DataFrame(rows, infer_schema_length=None)
 
     def save_processed(self, dest_path: Path | None = None) -> Path:
         """Transforma e persiste as pesquisas eleitorais em formato Parquet de alta performance.

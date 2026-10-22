@@ -977,7 +977,7 @@ class MultiOfficeCollector(BaseElectionDataExtractor):
                 b_dict[f"totais_{cand}"] = tot
             parquet_rows.append(b_dict)
 
-        pl_df = pl.DataFrame(parquet_rows)
+        pl_df = pl.DataFrame(parquet_rows, infer_schema_length=None)
         pl_df.write_parquet(parquet_path)
 
         return csv_path, parquet_path

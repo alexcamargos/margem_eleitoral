@@ -17,6 +17,7 @@ from src.ingestion.data_loader import (
     get_tse_registration_census,
 )
 from src.presentation.components.documentation_modal import render_documentation_modal
+from src.presentation.components.executive_story_cards import render_executive_story_cards
 from src.presentation.story_acts.act1_uncertainty import render_act1
 from src.presentation.story_acts.act2_election_film import render_act2
 from src.presentation.story_acts.act3_rejection import render_act3
@@ -194,6 +195,142 @@ def apply_custom_css() -> None:
             color: #38BDF8 !important;
             font-weight: 700 !important;
         }
+
+        /* Hero Executive Storytelling Cards */
+        .hero-card {
+            background-color: #181B20;
+            border: 1px solid #282D37;
+            border-radius: 12px;
+            padding: 20px 22px;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        .hero-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 16px;
+        }
+        .hero-candidates-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .hero-cand-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #F1F5F9;
+        }
+        .hero-cand-party {
+            font-size: 11px;
+            color: #94A3B8;
+            background-color: #242933;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .hero-cand-val {
+            font-size: 34px;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+        .hero-cand-val-sub {
+            font-size: 11.5px;
+            color: #94A3B8;
+            margin-top: 3px;
+        }
+        .hero-vs-badge {
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748B;
+        }
+        .hero-bar-track {
+            position: relative;
+            width: 100%;
+            height: 14px;
+            border-radius: 7px;
+            background-color: #242933;
+            display: flex;
+            margin: 18px 0 8px 0;
+        }
+        .hero-bar-split {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            border-radius: 7px;
+            overflow: hidden;
+        }
+        .hero-bar-threshold {
+            position: absolute;
+            left: 50%;
+            top: -4px;
+            bottom: -4px;
+            width: 2px;
+            border-left: 2px dashed #FFFFFF;
+            z-index: 5;
+        }
+        .hero-bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11.5px;
+            color: #94A3B8;
+            margin-top: 6px;
+        }
+        .hero-pills-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 18px;
+        }
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            background-color: #20242C;
+            border: 1px solid #333A48;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #CBD5E1;
+        }
+        .hero-pill-highlight {
+            background-color: rgba(56, 189, 248, 0.12);
+            border: 1px solid #38BDF8;
+            color: #38BDF8;
+        }
+        .hero-pill-tie {
+            background-color: rgba(245, 158, 11, 0.12);
+            border: 1px solid #F59E0B;
+            color: #FCD34D;
+        }
+        .hero-gauge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 0;
+        }
+        .hero-gauge-summary {
+            font-size: 17.5px;
+            font-weight: 700;
+            margin-top: 10px;
+            text-align: center;
+            color: #F8FAFC;
+        }
+        .hero-gauge-subtext {
+            font-size: 12px;
+            color: #94A3B8;
+            text-align: center;
+            margin-top: 6px;
+            line-height: 1.45;
+            max-width: 330px;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -321,6 +458,33 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
+    # Carrega dados multi-escopo e calibração de 1º turno para o Storytelling e Modelo Preditivo
+    _, _, multiscope_polls = get_election_dataset(
+        year=ano_eleicao, turno=turno_num, include_subnational=True
+    )
+    election_dt = get_election_date(year=ano_eleicao, turno=turno_num)
+    t1_tse_res = None
+    t1_polls_all = None
+    t1_dt = None
+    if turno_num == 2:
+        t1_tse_res, _, t1_polls_all = get_election_dataset(
+            year=ano_eleicao, turno=1, include_subnational=True
+        )
+        t1_dt = get_election_date(year=ano_eleicao, turno=1)
+
+    # Hero Executive Storytelling Cards (Síntese Imediata: Agregação & Modelo Preditivo)
+    render_executive_story_cards(
+        polls=all_polls,
+        multiscope_polls=multiscope_polls,
+        election_date=election_dt,
+        turno_num=turno_num,
+        ano_eleicao=ano_eleicao,
+        tse_result=tse_result,
+        t1_polls=t1_polls_all,
+        t1_tse_result=t1_tse_res,
+        t1_election_date=t1_dt,
+    )
+
     # Navegação por Abas na sequência lógica e pedagógica dos Atos 1 a 7
     tabs = st.tabs(
         [
@@ -375,19 +539,6 @@ def main() -> None:
             render_act7_fn = _act7_mod.render_act7
         else:
             render_act7_fn = render_act7
-
-        _, _, multiscope_polls = get_election_dataset(
-            year=ano_eleicao, turno=turno_num, include_subnational=True
-        )
-        election_dt = get_election_date(year=ano_eleicao, turno=turno_num)
-        t1_tse_res = None
-        t1_polls_all = None
-        t1_dt = None
-        if turno_num == 2:
-            t1_tse_res, _, t1_polls_all = get_election_dataset(
-                year=ano_eleicao, turno=1, include_subnational=True
-            )
-            t1_dt = get_election_date(year=ano_eleicao, turno=1)
 
         render_act7_fn(
             polls=multiscope_polls,

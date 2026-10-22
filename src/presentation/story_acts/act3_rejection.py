@@ -16,12 +16,13 @@ from src.ingestion.data_loader import get_rejection_dataset
 from src.presentation.components.dumbbell_chart import create_rejection_dumbbell_chart
 
 
-def render_act3(year: int = 2026, turno: int = 1) -> None:
+def render_act3(year: int = 2026, turno: int = 1, cargo: str = "Presidente da República") -> None:
     """Renderiza a narrativa e as visualizações analíticas de rejeição no Ato 3.
 
     Args:
         year: Ano do ciclo eleitoral (ex.: 2026, 2022).
         turno: Turno da eleição selecionado (1 ou 2).
+        cargo: Cargo eletivo em auditoria (default: 'Presidente da República').
 
     Returns:
         None.
@@ -30,6 +31,14 @@ def render_act3(year: int = 2026, turno: int = 1) -> None:
         None.
     """
     st.markdown("## Ato 3: Quem é Menos Rejeitado? (Termômetro da Rejeição)")
+
+    if "PRESIDENTE" not in cargo.upper():
+        st.info(
+            f"ℹ️ O monitoramento longitudinal com dados empíricos de rejeição (voto negativo espontâneo e estimulado) "
+            f"está parametrizado para a disputa presidencial. Para {cargo}, utilize as intenções de voto e estimativas "
+            f"no **Ato 2 (Agregador Dinâmico)** e no **Ato 4 (Forest Plot)**."
+        )
+        return
 
     try:
         raw_dataset = get_rejection_dataset(year=year)

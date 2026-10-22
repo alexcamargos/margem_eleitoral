@@ -13,6 +13,7 @@ from src.analytics.aggregator_model import (
     compute_phase_aggregation_metrics,
     compute_poll_aggregation_series,
 )
+from src.presentation.components.executive_story_cards import get_candidate_metadata
 from src.presentation.components.phase_story_chart import create_phases_comparison_chart
 from src.presentation.components.trend_chart import create_trend_aggregator_chart
 from src.transformations.schemas import PesquisaEleitoralSchema
@@ -50,26 +51,21 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
         "ONLINE": "Online / Painel Digital",
     }
 
-    CANDIDATE_COLORS = {
-        "Lula": "#EF4444",
-        "Flávio Bolsonaro": "#1D4ED8",
-        "Bolsonaro": "#3B82F6",
-        "Augusto Cury": "#8B5CF6",
-        "Romeu Zema": "#F97316",
-        "Renan Santos": "#0EA5E9",
-        "Simone Tebet": "#10B981",
-        "Ciro Gomes": "#F59E0B",
-    }
-
     ano_pleito = polls[0].ano if polls else 2026
     turno_atual = polls[0].turno if (polls and hasattr(polls[0], "turno")) else 1
+    cargo_tag = str(polls[0].cargo).lower() if polls and hasattr(polls[0], "cargo") else "pres"
+    uf_tag = str(polls[0].uf).lower() if polls and hasattr(polls[0], "uf") else "br"
+
+    available_cands = sorted(
+        list({c for p in polls for c in p.votos_validos.keys() if c != "Outros"})
+    )
+    dynamic_candidate_colors = {
+        cand: get_candidate_metadata(cand)["color"] for cand in available_cands
+    }
 
     # Linha 1: Seleção de Candidatos e Metodologias (espaço amplo para tags/pills sem truncamento)
     row1_col1, row1_col2 = st.columns([1.0, 1.0])
     with row1_col1:
-        available_cands = sorted(
-            list({c for p in polls for c in p.votos_validos.keys() if c != "Outros"})
-        )
         default_cands = [
             c for c in ["Lula", "Flávio Bolsonaro", "Bolsonaro"] if c in available_cands
         ]
@@ -79,7 +75,7 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
             "Candidatos para Visualização:",
             options=available_cands,
             default=default_cands,
-            key=f"act2_candidates_{ano_pleito}_{turno_atual}",
+            key=f"act2_candidates_{ano_pleito}_{cargo_tag}_{uf_tag}_{turno_atual}",
         )
         # Sanitiza candidatos caso haja resíduos de estados anteriores
         selected_candidates = [c for c in selected_candidates if c in available_cands]
@@ -90,7 +86,7 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
             options=metodologias_disponiveis,
             default=metodologias_disponiveis,
             format_func=lambda m: METHODOLOGY_LABELS.get(m, m),
-            key=f"act2_methods_{ano_pleito}_{turno_atual}",
+            key=f"act2_methods_{ano_pleito}_{cargo_tag}_{uf_tag}_{turno_atual}",
         )
 
     # Opções de Horizonte Temporal: 3 fases canônicas no 1º turno e divisão em 3 semanas no 2º turno
@@ -117,7 +113,7 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
             index=0,
             horizontal=True,
             help="Alterne entre a visão macro longitudinal e o foco nos períodos críticos da reta final.",
-            key=f"act2_horizon_{ano_pleito}_{turno_atual}",
+            key=f"act2_horizon_{ano_pleito}_{cargo_tag}_{uf_tag}_{turno_atual}",
         )
     with row2_col2:
         tipo_metrica = st.radio(
@@ -126,7 +122,7 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
             index=0,
             horizontal=True,
             help="Alterne entre votos válidos (sem brancos/nulos) e cenário estimulado bruto.",
-            key=f"act2_metric_{ano_pleito}_{turno_atual}",
+            key=f"act2_metric_{ano_pleito}_{cargo_tag}_{uf_tag}_{turno_atual}",
         )
         use_valid = "Válidos" in tipo_metrica
 
@@ -248,7 +244,7 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
             cands_html_list: list[str] = []
             for cand in selected_candidates:
                 est = s.estimativas.get(cand)
-                c_color = CANDIDATE_COLORS.get(cand, "#94A3B8")
+                c_color = dynamic_candidate_colors.get(cand, "#94A3B8")
                 bullet = (
                     f"<span style='display:inline-block; width:9px; height:9px; border-radius:50%; "
                     f"background-color:{c_color}; margin-right:6px;'></span>"
@@ -334,6 +330,6 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
         fig_phases = create_phases_comparison_chart(
             summaries=phase_summaries,
             candidates=selected_candidates,
-            candidate_colors=CANDIDATE_COLORS,
+            candidate_colors=dynamic_candidate_colors,
         )
         st.plotly_chart(fig_phases, width="stretch")

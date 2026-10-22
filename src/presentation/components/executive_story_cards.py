@@ -36,6 +36,7 @@ CANDIDATE_METADATA_REGISTRY: dict[str, dict[str, str]] = {
         "color": "#EF4444",
         "bg_tint": "rgba(239, 68, 68, 0.15)",
         "initials": "LU",
+        "foto_url": "https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/2040602022/280001607829/BR",
     },
     "Flávio Bolsonaro": {
         "name": "Flávio Bolsonaro",
@@ -44,6 +45,7 @@ CANDIDATE_METADATA_REGISTRY: dict[str, dict[str, str]] = {
         "color": "#3B82F6",
         "bg_tint": "rgba(59, 130, 246, 0.15)",
         "initials": "FB",
+        "foto_url": "https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/2022802018/190000624083/RJ",
     },
     "Bolsonaro": {
         "name": "Bolsonaro",
@@ -52,6 +54,7 @@ CANDIDATE_METADATA_REGISTRY: dict[str, dict[str, str]] = {
         "color": "#3B82F6",
         "bg_tint": "rgba(59, 130, 246, 0.15)",
         "initials": "JB",
+        "foto_url": "https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/2040602022/280001618036/BR",
     },
     "Jair Bolsonaro": {
         "name": "Bolsonaro",
@@ -60,6 +63,7 @@ CANDIDATE_METADATA_REGISTRY: dict[str, dict[str, str]] = {
         "color": "#3B82F6",
         "bg_tint": "rgba(59, 130, 246, 0.15)",
         "initials": "JB",
+        "foto_url": "https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/2040602022/280001618036/BR",
     },
     "Simone Tebet": {
         "name": "Simone Tebet",
@@ -68,6 +72,7 @@ CANDIDATE_METADATA_REGISTRY: dict[str, dict[str, str]] = {
         "color": "#10B981",
         "bg_tint": "rgba(16, 185, 129, 0.15)",
         "initials": "ST",
+        "foto_url": "https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/2040602022/280001607833/BR",
     },
     "Ciro Gomes": {
         "name": "Ciro Gomes",
@@ -76,6 +81,7 @@ CANDIDATE_METADATA_REGISTRY: dict[str, dict[str, str]] = {
         "color": "#F59E0B",
         "bg_tint": "rgba(245, 158, 11, 0.15)",
         "initials": "CG",
+        "foto_url": "https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/2040602022/280001600167/BR",
     },
     "Augusto Cury": {
         "name": "Augusto Cury",
@@ -327,6 +333,7 @@ def get_candidate_metadata(candidate_name: str) -> dict[str, str]:
         "color": "#38BDF8",
         "bg_tint": "rgba(56, 189, 248, 0.15)",
         "initials": initials,
+        "foto_url": None,
     }
 
 
@@ -359,6 +366,37 @@ def render_avatar_svg(meta: dict[str, str], size: int = 44) -> str:
         f'<text x="22" y="27" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="700" '
         f'font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif">{initials}</text>'
         f'</svg>'
+    )
+
+
+def render_candidate_avatar(meta: dict[str, str], size: int = 46) -> str:
+    """Renderiza o avatar visual do candidato com a foto oficial do DivulgaCand ou fallback SVG.
+
+    Args:
+        meta: Dicionário retornado por `get_candidate_metadata`.
+        size: Dimensão em pixels de largura e altura (default: 46).
+
+    Returns:
+        str: Markup HTML contendo a imagem oficial com recorte circular e
+            fallback automático para o avatar vetorial com monograma.
+
+    Raises:
+        None.
+    """
+    color = meta.get("color", "#38BDF8")
+    foto_url = meta.get("foto_url")
+    svg_fallback = render_avatar_svg(meta, size=size)
+
+    if not foto_url:
+        return svg_fallback
+
+    return (
+        f'<img src="{foto_url}" width="{size}" height="{size}" alt="{meta["name"]}" '
+        f'style="width: {size}px; height: {size}px; border-radius: 50%; object-fit: cover; '
+        f'object-position: top center; border: 2px solid {color}; box-shadow: 0 2px 8px rgba(0,0,0,0.4); '
+        f'vertical-align: middle; display: inline-block;" '
+        f'onerror="this.style.display=\'none\'; if(this.nextElementSibling) this.nextElementSibling.style.display=\'inline-block\';" />'
+        f'<span style="display: none; vertical-align: middle;">{svg_fallback}</span>'
     )
 
 
@@ -708,7 +746,7 @@ def render_executive_story_cards(
         </div>
         <div class="hero-candidates-row">
             <div style="display: flex; align-items: center; gap: 12px;">
-                {render_avatar_svg(meta1, size=46)}
+                {render_candidate_avatar(meta1, size=46)}
                 <div>
                     <div style="display: flex; align-items: baseline; gap: 6px;">
                         <span class="hero-cand-name">{meta1["name"]}</span>
@@ -722,7 +760,7 @@ def render_executive_story_cards(
             </div>
             <div class="hero-vs-badge">×</div>
             <div style="display: flex; align-items: center; gap: 12px; text-align: right; flex-direction: row-reverse;">
-                {render_avatar_svg(meta2, size=46)}
+                {render_candidate_avatar(meta2, size=46)}
                 <div>
                     <div style="display: flex; align-items: baseline; gap: 6px; justify-content: flex-end;">
                         <span class="hero-cand-name">{meta2["name"]}</span>

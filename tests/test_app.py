@@ -63,6 +63,7 @@ def test_main_render_flow(mocker: MockerFixture) -> None:
     mocker.patch("streamlit.button", return_value=False)
     mocker.patch("streamlit.markdown")
     mocker.patch("src.presentation.app.render_documentation_modal")
+    mocker.patch("src.presentation.app.render_polls_modal")
     mock_tabs = [mocker.MagicMock() for _ in range(7)]
     mocker.patch("streamlit.tabs", return_value=mock_tabs)
 
@@ -75,6 +76,48 @@ def test_main_render_flow(mocker: MockerFixture) -> None:
     mocker.patch("src.presentation.app.render_act7")
 
     main()
+
+
+def test_main_polls_button_click(mocker: MockerFixture) -> None:
+    """Verifica se o modal de pesquisas é acionado ao clicar no botão da interface.
+
+    Args:
+        mocker: Fixture do pytest-mock.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    mocker.patch("streamlit.set_page_config")
+    mocker.patch("streamlit.session_state", {"polls_synced_r2": True})
+    mocker.patch("streamlit.sidebar.markdown")
+    mocker.patch("streamlit.sidebar.selectbox", return_value=2026)
+    mocker.patch("streamlit.sidebar.radio", return_value="2º Turno (Contínuo)")
+    # Simula clique no botão de consultar pesquisas na sidebar
+    mocker.patch(
+        "streamlit.sidebar.button",
+        side_effect=lambda label, **kwargs: "Pesquisas" in label,
+    )
+    mocker.patch("streamlit.button", return_value=False)
+    mocker.patch("streamlit.markdown")
+    mocker.patch("src.presentation.app.render_documentation_modal")
+    mock_polls_modal = mocker.patch("src.presentation.app.render_polls_modal")
+    mock_tabs = [mocker.MagicMock() for _ in range(7)]
+    mocker.patch("streamlit.tabs", return_value=mock_tabs)
+
+    mocker.patch("src.presentation.app.render_act1")
+    mocker.patch("src.presentation.app.render_act2")
+    mocker.patch("src.presentation.app.render_act3")
+    mocker.patch("src.presentation.app.render_act4")
+    mocker.patch("src.presentation.app.render_act5")
+    mocker.patch("src.presentation.app.render_act6")
+    mocker.patch("src.presentation.app.render_act7")
+
+    main()
+
+    assert mock_polls_modal.called
 
 
 def test_run(mocker: MockerFixture) -> None:

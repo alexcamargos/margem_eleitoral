@@ -364,15 +364,15 @@ def main() -> None:
     st.sidebar.markdown("## ⚙️ Parâmetros de Auditoria")
     ano_opcao = st.sidebar.selectbox(
         "Ciclo Eleitoral:",
-        [2026, 2022],
+        [2026, 2022, 2018],
         index=0,
-        help="Base ativa oficial do ciclo eleitoral (dados de 2026 pós-1º Turno ou histórico de 2022).",
+        help="Base ativa oficial do ciclo eleitoral (dados de 2026 pós-1º Turno, 2022 ou 2018).",
     )
     ano_eleicao = int(ano_opcao)
 
     cargo_selecionado = st.sidebar.selectbox(
         "Cargo em Auditoria:",
-        ["Presidente da República", "Governadores (Em breve)", "Senado (Em breve)"],
+        ["Presidente da República", "Governadores", "Senado"],
         index=0,
     )
     turno_selecionado = st.sidebar.radio(
@@ -382,7 +382,9 @@ def main() -> None:
     turno_label = "1º Turno" if turno_num == 1 else "2º Turno"
 
     # Carrega resultado oficial e pesquisas do turno selecionado via data_loader
-    tse_result, eve_polls, all_polls = get_election_dataset(year=ano_eleicao, turno=turno_num)
+    tse_result, eve_polls, all_polls = get_election_dataset(
+        year=ano_eleicao, turno=turno_num, cargo=cargo_selecionado
+    )
 
     st.sidebar.markdown("---")
     st.sidebar.markdown("### 📚 Guia e Auditoria")
@@ -473,7 +475,7 @@ def main() -> None:
     st.markdown(
         f"""
         <div class="tse-summary-card">
-            <div class="tse-summary-title">Presidente — {ano_eleicao} ({turno_label})</div>
+            <div class="tse-summary-title">{cargo_selecionado} — {ano_eleicao} ({turno_label})</div>
             <div class="tse-summary-stats">
                 {status_line}
                 {census_info_html}
@@ -485,7 +487,10 @@ def main() -> None:
 
     # Carrega dados multi-escopo e calibração de 1º turno para o Storytelling e Modelo Preditivo
     _, _, multiscope_polls = get_election_dataset(
-        year=ano_eleicao, turno=turno_num, include_subnational=True
+        year=ano_eleicao,
+        turno=turno_num,
+        include_subnational=True,
+        cargo=cargo_selecionado,
     )
     election_dt = get_election_date(year=ano_eleicao, turno=turno_num)
     t1_tse_res = None
@@ -493,7 +498,10 @@ def main() -> None:
     t1_dt = None
     if turno_num == 2:
         t1_tse_res, _, t1_polls_all = get_election_dataset(
-            year=ano_eleicao, turno=1, include_subnational=True
+            year=ano_eleicao,
+            turno=1,
+            include_subnational=True,
+            cargo=cargo_selecionado,
         )
         t1_dt = get_election_date(year=ano_eleicao, turno=1)
 

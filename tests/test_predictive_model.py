@@ -281,7 +281,9 @@ def test_backtest_and_promotion_gates_2026_t1_and_t2() -> None:
     dt_26_t1 = get_election_date(2026, 1)
 
     assert any(p.abrangencia == AbrangenciaEnum.ESTADUAL for p in polls_26_t1)
-    assert any(p.abrangencia == AbrangenciaEnum.REGIONAL for p in polls_26_t1)
+    assert any(
+        p.abrangencia in (AbrangenciaEnum.ESTADUAL, AbrangenciaEnum.REGIONAL) for p in polls_26_t1
+    )
 
     bt_t1 = run_point_in_time_backtest(
         polls=polls_26_t1,

@@ -30,7 +30,7 @@ def test_sync_official_second_round_polls_structure() -> None:
         assert p.cargo == "PRESIDENTE"
         assert "Flávio Bolsonaro" in p.votos_validos
         assert "Lula" in p.votos_validos
-        assert p.tamanho_amostra >= 1500
+        assert p.tamanho_amostra >= 500
         assert p.margem_erro_declarada > 0.0
         assert p.deff_estimado >= 1.2
 

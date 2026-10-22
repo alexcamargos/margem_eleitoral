@@ -9,6 +9,7 @@ from src.presentation.components.executive_story_cards import (
     compute_executive_snapshot,
     get_candidate_metadata,
     render_avatar_svg,
+    render_candidate_avatar,
     render_executive_story_cards,
     render_gauge_svg,
 )
@@ -21,12 +22,14 @@ def test_get_candidate_metadata_known() -> None:
     assert meta_lula["party"] == "PT"
     assert meta_lula["color"] == "#EF4444"
     assert meta_lula["initials"] == "LU"
+    assert "divulgacandcontas.tse.jus.br" in str(meta_lula.get("foto_url"))
 
     meta_flavio = get_candidate_metadata("Flávio Bolsonaro")
     assert meta_flavio["name"] == "Flávio Bolsonaro"
     assert meta_flavio["party"] == "PL"
     assert meta_flavio["color"] == "#3B82F6"
     assert meta_flavio["initials"] == "FB"
+    assert "divulgacandcontas.tse.jus.br" in str(meta_flavio.get("foto_url"))
 
 
 def test_get_candidate_metadata_unknown() -> None:
@@ -36,6 +39,30 @@ def test_get_candidate_metadata_unknown() -> None:
     assert meta_custom["party"] == "IND"
     assert meta_custom["color"] == "#38BDF8"
     assert meta_custom["initials"] == "CI"
+    assert meta_custom.get("foto_url") is None
+
+
+def test_render_candidate_avatar_with_photo() -> None:
+    """Verifica a renderização do avatar híbrido com a foto oficial do DivulgaCand e fallback."""
+    meta = get_candidate_metadata("Lula")
+    avatar_html = render_candidate_avatar(meta, size=46)
+
+    assert "<img" in avatar_html
+    assert 'src="https://divulgacandcontas.tse.jus.br' in avatar_html
+    assert "onerror=" in avatar_html
+    assert "border-radius: 50%" in avatar_html
+    assert meta["color"] in avatar_html
+    assert "<svg" in avatar_html  # Fallback embutido no span
+
+
+def test_render_candidate_avatar_without_photo() -> None:
+    """Verifica que candidatos sem foto registrada renderizam diretamente o avatar vetorial."""
+    meta = get_candidate_metadata("Candidato Independente")
+    avatar_html = render_candidate_avatar(meta, size=46)
+
+    assert "<img" not in avatar_html
+    assert "<svg" in avatar_html
+    assert "CI" in avatar_html
 
 
 def test_render_avatar_svg() -> None:

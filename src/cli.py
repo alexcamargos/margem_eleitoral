@@ -6,6 +6,7 @@ executar/ajustar os modelos agregador e preditivo diretamente pelo terminal.
 """
 
 import argparse
+import dataclasses
 import sys
 from datetime import date
 from pathlib import Path
@@ -386,21 +387,12 @@ def cmd_predict(args: argparse.Namespace) -> None:
     # 2. Modelo Preditivo Hierárquico Calibrado (Ato 6)
     print("\n--- [2] Modelo Estado-Espaço Hierárquico Calibrado ---")
     cfg = PredictiveModelConfig.load_from_settings()
-    if args.tau != 7.0:
-        cfg = PredictiveModelConfig(
-            tau_days=args.tau,
-            momentum_window_days=cfg.momentum_window_days,
-            audit_lambda=cfg.audit_lambda,
-            shrinkage_alpha=cfg.shrinkage_alpha,
-            unobserved_error_sigma=cfg.unobserved_error_sigma,
-            student_t_df=cfg.student_t_df,
-            n_simulations=args.simulations,
-            random_seed=cfg.random_seed,
-            scope_weights=cfg.scope_weights,
-            macro_region_weights=cfg.macro_region_weights,
-            regional_differentials=cfg.regional_differentials,
-            promotion_gates=cfg.promotion_gates,
-        )
+    cfg = dataclasses.replace(
+        cfg,
+        tau_days=float(args.tau),
+        n_simulations=int(args.simulations),
+    )
+    print(f"-> Parâmetros estocásticos: {cfg.n_simulations:,} cenários de Monte Carlo (tau={cfg.tau_days}d)")
 
     calib_t1 = None
     if turno == 2:

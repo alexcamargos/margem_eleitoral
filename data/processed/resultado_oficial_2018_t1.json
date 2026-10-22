@@ -1,0 +1,17 @@
+{
+  "cargo": "PRESIDENTE",
+  "turno": 1,
+  "ano": 2018,
+  "total_votos_validos": 107050674,
+  "total_brancos": 3106936,
+  "total_nulos": 7206205,
+  "total_abstencoes": 29941265,
+  "resultado_nominal": {
+    "Bolsonaro": 46.03,
+    "Haddad": 29.28,
+    "Ciro Gomes": 12.47,
+    "Geraldo Alckmin": 4.76,
+    "Outros": 7.46
+  },
+  "apuracao_concluida": true
+}

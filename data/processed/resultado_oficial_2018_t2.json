@@ -1,0 +1,14 @@
+{
+  "cargo": "PRESIDENTE",
+  "turno": 2,
+  "ano": 2018,
+  "total_votos_validos": 104838753,
+  "total_brancos": 2486593,
+  "total_nulos": 8608105,
+  "total_abstencoes": 31371704,
+  "resultado_nominal": {
+    "Bolsonaro": 55.13,
+    "Haddad": 44.87
+  },
+  "apuracao_concluida": true
+}

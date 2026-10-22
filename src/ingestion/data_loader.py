@@ -24,6 +24,75 @@ from src.transformations.schemas import (
     TierFonteEnum,
 )
 
+BRAZILIAN_STATES: dict[str, str] = {
+    "AC": "Acre",
+    "AL": "Alagoas",
+    "AP": "Amapá",
+    "AM": "Amazonas",
+    "BA": "Bahia",
+    "CE": "Ceará",
+    "DF": "Distrito Federal",
+    "ES": "Espírito Santo",
+    "GO": "Goiás",
+    "MA": "Maranhão",
+    "MT": "Mato Grosso",
+    "MS": "Mato Grosso do Sul",
+    "MG": "Minas Gerais",
+    "PA": "Pará",
+    "PB": "Paraíba",
+    "PR": "Paraná",
+    "PE": "Pernambuco",
+    "PI": "Piauí",
+    "RJ": "Rio de Janeiro",
+    "RN": "Rio Grande do Norte",
+    "RS": "Rio Grande do Sul",
+    "RO": "Rondônia",
+    "RR": "Roraima",
+    "SC": "Santa Catarina",
+    "SP": "São Paulo",
+    "SE": "Sergipe",
+    "TO": "Tocantins",
+}
+
+
+def get_available_states_for_cargo(year: int = 2026, cargo: str = "GOVERNADOR") -> list[str]:
+    """Retorna a lista ordenada de siglas de UF com pesquisas registradas para o cargo e ano.
+
+    Args:
+        year: Ano eleitoral analisado (ex.: 2026, 2022, 2018).
+        cargo: Cargo eletivo em auditoria ('GOVERNADOR', 'SENADOR').
+
+    Returns:
+        list[str]: Lista ordenada com as siglas de 2 letras das UFs disponíveis.
+
+    Raises:
+        None.
+    """
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    processed_dir = repo_root / "data" / "processed"
+    norm_cargo = str(cargo or "").strip().upper()
+
+    if "SENAD" in norm_cargo:
+        parquet_path = processed_dir / f"pesquisas_senado_{year}.parquet"
+    else:
+        parquet_path = processed_dir / f"pesquisas_governador_{year}.parquet"
+
+    if parquet_path.exists():
+        try:
+            df = pl.read_parquet(parquet_path)
+            if "uf" in df.columns:
+                available_ufs = [
+                    u
+                    for u in df["uf"].unique().to_list()
+                    if u and u != "BR" and u in BRAZILIAN_STATES
+                ]
+                if available_ufs:
+                    return sorted(available_ufs)
+        except Exception:
+            pass
+
+    return sorted(list(BRAZILIAN_STATES.keys()))
+
 
 def load_election_settings() -> dict:
     """Carrega as configurações eleitorais e calendários do arquivo settings.yaml.
@@ -158,10 +227,11 @@ def get_election_dataset(
     cutoff_days: int = 3,
     include_subnational: bool = False,
     cargo: str = "PRESIDENTE",
+    uf: str | None = None,
 ) -> tuple[
     ResultadoOficialTSESchema | None, list[PesquisaEleitoralSchema], list[PesquisaEleitoralSchema]
 ]:
-    """Carrega o resultado oficial do TSE e as pesquisas eleitorais para um dado pleito e cargo.
+    """Carrega o resultado oficial do TSE e as pesquisas eleitorais para um dado pleito, cargo e UF.
 
     Separa as pesquisas entre levantamentos de véspera (fim de campo <= cutoff_days antes da eleição)
     e o conjunto total longitudinal para o Agregador Dinâmico e para o Modelo Preditivo.
@@ -173,6 +243,7 @@ def get_election_dataset(
         include_subnational: Se True, inclui pesquisas ESTADUAL e REGIONAL além das NACIONAL
             (default: False para manter a auditoria nacional dos Atos 2 a 5).
         cargo: Cargo eletivo em auditoria ('PRESIDENTE', 'GOVERNADOR', 'SENADOR').
+        uf: Sigla da Unidade Federativa (UF) para filtragem de pleitos subnacionais (ex.: 'SP', 'PE').
 
     Returns:
         tuple[ResultadoOficialTSESchema | None, list[PesquisaEleitoralSchema], list[PesquisaEleitoralSchema]]:
@@ -256,7 +327,11 @@ def get_election_dataset(
             p for p in all_polls if p.cargo == canonical_cargo and p.turno == turno
         ]
 
-    if not effective_include_subnational:
+    # Filtragem por UF quando especificada (para disputas estaduais ou recortes subnacionais)
+    if uf and uf.strip().upper() != "BR":
+        norm_uf = uf.strip().upper()
+        all_polls_filtered = [p for p in all_polls_filtered if p.uf == norm_uf]
+    elif not effective_include_subnational:
         all_polls_filtered = [
             p for p in all_polls_filtered if p.abrangencia == AbrangenciaEnum.NACIONAL
         ]

@@ -110,3 +110,71 @@ def test_get_second_round_sync_summary() -> None:
     assert summary["eve_polls_count"] == 0
     assert len(summary["institutes"]) >= 5
     assert summary["latest_field_date"] is not None
+
+
+def test_get_available_states_for_cargo() -> None:
+    """Verifica a recuperação da lista de UFs disponíveis para pleitos subnacionais.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    from src.ingestion.data_loader import BRAZILIAN_STATES, get_available_states_for_cargo
+
+    ufs_gov_2026 = get_available_states_for_cargo(year=2026, cargo="GOVERNADOR")
+    assert len(ufs_gov_2026) == 27
+    assert "SP" in ufs_gov_2026
+    assert "PE" in ufs_gov_2026
+    assert "RJ" in ufs_gov_2026
+    for uf in ufs_gov_2026:
+        assert uf in BRAZILIAN_STATES
+
+    ufs_sen_2026 = get_available_states_for_cargo(year=2026, cargo="SENADOR")
+    assert len(ufs_sen_2026) == 27
+    assert "MG" in ufs_sen_2026
+
+
+def test_get_election_dataset_state_filtering() -> None:
+    """Verifica se o filtro por UF isola rigorosamente os candidatos de cada estado.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    # 1. Filtro para Governador em Pernambuco (PE)
+    _, _, pe_polls = get_election_dataset(year=2026, turno=1, cargo="Governadores", uf="PE")
+    assert len(pe_polls) > 0
+    for p in pe_polls:
+        assert p.uf == "PE"
+        assert p.cargo == "GOVERNADOR"
+    pe_cands = {c for p in pe_polls for c in p.votos_validos.keys()}
+    assert "Raquel Lyra" in pe_cands
+    assert "Tarcísio de Freitas" not in pe_cands
+    assert "Eduardo Paes" not in pe_cands
+
+    # 2. Filtro para Governador em São Paulo (SP)
+    _, _, sp_polls = get_election_dataset(year=2026, turno=1, cargo="Governadores", uf="SP")
+    assert len(sp_polls) > 0
+    for p in sp_polls:
+        assert p.uf == "SP"
+        assert p.cargo == "GOVERNADOR"
+    sp_cands = {c for p in sp_polls for c in p.votos_validos.keys()}
+    assert any("Tarcísio" in c for c in sp_cands)
+    assert "Raquel Lyra" not in sp_cands
+
+    # 3. Filtro para Senado no Rio de Janeiro (RJ)
+    _, _, rj_sen_polls = get_election_dataset(year=2026, turno=1, cargo="Senado", uf="RJ")
+    assert len(rj_sen_polls) > 0
+    for p in rj_sen_polls:
+        assert p.uf == "RJ"
+        assert p.cargo == "SENADOR"

@@ -12,6 +12,8 @@ import streamlit as st
 from streamlit.web import cli as stcli
 
 from src.ingestion.data_loader import (
+    BRAZILIAN_STATES,
+    get_available_states_for_cargo,
     get_election_dataset,
     get_election_date,
     get_tse_registration_census,
@@ -375,15 +377,48 @@ def main() -> None:
         ["Presidente da República", "Governadores", "Senado"],
         index=0,
     )
-    turno_selecionado = st.sidebar.radio(
-        "Turno:", ["1º Turno (Consolidado)", "2º Turno (Contínuo)"], index=0
-    )
+
+    is_subnacional = cargo_selecionado in ("Governadores", "Senado")
+    uf_selecionada: str | None = None
+    if is_subnacional:
+        estados_disponiveis = get_available_states_for_cargo(
+            year=ano_eleicao, cargo=cargo_selecionado
+        )
+        default_uf_idx = estados_disponiveis.index("SP") if "SP" in estados_disponiveis else 0
+        uf_selecionada = st.sidebar.selectbox(
+            "Estado em Auditoria (UF):",
+            estados_disponiveis,
+            index=default_uf_idx,
+            format_func=lambda u: f"{u} — {BRAZILIAN_STATES.get(u, u)}",
+            help="Selecione a Unidade Federativa (UF) para auditar os candidatos e pesquisas deste pleito estadual.",
+        )
+
+    if cargo_selecionado == "Senado":
+        turno_selecionado = st.sidebar.radio("Turno:", ["1º Turno (Turno Único)"], index=0)
+    else:
+        turno_selecionado = st.sidebar.radio(
+            "Turno:", ["1º Turno (Consolidado)", "2º Turno (Contínuo)"], index=0
+        )
     turno_num = 1 if "1º" in turno_selecionado else 2
     turno_label = "1º Turno" if turno_num == 1 else "2º Turno"
 
     # Carrega resultado oficial e pesquisas do turno selecionado via data_loader
     tse_result, eve_polls, all_polls = get_election_dataset(
-        year=ano_eleicao, turno=turno_num, cargo=cargo_selecionado
+        year=ano_eleicao,
+        turno=turno_num,
+        cargo=cargo_selecionado,
+        uf=uf_selecionada,
+    )
+
+    nome_estado = (
+        BRAZILIAN_STATES.get(uf_selecionada, uf_selecionada)
+        if (is_subnacional and uf_selecionada)
+        else None
+    )
+    cargo_display = (
+        f"{cargo_selecionado} ({uf_selecionada} — {nome_estado})"
+        if (is_subnacional and uf_selecionada)
+        else cargo_selecionado
     )
 
     st.sidebar.markdown("---")
@@ -397,7 +432,7 @@ def main() -> None:
             polls=all_polls,
             ano_eleicao=ano_eleicao,
             turno_num=turno_num,
-            cargo=cargo_selecionado,
+            cargo=cargo_display,
         )
     if st.sidebar.button(
         "📖 Consultar Metodologia",
@@ -428,7 +463,7 @@ def main() -> None:
                 polls=all_polls,
                 ano_eleicao=ano_eleicao,
                 turno_num=turno_num,
-                cargo=cargo_selecionado,
+                cargo=cargo_display,
             )
     with col_doc:
         st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
@@ -450,17 +485,28 @@ def main() -> None:
             f"<span style='color: #64748B;'>Disputa com totalização oficial consolidada pelo TSE. "
             f"Total de votos válidos contabilizados oficialmente: {tse_result.total_votos_validos:,}.</span>"
         )
+    elif ano_eleicao < 2026:
+        election_dt = get_election_date(year=ano_eleicao, turno=turno_num)
+        dt_fmt = election_dt.strftime("%d/%m/%Y")
+        status_line = (
+            f"<span style='color: #10B981; font-weight: 600;'>🟢 Pleito Histórico Concluído</span> &nbsp;|&nbsp; "
+            f"<b>Data da Eleição:</b> {dt_fmt}<br>"
+            f"<span style='color: #94A3B8;'>Base histórica consolidada de pesquisas eleitorais registradas no TSE. "
+            f"Exibindo auditoria de agregação e desempenho dos institutos.</span>"
+        )
     else:
+        election_dt = get_election_date(year=ano_eleicao, turno=turno_num)
+        dt_fmt = election_dt.strftime("%d/%m/%Y")
         status_line = (
             "<span style='color: #38BDF8; font-weight: 600;'>🟡 Campanha em Andamento</span> &nbsp;|&nbsp; "
-            "<b>Votação Oficial:</b> 25/10/2026<br>"
+            f"<b>Votação Oficial:</b> {dt_fmt}<br>"
             "<span style='color: #94A3B8;'>Apuração oficial aguardando abertura das urnas. "
             "Exibindo modo de <b>Projeção Contínua (Nowcasting)</b> baseado nas pesquisas registradas.</span>"
         )
 
     census_df = get_tse_registration_census(ano_eleicao)
     census_info_html = ""
-    if census_df.height > 0:
+    if census_df.height > 0 and cargo_selecionado == "Presidente da República":
         tot_reg = census_df.height
         insts_cons = census_df.filter(pl.col("instituto_consistente"))[
             "instituto_nome_fantasia"
@@ -471,11 +517,16 @@ def main() -> None:
             f"({insts_cons} institutos consistentes com &ge; 2 levantamentos) &nbsp;|&nbsp; "
             f"<b>Base de Pesquisas:</b> {len(all_polls)} levantamentos com intenções de voto.</span>"
         )
+    else:
+        census_info_html = (
+            f"<br><span style='color: #38BDF8; font-size: 12.5px;'>"
+            f"📋 <b>Base Auditada:</b> {len(all_polls)} pesquisas registradas com intenções de voto para {cargo_display}.</span>"
+        )
 
     st.markdown(
         f"""
         <div class="tse-summary-card">
-            <div class="tse-summary-title">{cargo_selecionado} — {ano_eleicao} ({turno_label})</div>
+            <div class="tse-summary-title">{cargo_display} — {ano_eleicao} ({turno_label})</div>
             <div class="tse-summary-stats">
                 {status_line}
                 {census_info_html}
@@ -491,6 +542,7 @@ def main() -> None:
         turno=turno_num,
         include_subnational=True,
         cargo=cargo_selecionado,
+        uf=uf_selecionada,
     )
     election_dt = get_election_date(year=ano_eleicao, turno=turno_num)
     t1_tse_res = None
@@ -502,6 +554,7 @@ def main() -> None:
             turno=1,
             include_subnational=True,
             cargo=cargo_selecionado,
+            uf=uf_selecionada,
         )
         t1_dt = get_election_date(year=ano_eleicao, turno=1)
 
@@ -538,7 +591,7 @@ def main() -> None:
         render_act2(polls=all_polls)
 
     with tabs[2]:
-        render_act3(year=ano_eleicao, turno=turno_num)
+        render_act3(year=ano_eleicao, turno=turno_num, cargo=cargo_selecionado)
 
     with tabs[3]:
         render_act4(

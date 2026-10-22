@@ -29,6 +29,17 @@ elections:
       - "Simone Tebet"
       - "Ciro Gomes"
       - "Outros"
+  2018:
+    year: 2018
+    first_round_date: "2018-10-07"
+    second_round_date: "2018-10-28"
+    default_round: 1
+    candidates:
+      - "Bolsonaro"
+      - "Haddad"
+      - "Ciro Gomes"
+      - "Geraldo Alckmin"
+      - "Outros"
 
 audit_parameters:
   eve_cutoff_days: 3 # 72 horas antes da votação para pesquisas de véspera

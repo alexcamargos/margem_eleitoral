@@ -70,6 +70,8 @@ def get_election_date(year: int, turno: int = 1) -> date:
         return date(2026, 10, 4) if turno == 1 else date(2026, 10, 25)
     if year == 2022:
         return date(2022, 10, 2) if turno == 1 else date(2022, 10, 30)
+    if year == 2018:
+        return date(2018, 10, 7) if turno == 1 else date(2018, 10, 28)
 
     raise ValueError(f"Data eleitoral não configurada para o ano {year} e turno {turno}.")
 
@@ -155,21 +157,25 @@ def get_election_dataset(
     turno: int = 1,
     cutoff_days: int = 3,
     include_subnational: bool = False,
-) -> tuple[ResultadoOficialTSESchema, list[PesquisaEleitoralSchema], list[PesquisaEleitoralSchema]]:
-    """Carrega o resultado oficial do TSE e as pesquisas eleitorais para um dado pleito.
+    cargo: str = "PRESIDENTE",
+) -> tuple[
+    ResultadoOficialTSESchema | None, list[PesquisaEleitoralSchema], list[PesquisaEleitoralSchema]
+]:
+    """Carrega o resultado oficial do TSE e as pesquisas eleitorais para um dado pleito e cargo.
 
     Separa as pesquisas entre levantamentos de véspera (fim de campo <= cutoff_days antes da eleição)
     e o conjunto total longitudinal para o Agregador Dinâmico e para o Modelo Preditivo.
 
     Args:
-        year: Ano eleitoral (ex.: 2026, 2022).
+        year: Ano eleitoral (ex.: 2026, 2022, 2018).
         turno: Turno da eleição (1 ou 2).
         cutoff_days: Limite em dias para inclusão no critério de véspera (default: 3 dias / 72h).
         include_subnational: Se True, inclui pesquisas ESTADUAL e REGIONAL além das NACIONAL
             (default: False para manter a auditoria nacional dos Atos 2 a 5).
+        cargo: Cargo eletivo em auditoria ('PRESIDENTE', 'GOVERNADOR', 'SENADOR').
 
     Returns:
-        tuple[ResultadoOficialTSESchema, list[PesquisaEleitoralSchema], list[PesquisaEleitoralSchema]]:
+        tuple[ResultadoOficialTSESchema | None, list[PesquisaEleitoralSchema], list[PesquisaEleitoralSchema]]:
             (tse_result, eve_polls, all_polls).
 
     Raises:
@@ -178,25 +184,47 @@ def get_election_dataset(
     """
     repo_root = Path(__file__).resolve().parent.parent.parent
     processed_dir = repo_root / "data" / "processed"
-    parquet_path = processed_dir / f"pesquisas_{year}.parquet"
+
+    norm_cargo = str(cargo or "PRESIDENTE").strip().upper()
+    if "GOVERNADOR" in norm_cargo:
+        canonical_cargo = "GOVERNADOR"
+        parquet_path = processed_dir / f"pesquisas_governador_{year}.parquet"
+        effective_include_subnational = True
+    elif "SENAD" in norm_cargo:
+        canonical_cargo = "SENADOR"
+        parquet_path = processed_dir / f"pesquisas_senado_{year}.parquet"
+        effective_include_subnational = True
+    else:
+        canonical_cargo = "PRESIDENTE"
+        parquet_path = processed_dir / f"pesquisas_{year}.parquet"
+        effective_include_subnational = include_subnational
+
     tse_json_path = processed_dir / f"resultado_oficial_{year}_t{turno}.json"
 
-    # Se os arquivos processados não existirem, executa o pipeline de ETL sob demanda
-    if not parquet_path.exists():
+    # Se os arquivos processados de presidente não existirem, executa o pipeline de ETL sob demanda
+    if not parquet_path.exists() and canonical_cargo == "PRESIDENTE":
         run_etl_for_year(year=year, turno=turno)
+    elif not parquet_path.exists():
+        # Fallback para o arquivo consolidado de pesquisas se o cargo estiver nele
+        fallback_path = processed_dir / f"pesquisas_{year}.parquet"
+        if fallback_path.exists():
+            parquet_path = fallback_path
 
     # 1. Carrega o resultado oficial se disponível e apurado
     tse_result: ResultadoOficialTSESchema | None = None
-    if tse_json_path.exists():
+    if tse_json_path.exists() and canonical_cargo == "PRESIDENTE":
         try:
             with open(tse_json_path, encoding="utf-8") as f:
                 tse_dict = json.load(f)
             tse_result = ResultadoOficialTSESchema(**tse_dict)
         except (OSError, json.JSONDecodeError, ValidationError, ValueError):
             tse_result = None
-    elif Path(
-        repo_root / "data" / "raw" / str(year) / f"resultado_tse_{year}_t{turno}.json"
-    ).exists():
+    elif (
+        canonical_cargo == "PRESIDENTE"
+        and Path(
+            repo_root / "data" / "raw" / str(year) / f"resultado_tse_{year}_t{turno}.json"
+        ).exists()
+    ):
         try:
             tse_extractor = TSEResultsExtractor(year=year, turno=turno)
             tse_result = tse_extractor.extract_and_transform()
@@ -206,33 +234,40 @@ def get_election_dataset(
             tse_result = None
 
     # 2. Carrega as pesquisas via Polars Parquet
+    if not parquet_path.exists():
+        raise FileNotFoundError(f"Arquivo Parquet não encontrado em: {parquet_path}")
+
     df_polls = pl.read_parquet(parquet_path)
-    if "abrangencia" not in df_polls.columns:
+    if "abrangencia" not in df_polls.columns and canonical_cargo == "PRESIDENTE":
         run_etl_for_year(year=year, turno=turno)
         df_polls = pl.read_parquet(parquet_path)
     all_polls = polars_to_polls(df_polls)
 
-    # Filtra por turno
-    all_polls_turno = [p for p in all_polls if p.turno == turno]
+    # Filtra por cargo e por turno
+    all_polls_filtered = [p for p in all_polls if p.cargo == canonical_cargo and p.turno == turno]
 
-    # Se for o 2º turno de 2026 e ainda não houver pesquisas no Parquet, sincroniza automaticamente
-    if turno == 2 and not all_polls_turno and year == 2026:
+    # Se for o 2º turno de 2026 de presidente e ainda não houver pesquisas no Parquet, sincroniza automaticamente
+    if turno == 2 and not all_polls_filtered and year == 2026 and canonical_cargo == "PRESIDENTE":
         collector = PesqEleCollector(year=year)
         collector.sync_official_second_round_polls()
         df_polls = pl.read_parquet(parquet_path)
         all_polls = polars_to_polls(df_polls)
-        all_polls_turno = [p for p in all_polls if p.turno == turno]
+        all_polls_filtered = [
+            p for p in all_polls if p.cargo == canonical_cargo and p.turno == turno
+        ]
 
-    if not include_subnational:
-        all_polls_turno = [p for p in all_polls_turno if p.abrangencia == AbrangenciaEnum.NACIONAL]
+    if not effective_include_subnational:
+        all_polls_filtered = [
+            p for p in all_polls_filtered if p.abrangencia == AbrangenciaEnum.NACIONAL
+        ]
 
     # 3. Segrega pesquisas de véspera (<= 72 horas / 3 dias da eleição)
     election_date = get_election_date(year=year, turno=turno)
     eve_polls = [
-        p for p in all_polls_turno if (election_date - p.data_fim_campo).days <= cutoff_days
+        p for p in all_polls_filtered if (election_date - p.data_fim_campo).days <= cutoff_days
     ]
 
-    return tse_result, eve_polls, all_polls_turno
+    return tse_result, eve_polls, all_polls_filtered
 
 
 def get_tse_registration_census(year: int = 2026) -> pl.DataFrame:
@@ -327,4 +362,3 @@ def get_rejection_dataset(year: int = 2026) -> dict[str, Any]:
 
     with open(rejeicao_file, encoding="utf-8") as f:
         return json.load(f)
-

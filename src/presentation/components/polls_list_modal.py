@@ -641,12 +641,17 @@ def render_polls_list_content(
     st.markdown(POLLS_MODAL_CSS, unsafe_allow_html=True)
 
     turno_label = "1º Turno" if turno_num == 1 else "2º Turno"
+    escopo_label = (
+        f"de {cargo}"
+        if ("Governador" in cargo or "Senad" in cargo or "(" in cargo)
+        else "nacionais"
+    )
 
     # Banner de critérios metodológicos de inclusão
     st.markdown(
         f"""
         <div class="poll-criteria-banner">
-            Só entram pesquisas nacionais, de <b>{turno_label}</b>, registradas no TSE, com números conferidos na fonte.
+            Só entram pesquisas {escopo_label}, de <b>{turno_label}</b>, registradas no TSE, com números conferidos na fonte.
             Se o registro citado na divulgação ainda não aparece no cadastro aberto do TSE, a pesquisa entra como pendente e sai se ele não aparecer em até 5 dias.
             O peso de cada uma é proporcional ao número de entrevistados e cai pela metade a cada 7 dias desde o fim do campo
             (<i>pesquisas mais perto da eleição erram menos</i>).

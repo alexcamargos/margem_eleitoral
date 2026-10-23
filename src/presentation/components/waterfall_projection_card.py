@@ -31,27 +31,10 @@ WATERFALL_CSS = """
     box-sizing: border-box;
 }
 .conta-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
     margin-bottom: 12px;
 }
-.conta-icon-box {
-    background-color: #242933;
-    border: 1px solid #333A48;
-    border-radius: 8px;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #38BDF8;
-    font-size: 18px;
-    font-weight: 700;
-    flex-shrink: 0;
-}
 .conta-title-area {
-    flex-grow: 1;
+    width: 100%;
 }
 .conta-section-badge {
     font-size: 11px;
@@ -414,7 +397,6 @@ def render_waterfall_projection_breakdown(
     <div class="conta-container">
         <div class="conta-section-badge">A CONTA</div>
         <div class="conta-header">
-            <div class="conta-icon-box">|||</div>
             <div class="conta-title-area">
                 <div class="conta-main-title">De onde vem a projeção</div>
                 <div class="conta-subtitle">

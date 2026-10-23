@@ -230,6 +230,12 @@ def render_act5(
         unsafe_allow_html=True,
     )
 
+    if not eve_polls:
+        st.info(
+            "Nenhuma pesquisa eleitoral foi realizada na janela de véspera (<= 72h) para este pleito."
+        )
+        return
+
     ranking = sorted(
         tse_result.resultado_nominal.keys(),
         key=lambda c: tse_result.resultado_nominal[c],

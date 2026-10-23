@@ -83,6 +83,12 @@ def render_act6(
         """
     )
 
+    if not eve_polls:
+        st.info(
+            "Nenhuma pesquisa eleitoral foi realizada na janela de véspera (<= 72h) para este pleito."
+        )
+        return
+
     ranking = sorted(
         tse_result.resultado_nominal.keys(),
         key=lambda c: tse_result.resultado_nominal[c],
@@ -107,6 +113,13 @@ def render_act6(
             standard_window_days=7,
             max_window_days=14,
         )
+
+    if len(residuals) < 2:
+        st.info(
+            "São necessárias ao menos 2 pesquisas de véspera com estimativas para o candidato líder "
+            "para a execução dos testes estatísticos formais (t-Student, Wilcoxon e Binomial)."
+        )
+        return
 
     # 1. Testes de Hipótese Automatizados
     t_res = run_paired_t_test(residuals)
@@ -314,4 +327,3 @@ def render_act6(
 
 # Alias para retrocompatibilidade
 render_act5 = render_act6
-

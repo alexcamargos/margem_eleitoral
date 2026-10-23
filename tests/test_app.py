@@ -186,3 +186,53 @@ def test_root_main_script(mocker: MockerFixture) -> None:
 
     root_main.main()
     mock_run.assert_called_once()
+
+
+def test_main_empty_polls_renders_notice_button(mocker: MockerFixture) -> None:
+    """Verifica se main() exibe o botão e aviso de indisponibilidade quando não houver pesquisas agregadas.
+
+    Args:
+        mocker: Fixture do pytest-mock.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    mocker.patch("streamlit.set_page_config")
+    mocker.patch("streamlit.session_state", {"polls_synced_r2": True})
+    mocker.patch("streamlit.sidebar.markdown")
+    mocker.patch("streamlit.sidebar.selectbox", side_effect=[2026, "Senado", "PI"])
+    mocker.patch("streamlit.sidebar.radio", return_value="1º Turno (Turno Único)")
+    mocker.patch("streamlit.sidebar.button", return_value=False)
+
+    mock_btn = mocker.patch("streamlit.button", return_value=False)
+    mocker.patch("streamlit.markdown")
+    mocker.patch("streamlit.info")
+    mocker.patch("streamlit.warning")
+    mocker.patch("src.presentation.app.render_documentation_modal")
+    mocker.patch("src.presentation.app.render_polls_modal")
+
+    # Simula retorno vazio para o dataset
+    mocker.patch(
+        "src.presentation.app.get_election_dataset",
+        return_value=(None, [], []),
+    )
+
+    mock_tabs = [mocker.MagicMock() for _ in range(7)]
+    mocker.patch("streamlit.tabs", return_value=mock_tabs)
+    mock_act1 = mocker.patch("src.presentation.app.render_act1")
+    mock_act2 = mocker.patch("src.presentation.app.render_act2")
+    mock_hero = mocker.patch("src.presentation.app.render_executive_story_cards")
+
+    main()
+
+    # Confirma que o botão com a mensagem exata foi chamado
+    btn_labels = [call[0][0] for call in mock_btn.call_args_list if call[0]]
+    assert "A gente não tem pesquisa agregada para esse cargo nesse estado" in btn_labels
+
+    # Confirma que o storytelling card executivo foi suprimido e o Ato 1 pedagógico renderizou
+    mock_hero.assert_not_called()
+    mock_act1.assert_called_once()
+    mock_act2.assert_not_called()

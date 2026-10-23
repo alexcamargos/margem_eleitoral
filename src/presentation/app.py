@@ -403,12 +403,15 @@ def main() -> None:
     turno_label = "1º Turno" if turno_num == 1 else "2º Turno"
 
     # Carrega resultado oficial e pesquisas do turno selecionado via data_loader
-    tse_result, eve_polls, all_polls = get_election_dataset(
-        year=ano_eleicao,
-        turno=turno_num,
-        cargo=cargo_selecionado,
-        uf=uf_selecionada,
-    )
+    try:
+        tse_result, eve_polls, all_polls = get_election_dataset(
+            year=ano_eleicao,
+            turno=turno_num,
+            cargo=cargo_selecionado,
+            uf=uf_selecionada,
+        )
+    except Exception:
+        tse_result, eve_polls, all_polls = None, [], []
 
     nome_estado = (
         BRAZILIAN_STATES.get(uf_selecionada, uf_selecionada)
@@ -536,40 +539,82 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
-    # Carrega dados multi-escopo e calibração de 1º turno para o Storytelling e Modelo Preditivo
-    _, _, multiscope_polls = get_election_dataset(
-        year=ano_eleicao,
-        turno=turno_num,
-        include_subnational=True,
-        cargo=cargo_selecionado,
-        uf=uf_selecionada,
-    )
+    has_polls = len(all_polls) > 0
+
+    if not has_polls:
+        btn_no_data = st.button(
+            "A gente não tem pesquisa agregada para esse cargo nesse estado",
+            key="btn_no_polls_main",
+            width="stretch",
+            type="primary",
+            help="Nenhuma pesquisa eleitoral foi encontrada ou registrada no TSE para a combinação selecionada de cargo e estado.",
+        )
+        if btn_no_data:
+            st.info(
+                f"No momento, ainda não dispomos de pesquisas eleitorais registradas ou agregadas para "
+                f"{cargo_display} no ciclo de {ano_eleicao} ({turno_label}). "
+                f"Novas pesquisas registradas no TSE são processadas e incorporadas de forma contínua."
+            )
+        st.markdown(
+            f"""
+            <div style="background-color: #241A15; border-left: 4px solid #F59E0B; padding: 16px 20px; border-radius: 6px; margin: 12px 0 20px 0;">
+                <div style="color: #FBBF24; font-weight: 700; font-size: 15px; margin-bottom: 4px;">
+                    ℹ️ Nenhuma Pesquisa Eleitoral Agregada Disponível
+                </div>
+                <div style="color: #E2E8F0; font-size: 13.5px; line-height: 1.5;">
+                    Não encontramos levantamentos registrados no TSE com intenção de voto estimulada para
+                    <b>{cargo_display}</b> no ciclo eleitoral de <b>{ano_eleicao}</b> (<b>{turno_label}</b>).<br>
+                    Você pode alterar o <b>Estado (UF)</b>, o <b>Cargo</b> ou o <b>Ciclo Eleitoral</b> na barra lateral para explorar as bases ativas de auditoria.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
     election_dt = get_election_date(year=ano_eleicao, turno=turno_num)
+    multiscope_polls: list = []
     t1_tse_res = None
     t1_polls_all = None
     t1_dt = None
-    if turno_num == 2:
-        t1_tse_res, _, t1_polls_all = get_election_dataset(
-            year=ano_eleicao,
-            turno=1,
-            include_subnational=True,
-            cargo=cargo_selecionado,
-            uf=uf_selecionada,
-        )
-        t1_dt = get_election_date(year=ano_eleicao, turno=1)
 
-    # Hero Executive Storytelling Cards (Síntese Imediata: Agregação & Modelo Preditivo)
-    render_executive_story_cards(
-        polls=all_polls,
-        multiscope_polls=multiscope_polls,
-        election_date=election_dt,
-        turno_num=turno_num,
-        ano_eleicao=ano_eleicao,
-        tse_result=tse_result,
-        t1_polls=t1_polls_all,
-        t1_tse_result=t1_tse_res,
-        t1_election_date=t1_dt,
-    )
+    if has_polls:
+        # Carrega dados multi-escopo e calibração de 1º turno para o Storytelling e Modelo Preditivo
+        try:
+            _, _, multiscope_polls = get_election_dataset(
+                year=ano_eleicao,
+                turno=turno_num,
+                include_subnational=True,
+                cargo=cargo_selecionado,
+                uf=uf_selecionada,
+            )
+        except Exception:
+            multiscope_polls = []
+
+        if turno_num == 2:
+            try:
+                t1_tse_res, _, t1_polls_all = get_election_dataset(
+                    year=ano_eleicao,
+                    turno=1,
+                    include_subnational=True,
+                    cargo=cargo_selecionado,
+                    uf=uf_selecionada,
+                )
+            except Exception:
+                t1_tse_res, t1_polls_all = None, None
+            t1_dt = get_election_date(year=ano_eleicao, turno=1)
+
+        # Hero Executive Storytelling Cards (Síntese Imediata: Agregação & Modelo Preditivo)
+        render_executive_story_cards(
+            polls=all_polls,
+            multiscope_polls=multiscope_polls,
+            election_date=election_dt,
+            turno_num=turno_num,
+            ano_eleicao=ano_eleicao,
+            tse_result=tse_result,
+            t1_polls=t1_polls_all,
+            t1_tse_result=t1_tse_res,
+            t1_election_date=t1_dt,
+        )
 
     # Navegação por Abas na sequência lógica e pedagógica dos Atos 1 a 7
     tabs = st.tabs(
@@ -588,52 +633,120 @@ def main() -> None:
         render_act1()
 
     with tabs[1]:
-        render_act2(polls=all_polls)
+        if has_polls:
+            render_act2(polls=all_polls)
+        else:
+            st.button(
+                "A gente não tem pesquisa agregada para esse cargo nesse estado",
+                key="btn_empty_act2",
+                width="stretch",
+                disabled=True,
+            )
+            st.info(
+                f"Não há pesquisas eleitorais registradas para {cargo_display} no ciclo de {ano_eleicao} "
+                "para traçar a trajetória longitudinal do Agregador Dinâmico."
+            )
 
     with tabs[2]:
         render_act3(year=ano_eleicao, turno=turno_num, cargo=cargo_selecionado)
 
     with tabs[3]:
-        render_act4(
-            eve_polls=eve_polls,
-            tse_result=tse_result,
-        )
+        if has_polls and eve_polls:
+            render_act4(
+                eve_polls=eve_polls,
+                tse_result=tse_result,
+            )
+        elif not has_polls:
+            st.button(
+                "A gente não tem pesquisa agregada para esse cargo nesse estado",
+                key="btn_empty_act4",
+                width="stretch",
+                disabled=True,
+            )
+            st.info(f"Sem pesquisas registradas para {cargo_display} no ciclo de {ano_eleicao}.")
+        else:
+            render_act4(
+                eve_polls=eve_polls,
+                tse_result=tse_result,
+            )
 
     with tabs[4]:
-        render_act5(
-            eve_polls=eve_polls,
-            all_polls=all_polls,
-            tse_result=tse_result,
-        )
+        if has_polls and eve_polls:
+            render_act5(
+                eve_polls=eve_polls,
+                all_polls=all_polls,
+                tse_result=tse_result,
+            )
+        elif not has_polls:
+            st.button(
+                "A gente não tem pesquisa agregada para esse cargo nesse estado",
+                key="btn_empty_act5",
+                width="stretch",
+                disabled=True,
+            )
+            st.info(f"Sem pesquisas registradas para {cargo_display} no ciclo de {ano_eleicao}.")
+        else:
+            render_act5(
+                eve_polls=eve_polls,
+                all_polls=all_polls,
+                tse_result=tse_result,
+            )
 
     with tabs[5]:
-        render_act6(
-            eve_polls=eve_polls,
-            tse_result=tse_result,
-            all_polls=all_polls,
-        )
+        if has_polls and eve_polls:
+            render_act6(
+                eve_polls=eve_polls,
+                tse_result=tse_result,
+                all_polls=all_polls,
+            )
+        elif not has_polls:
+            st.button(
+                "A gente não tem pesquisa agregada para esse cargo nesse estado",
+                key="btn_empty_act6",
+                width="stretch",
+                disabled=True,
+            )
+            st.info(f"Sem pesquisas registradas para {cargo_display} no ciclo de {ano_eleicao}.")
+        else:
+            render_act6(
+                eve_polls=eve_polls,
+                tse_result=tse_result,
+                all_polls=all_polls,
+            )
 
     with tabs[6]:
-        if "pytest" not in sys.modules:
-            import importlib
+        if has_polls and multiscope_polls:
+            if "pytest" not in sys.modules:
+                import importlib
 
-            import src.presentation.components.predictive_charts as _pc_mod
-            import src.presentation.story_acts.act7_predictive_forecast as _act7_mod
+                import src.presentation.components.predictive_charts as _pc_mod
+                import src.presentation.story_acts.act7_predictive_forecast as _act7_mod
 
-            importlib.reload(_pc_mod)
-            importlib.reload(_act7_mod)
-            render_act7_fn = _act7_mod.render_act7
+                importlib.reload(_pc_mod)
+                importlib.reload(_act7_mod)
+                render_act7_fn = _act7_mod.render_act7
+            else:
+                render_act7_fn = render_act7
+
+            render_act7_fn(
+                polls=multiscope_polls,
+                tse_result=tse_result,
+                election_date=election_dt,
+                t1_polls=t1_polls_all,
+                t1_tse_result=t1_tse_res,
+                t1_election_date=t1_dt,
+            )
         else:
-            render_act7_fn = render_act7
-
-        render_act7_fn(
-            polls=multiscope_polls,
-            tse_result=tse_result,
-            election_date=election_dt,
-            t1_polls=t1_polls_all,
-            t1_tse_result=t1_tse_res,
-            t1_election_date=t1_dt,
-        )
+            st.button(
+                "A gente não tem pesquisa agregada para esse cargo nesse estado",
+                key="btn_empty_act7",
+                width="stretch",
+                disabled=True,
+            )
+            st.info(
+                f"O Modelo Preditivo requer pesquisas eleitorais registradas com intenções de voto "
+                f"para calibrar e simular projeções para {cargo_display} em {ano_eleicao}."
+            )
 
 
 def run() -> None:

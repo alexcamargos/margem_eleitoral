@@ -29,6 +29,9 @@ from src.presentation.components.predictive_charts import (
     create_electoral_college_regional_chart,
     create_win_probability_distribution_chart,
 )
+from src.presentation.components.sensitivity_table_card import (
+    render_sensitivity_analysis_section,
+)
 from src.presentation.components.waterfall_projection_card import (
     render_waterfall_projection_breakdown,
 )
@@ -400,6 +403,20 @@ def render_act7(
         t1_tse_result=source_t1_tse,
         polls=active_polls,
     )
+
+    # 4.1 Teste de Robustez Metodológica (13 Formas de Calcular a Previsão)
+    if turno_ativo == 2:
+        cand_lula = (
+            c1_name
+            if "lula" in c1_name.lower()
+            else (c2_name if "lula" in c2_name.lower() else c1_name)
+        )
+        cand_flavio = c2_name if cand_lula == c1_name else c1_name
+        render_sensitivity_analysis_section(
+            polls=active_polls,
+            candidate_a=cand_lula,
+            candidate_b=cand_flavio,
+        )
 
     # 5. Gráfico de Simulação de Monte Carlo e Tabela Comparativa por Candidato
     st.markdown("### 1. Distribuição de Probabilidades e Placar por Candidato")

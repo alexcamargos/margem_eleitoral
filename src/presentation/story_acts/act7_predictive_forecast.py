@@ -29,6 +29,9 @@ from src.presentation.components.predictive_charts import (
     create_electoral_college_regional_chart,
     create_win_probability_distribution_chart,
 )
+from src.presentation.components.waterfall_projection_card import (
+    render_waterfall_projection_breakdown,
+)
 from src.transformations.schemas import PesquisaEleitoralSchema, ResultadoOficialTSESchema
 
 
@@ -391,7 +394,14 @@ def render_act7(
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-    # 4. Gráfico de Simulação de Monte Carlo e Tabela Comparativa por Candidato
+    # 4. Decomposição da Projeção (A CONTA: De onde vem a projeção)
+    render_waterfall_projection_breakdown(
+        forecast=forecast,
+        t1_tse_result=source_t1_tse,
+        polls=active_polls,
+    )
+
+    # 5. Gráfico de Simulação de Monte Carlo e Tabela Comparativa por Candidato
     st.markdown("### 1. Distribuição de Probabilidades e Placar por Candidato")
     st.markdown(
         """

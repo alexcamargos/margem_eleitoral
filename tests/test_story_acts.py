@@ -369,7 +369,8 @@ def test_render_act7(
     )
 
     assert mock_md.call_count >= 6
-    assert mock_plotly.call_count == 3
+    # 4 gráficos: Decomposição (A CONTA), Distribuição Monte Carlo, Macrorregiões TSE e Backtest
+    assert mock_plotly.call_count == 4
     assert mock_df.call_count >= 3
 
     # 2º Turno (com calibração empírica do 1º turno)

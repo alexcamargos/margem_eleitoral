@@ -178,3 +178,31 @@ def test_get_election_dataset_state_filtering() -> None:
     for p in rj_sen_polls:
         assert p.uf == "RJ"
         assert p.cargo == "SENADOR"
+
+
+def test_get_election_dataset_missing_or_empty_returns_empty() -> None:
+    """Verifica se get_election_dataset retorna tupla vazia e segura em caso de pleito sem pesquisas.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    # Consulta pleito inexistente ou sem arquivo Parquet
+    tse_res, eve_polls, all_polls = get_election_dataset(
+        year=2014, turno=1, cargo="Governadores", uf="PI"
+    )
+    assert tse_res is None
+    assert eve_polls == []
+    assert all_polls == []
+
+    # Consulta cargo no 2º turno onde não há segundo turno (ex.: Senado 2026 Turno 2)
+    tse_res_s2, eve_polls_s2, all_polls_s2 = get_election_dataset(
+        year=2026, turno=2, cargo="Senado", uf="PI"
+    )
+    assert eve_polls_s2 == []
+    assert all_polls_s2 == []

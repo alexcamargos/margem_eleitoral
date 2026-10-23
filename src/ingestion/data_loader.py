@@ -304,14 +304,18 @@ def get_election_dataset(
         except (FileNotFoundError, OSError, json.JSONDecodeError, ValidationError, ValueError):
             tse_result = None
 
-    # 2. Carrega as pesquisas via Polars Parquet
+    # 2. Carrega as pesquisas via Polars Parquet de forma resiliente
     if not parquet_path.exists():
-        raise FileNotFoundError(f"Arquivo Parquet não encontrado em: {parquet_path}")
+        return tse_result, [], []
 
-    df_polls = pl.read_parquet(parquet_path)
-    if "abrangencia" not in df_polls.columns and canonical_cargo == "PRESIDENTE":
-        run_etl_for_year(year=year, turno=turno)
+    try:
         df_polls = pl.read_parquet(parquet_path)
+        if "abrangencia" not in df_polls.columns and canonical_cargo == "PRESIDENTE":
+            run_etl_for_year(year=year, turno=turno)
+            df_polls = pl.read_parquet(parquet_path)
+    except Exception:
+        return tse_result, [], []
+
     all_polls = polars_to_polls(df_polls)
 
     # Filtra por cargo e por turno

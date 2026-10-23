@@ -191,6 +191,13 @@ def render_act7(
     active_polls = (
         list(polls) if include_geo else [p for p in polls if p.abrangencia.value == "NACIONAL"]
     )
+    if not active_polls:
+        st.info(
+            "O Modelo Preditivo requer pesquisas eleitorais com intenções de voto registradas "
+            "para gerar projeções probabilísticas e Nowcasting."
+        )
+        return
+
     active_calibration = calibration_map if (use_t1_cal and turno_ativo == 2) else None
 
     earliest_field = min(p.data_fim_campo for p in active_polls)
@@ -678,4 +685,3 @@ def render_act7(
 
 # Alias para retrocompatibilidade
 render_act6 = render_act7
-

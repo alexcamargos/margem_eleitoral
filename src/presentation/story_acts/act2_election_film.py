@@ -43,6 +43,12 @@ def render_act2(polls: Sequence[PesquisaEleitoralSchema]) -> None:
         """
     )
 
+    if not polls:
+        st.info(
+            "Nenhuma pesquisa eleitoral disponível para traçar a série histórica agregada deste cargo/estado."
+        )
+        return
+
     METHODOLOGY_LABELS = {
         "PRESENCIAL_DOMICILIAR": "Presencial Domiciliar",
         "PRESENCIAL_FLUXO": "Presencial (Pontos de Fluxo)",

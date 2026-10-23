@@ -1,14 +1,14 @@
 {
   "versao_schema": 1,
   "data_referencia": "2026-10-23",
-  "atualizado_em": "2026-10-23T07:08:24-03:00",
+  "atualizado_em": "2026-10-23T11:06:36-03:00",
   "ultima_pesquisa": {
-    "instituto": "Vox Brasil",
-    "registro_tse": "BR-03259/2026",
-    "data_campo_inicio": "2026-10-20",
-    "data_campo_fim": "2026-10-22",
+    "instituto": "Vetor Arrow",
+    "registro_tse": "BR-06957/2026",
+    "data_campo_inicio": "2026-10-22",
+    "data_campo_fim": "2026-10-23",
     "data_divulgacao": "2026-10-23",
-    "adicionada_em": "2026-10-23T07:00:29-03:00"
+    "adicionada_em": "2026-10-23T11:00:36-03:00"
   },
   "atualizacoes": "Buscas a cada 2 horas, das 07h às 23h (horário de Brasília); a projeção só muda quando entra pesquisa nova.",
   "data_eleicao": "2026-10-25",
@@ -54,27 +54,27 @@
     "n_ancora_1t": 1,
     "n_imputadas": 0,
     "frac_peso_imputado": 0.0,
-    "n_eff_kish": 15.62,
-    "p_validos_a": 0.483637,
-    "p_validos_b": 0.516363,
-    "p_validos_a_sem_ajuste": 0.490411,
-    "margem": -0.032726,
-    "ic80_inf": 0.457044,
-    "ic80_sup": 0.510452,
-    "ic95_inf": 0.437293,
-    "ic95_sup": 0.529819,
-    "margem_ic95_inf": -0.125415,
-    "margem_ic95_sup": 0.059639,
-    "prob_a": 0.20463,
-    "prob_b": 0.79537,
-    "prob_a_normal": 0.241815,
+    "n_eff_kish": 17.0816,
+    "p_validos_a": 0.48062,
+    "p_validos_b": 0.51938,
+    "p_validos_a_sem_ajuste": 0.489091,
+    "margem": -0.038761,
+    "ic80_inf": 0.454005,
+    "ic80_sup": 0.507456,
+    "ic95_inf": 0.434239,
+    "ic95_sup": 0.526839,
+    "margem_ic95_inf": -0.131523,
+    "margem_ic95_sup": 0.053677,
+    "prob_a": 0.167475,
+    "prob_b": 0.832525,
+    "prob_a_normal": 0.203558,
     "empate_tecnico": true,
     "abaixo_minimo": false,
-    "tau2": 0.0,
-    "sd_media": 0.002047,
-    "sigma_total": 0.02336,
+    "tau2": 1.32702e-05,
+    "sd_media": 0.002248,
+    "sigma_total": 0.023378,
     "dias_ate_eleicao": 2,
-    "maior_peso": 0.169648,
+    "maior_peso": 0.154191,
     "maior_peso_instituto": "Instituto Veritá",
     "alerta_peso": false
   },
@@ -695,32 +695,119 @@
       "n_ancora_1t": 1,
       "n_imputadas": 0,
       "frac_peso_imputado": 0.0,
-      "n_eff_kish": 15.62,
-      "p_validos_a": 0.483637,
-      "p_validos_b": 0.516363,
-      "p_validos_a_sem_ajuste": 0.490411,
-      "margem": -0.032726,
-      "ic80_inf": 0.457044,
-      "ic80_sup": 0.510452,
-      "ic95_inf": 0.437293,
-      "ic95_sup": 0.529819,
-      "margem_ic95_inf": -0.125415,
-      "margem_ic95_sup": 0.059639,
-      "prob_a": 0.20463,
-      "prob_b": 0.79537,
-      "prob_a_normal": 0.241815,
+      "n_eff_kish": 17.0816,
+      "p_validos_a": 0.48062,
+      "p_validos_b": 0.51938,
+      "p_validos_a_sem_ajuste": 0.489091,
+      "margem": -0.038761,
+      "ic80_inf": 0.454005,
+      "ic80_sup": 0.507456,
+      "ic95_inf": 0.434239,
+      "ic95_sup": 0.526839,
+      "margem_ic95_inf": -0.131523,
+      "margem_ic95_sup": 0.053677,
+      "prob_a": 0.167475,
+      "prob_b": 0.832525,
+      "prob_a_normal": 0.203558,
       "empate_tecnico": true,
       "abaixo_minimo": false,
-      "tau2": 0.0,
-      "sd_media": 0.002047,
-      "sigma_total": 0.02336,
+      "tau2": 1.32702e-05,
+      "sd_media": 0.002248,
+      "sigma_total": 0.023378,
       "dias_ate_eleicao": 2,
-      "maior_peso": 0.169648,
+      "maior_peso": 0.154191,
       "maior_peso_instituto": "Instituto Veritá",
       "alerta_peso": false
     }
   ],
   "janela": [
+    {
+      "poll_id": "f2f05f93cf87",
+      "instituto": "Vetor Arrow",
+      "registro_tse": "BR-06957/2026",
+      "data_campo_inicio": "2026-10-22",
+      "data_campo_fim": "2026-10-23",
+      "data_divulgacao": "2026-10-23",
+      "modo": "desconhecido",
+      "n": 3000.0,
+      "n_original": 3000,
+      "amostra_fonte": "pesqele",
+      "imputada": false,
+      "pct_a": 44.9,
+      "pct_b": 50.0,
+      "p_bruto": 0.47313,
+      "vies_aplicado": 0.011161951665857324,
+      "p": 0.4619680483341427,
+      "peso": 3000.0,
+      "peso_rel": 0.059479779635080235,
+      "origem": "pos_1t",
+      "urls": "https://agendadopoder.com.br/ https://agendadopoder.com.br/flavio-bolsonaro-tem-527-dos-votos-validos-contra-473-de-lula-aponta-pesquisa-vetor-arrow/ https://agendadopoder.com.br/lula-comemora-empate-no-datafolha-em-live-com-janones-e-so-vitoria/ https://agendadopoder.com.br/pl-volta-a-convocar-fiscais-de-urnas-apos-flavio-levantar-suspeitas-sobre-processo-eleitoral/ https://agendadopoder.com.br/pt-entrega-malote-com-sigilos-de-lula-ao-tse-e-cobra-andre-mendonca-papel-de-arbitro/",
+      "rej_a": null,
+      "rej_b": null,
+      "p_intencao": 0.4619680483341427,
+      "p_potencial": null,
+      "adicionada_em": "2026-10-23T11:00:36-03:00",
+      "situacao_tse": "confirmado",
+      "tse_prazo": "2026-10-28"
+    },
+    {
+      "poll_id": "1159b3ee088e",
+      "instituto": "Ipespe",
+      "registro_tse": "BR-04350/2026",
+      "data_campo_inicio": "2026-10-20",
+      "data_campo_fim": "2026-10-22",
+      "data_divulgacao": "2026-10-23",
+      "modo": "telefone",
+      "n": 1500.0,
+      "n_original": 1500,
+      "amostra_fonte": "imprensa",
+      "imputada": false,
+      "pct_a": 47.0,
+      "pct_b": 48.0,
+      "p_bruto": 0.494737,
+      "vies_aplicado": 0.010778490946222356,
+      "p": 0.48395850905377763,
+      "peso": 1261.3446228805717,
+      "peso_rel": 0.02500816673760993,
+      "origem": "pos_1t",
+      "urls": "https://www.reporterpb.com.br/noticia-extra/2026/10/23/ipespe-abrapel-flavio-bolsonaro-tem-50-5-dos-votos-validos-no-2o-turno-e-lula-49-5/134639.html https://www1.folha.uol.com.br/poder/2026/10/ipespeabrapel-flavio-bolsonaro-tem-505-dos-votos-validos-no-2o-turno-e-lula-495.shtml",
+      "rej_a": null,
+      "rej_b": null,
+      "p_intencao": 0.48395850905377763,
+      "p_potencial": null,
+      "adicionada_em": "2026-10-23T10:20:25-03:00",
+      "situacao_tse": "confirmado",
+      "tse_prazo": "2026-10-28"
+    },
+    {
+      "poll_id": "3ea072901b36",
+      "instituto": "Alfa Inteligência",
+      "registro_tse": "BR-08496/2026",
+      "data_campo_inicio": "2026-10-18",
+      "data_campo_fim": "2026-10-22",
+      "data_divulgacao": "2026-10-23",
+      "modo": "presencial",
+      "n": 2700.0,
+      "n_original": 2700,
+      "amostra_fonte": "imprensa",
+      "imputada": false,
+      "pct_a": 46.0,
+      "pct_b": 49.9,
+      "p_bruto": 0.479666,
+      "vies_aplicado": 0.029030075123378463,
+      "p": 0.4506359248766215,
+      "peso": 2270.420321185029,
+      "peso_rel": 0.04501470012769787,
+      "origem": "pos_1t",
+      "urls": "https://exame.com/brasil/pesquisa-alfa-a-dois-dias-do-2o-turno-flavio-bolsonaro-tem-52-e-lula-48/ https://tmc.com.br/politica/flavio-bolsonaro-lula-pesquisa-alfa-segundo-turno-2026/ https://www.cnnbrasil.com.br/eleicoes/alfa-flavio-tem-52-dos-votos-validos-no-2o-turno-lula-48/",
+      "rej_a": null,
+      "rej_b": null,
+      "p_intencao": 0.4506359248766215,
+      "p_potencial": null,
+      "adicionada_em": "2026-10-23T08:00:37-03:00",
+      "situacao_tse": "confirmado",
+      "tse_prazo": "2026-10-28"
+    },
     {
       "poll_id": "8345de1dafe5",
       "instituto": "Vox Brasil",
@@ -739,7 +826,7 @@
       "vies_aplicado": 0.0026064919914955964,
       "p": 0.502456730689896,
       "peso": 1765.8824720328005,
-      "peso_rel": 0.03852116335128688,
+      "peso_rel": 0.03501143343265391,
       "origem": "pos_1t",
       "urls": "https://exame.com/brasil/pesquisa-vox-brasil-lula-tem-506-e-flavio-494-dos-votos-validos-no-2o-turno/ https://www.jota.info/eleicoes/eleicoes-2026/lula-tem-506-dos-votos-validos-contra-494-de-flavio-bolsonaro-diz-pesquisa-vox-brasil https://www.poder360.com.br/poder-eleicoes-2026/lula-tem-506-contra-494-de-flavio-em-votos-validos-diz-vox/",
       "rej_a": 44.8,
@@ -768,7 +855,7 @@
       "vies_aplicado": 0.017252594334871973,
       "p": 0.462747405665128,
       "peso": 1681.792830507429,
-      "peso_rel": 0.036686822239320835,
+      "peso_rel": 0.03334422231681324,
       "origem": "pos_1t",
       "urls": "https://veja.abril.com.br https://www.gazetadopovo.com.br",
       "rej_a": null,
@@ -797,7 +884,7 @@
       "vies_aplicado": 0.013678162038824881,
       "p": 0.4902377607704127,
       "peso": 2119.0589664393606,
-      "peso_rel": 0.046225396021544254,
+      "peso_rel": 0.04201372011918469,
       "origem": "pos_1t",
       "urls": "https://veja.abril.com.br/politica/a-penultima-pesquisa-datafolha-sobre-a-disputa-flavio-x-lula/ https://www.brasildefato.com.br/2026/10/22/datafolha-aponta-empate-tecnico-no-2o-turno-flavio-bolsonaro-47-lula-46/ https://www.estadao.com.br/politica/eleicoes/pesquisa-datafolha-flavio-tem-47-e-lula-46-a-tres-dias-das-eleicoes/ https://www.gazetadopovo.com.br/eleicoes/2026/pesquisa-eleitoral-2026/datafolha-presidente-outubro-2026-segundo-turno-3/ https://www.gazetaweb.com/noticias/eleicoes/datafolha-46-rejeitam-flavio-bolsonaro-e-lula-e-rejeitado-por-45-944238 https://www.metropoles.com/brasil/datafolha-flavio-bolsonaro-lula-22-10 https://www1.folha.uol.com.br/poder/2026/10/datafolha-flavio-bolsonaro-e-lula-empatam-com-50-dos-votos-validos-cada.shtml",
       "rej_a": 45.0,
@@ -826,7 +913,7 @@
       "vies_aplicado": 0.008069520576423517,
       "p": 0.4849750981893978,
       "peso": 2828.42712474619,
-      "peso_rel": 0.061699634616190296,
+      "peso_rel": 0.05607807403126233,
       "origem": "pos_1t",
       "urls": "https://www.poder360.com.br/poderdata/flavio-tem-51-e-lula-tem-49-dos-votos-validos-diz-poderdata-aya/",
       "rej_a": 47.0,
@@ -855,7 +942,7 @@
       "vies_aplicado": 0.010778490946222356,
       "p": 0.4830625090537776,
       "peso": 1414.213562373095,
-      "peso_rel": 0.030849817308095148,
+      "peso_rel": 0.028039037015631166,
       "origem": "pos_1t",
       "urls": "https://www.atribuna.com.br/ https://www.gazetadopovo.com.br/ https://www.oliberal.com/",
       "rej_a": null,
@@ -884,7 +971,7 @@
       "vies_aplicado": -0.006053638727458649,
       "p": 0.4958496387274587,
       "peso": 2973.0177875068025,
-      "peso_rel": 0.06485375196402302,
+      "peso_rel": 0.05894481428402614,
       "origem": "pos_1t",
       "urls": "https://exame.com/brasil/pesquisa-palver-flavio-bolsonaro-tem-50-e-lula-48-no-2o-turno/",
       "rej_a": null,
@@ -913,7 +1000,7 @@
       "vies_aplicado": -0.0012354337948372596,
       "p": 0.4902634337948373,
       "peso": 1189.2071150027211,
-      "peso_rel": 0.02594150078560921,
+      "peso_rel": 0.02357792571361046,
       "origem": "pos_1t",
       "urls": "https://radiocorredor.com.br",
       "rej_a": null,
@@ -942,7 +1029,7 @@
       "vies_aplicado": -0.0004980831719031131,
       "p": 0.48559701834472613,
       "peso": 1427.0485380032653,
-      "peso_rel": 0.03112980094273105,
+      "peso_rel": 0.028293510856332547,
       "origem": "pos_1t",
       "urls": "https://colinhadigital.com/pesquisas/ https://exame.com/brasil/pesquisa-gerp-flavio-bolsonaro-tem-53-e-lula-47-no-2o-turno/ https://timesbrasil.com.br/eleicoes-2026/bolsonaro-lula-2-gerp-segundo-turno-votos-validos/ https://www.estadao.com.br/politica/eleicoes/pesquisa-quaest-flavio-tem-46-e-lula-44-no-segundo-turno/ https://www.trbn.com.br/materia/I165905/afinal-qual-candidato-lidera-entre-os-trabalhadores-com-carteira-assinada",
       "rej_a": 49.0,
@@ -971,7 +1058,7 @@
       "vies_aplicado": 0.007804725130905188,
       "p": 0.5017316444844611,
       "peso": 1280.7760628579306,
-      "peso_rel": 0.027938996346101114,
+      "peso_rel": 0.025393425993558462,
       "origem": "pos_1t",
       "urls": "https://exame.com/brasil/pesquisa-para-presidente-quaest-flavio-bolsonaro-tem-45-e-lula-44-a-4-dias-do-2o-turno/ https://gauchazh.clicrbs.com.br/politica/eleicoes/noticia/2026/10/quando-saem-as-proximas-pesquisas-eleitorais-veja-datas-institutos-e-detalhes-dos-levantamentos-cmvfdz89m002101eiub68hpht.html https://noshitena.blog/en_GB/ https://veja.abril.com.br/politica/a-nova-pesquisa-quaest-sobre-a-disputa-flavio-x-lula-a-quatro-dias-do-2o-turno/ https://www.infomoney.com.br/politica/quaest-testa-se-debate-e-reacao-digital-de-lula-mexeram-na-disputa-com-flavio/ https://www.nsctotal.com.br/politica/nova-pesquisa-quaest-de-2o-turno-que-horas-sai-levantamento-entre-lula-e-flavio-bolsonaro-nas-eleicoes-2026 https://www.poder360.com.br/poder-eleicoes-2026/flavio-tem-45-contra-44-de-lula-no-2o-turno-diz-quaest/",
       "rej_a": 47.0,
@@ -1000,7 +1087,7 @@
       "vies_aplicado": 0.011161951665857324,
       "p": 0.4807730483341427,
       "peso": 1783.8106725040816,
-      "peso_rel": 0.038912251178413806,
+      "peso_rel": 0.035366888570415686,
       "origem": "pos_1t",
       "urls": "https://fanf1.com.br/2026/10/01/do-horto-ao-manguezal-aracaju-passa-a-produzir-as-proprias-mudas-para-recuperar-o-mangue-sobre-o-qual-a-cidade-cresceu/ https://fanf1.com.br/2026/10/04/reeleito-alessandro-vieira-afirma-nao-sou-senador-de-lula-nao-sou-senador-de-bolsonaro-sou-o-senador-dos-sergipanos/ https://fanf1.com.br/2026/10/20/flavio-mira-publico-lgbt-e-afirma-minha-obrigacao-como-presidente-da-republica-e-garantir-que-voce-vai-dar-o-seu-caneco-e-nao-vai-ser-assaltado-no-caminho/ https://fanf1.com.br/2026/10/20/instituto-franca-flavio-tem-508-e-lula-492-indecisos-sao-quase-9/",
       "rej_a": null,
@@ -1029,7 +1116,7 @@
       "vies_aplicado": 0.011161951665857324,
       "p": 0.4811770483341427,
       "peso": 7777.0,
-      "peso_rel": 0.1696483724865884,
+      "peso_rel": 0.15419141540733966,
       "origem": "pos_1t",
       "urls": "https://claudiodantas.com.br/verita-flavio-tem-507-e-lula-493-dos-votos-validos/ https://jornalrazao.com/politica/verita-flavio-bolsonaro-50-lula-49-segundo-turno https://noticias.r7.com/eleicoes/2026/verita-flavio-bolsonaro-tem-507-dos-votos-validos-e-lula-493-no-2-turno-21102026/",
       "rej_a": null,
@@ -1058,7 +1145,7 @@
       "vies_aplicado": 0.008270839992906953,
       "p": 0.48109116000709307,
       "peso": 750.0,
-      "peso_rel": 0.01636058626269015,
+      "peso_rel": 0.014869944908770059,
       "origem": "pos_1t",
       "urls": "https://veja.abril.com.br/brasil/o-que-diz-a-nova-pesquisa-meio-ideia-sobre-a-disputa-presidencial-entre-flavio-bolsonaro-e-lula/ https://www.metropoles.com/brasil/meio-ideia-flavio-tem-51-dos-votos-validos-contra-49-de-lula-no-2o-turno https://www.poder360.com.br/poder-eleicoes-2026/312-dos-eleitores-de-flavio-votam-nele-por-rejeitar-lula/ https://www1.folha.uol.com.br/poder/2026/10/flavio-bolsonaro-tem-511-e-lula-489-dos-votos-validos-e-seguem-empatados-diz-meioideia.shtml",
       "rej_a": null,
@@ -1087,7 +1174,7 @@
       "vies_aplicado": 0.017252594334871973,
       "p": 0.47699258785285903,
       "peso": 1000.0,
-      "peso_rel": 0.0218141150169202,
+      "peso_rel": 0.019826593211693413,
       "origem": "pos_1t",
       "urls": "https://veja.abril.com.br/politica/nova-pesquisa-real-time-big-data-revela-a-rejeicao-a-flavio-e-lula-a-cinco-dias-do-segundo-turno/ https://www.cnnbrasil.com.br/eleicoes/real-time-big-data-flavio-tem-52-dos-votos-validos-lula-48/ https://www.moneytimes.com.br/flavio-bolsonaro-e-lula-empatam-tecnicamente-em-pesquisa-real-time-big-data-gaep/",
       "rej_a": 35.0,
@@ -1116,7 +1203,7 @@
       "vies_aplicado": 0.029030075123378463,
       "p": 0.4559699248766215,
       "peso": 1350.0,
-      "peso_rel": 0.02944905527284227,
+      "peso_rel": 0.026765900835786106,
       "origem": "pos_1t",
       "urls": "https://www.cnnbrasil.com.br/eleicoes/alfa-flavio-tem-515-dos-votos-validos-no-2o-turno-lula-485/",
       "rej_a": null,
@@ -1145,7 +1232,7 @@
       "vies_aplicado": 0.020880257193779006,
       "p": 0.47944634741561665,
       "peso": 841.7373116689682,
-      "peso_rel": 0.01836175453078008,
+      "peso_rel": 0.01668878326956503,
       "origem": "pos_1t",
       "urls": "https://gauchazh.clicrbs.com.br/ https://www.cnnbrasil.com.br/ https://www.poder360.com.br/ https://www.poder360.com.br/poder-eleicoes-2026/lula-tem-478-de-rejeicao-contra-468-de-flavio-diz-btg-nexus/",
       "rej_a": 47.8,
@@ -1174,7 +1261,7 @@
       "vies_aplicado": 0.013068522107409386,
       "p": 0.4759314778925906,
       "peso": 2101.4001417190325,
-      "peso_rel": 0.045840184388031384,
+      "peso_rel": 0.04166360578485814,
       "origem": "pos_1t",
       "urls": "https://exame.com/brasil/pesquisa-para-presidente-atlasintel-flavio-bolsonaro-cai-para-511-e-lula-sobe-para-489/ https://www.infomoney.com.br/politica/como-esta-a-disputa-entre-flavio-e-lula-nas-primeiras-pesquisas-do-2o-turno/ https://www.jota.info/eleicoes/eleicoes-2026/pesquisa-atlasintel-bloomberg-mostra-vantagem-de-flavio-bolsonaro-sobre-lula-cair-para-22-pontos",
       "rej_a": null,
@@ -1203,7 +1290,7 @@
       "vies_aplicado": 0.008069520576423517,
       "p": 0.47534546855976817,
       "peso": 1261.3446228805717,
-      "peso_rel": 0.027515116679490626,
+      "peso_rel": 0.02500816673760993,
       "origem": "pos_1t",
       "urls": "https://amadomundo.com/poderdata-flavio-abre-vantagem-em-segundo-turno/ https://www.grandeponto.com.br/noticia/poderdataaya-flavio-vai-a-a-52-contra-48-de-lula https://www.poder360.com.br/ https://www.poder360.com.br/poder-eleicoes-2026/flavio-reage-e-vai-a-52-contra-48-de-lula-diz-poderdata-aya/ https://www.poder360.com.br/poder-eleicoes/ https://www.poder360.com.br/poderdata/a-6-dias-do-2o-turno-rejeicao-a-lula-vai-a-48-e-de-flavio-e-de-44/",
       "rej_a": 48.0,
@@ -1232,7 +1319,7 @@
       "vies_aplicado": 0.011307472383652428,
       "p": 0.4729035276163476,
       "peso": 707.1067811865476,
-      "peso_rel": 0.015424908654047574,
+      "peso_rel": 0.014019518507815583,
       "origem": "pos_1t",
       "urls": "https://www.edmarlyra.com/datatrends-flavio-bolsonaro-tem-515-dos-votos-validos-contra-485-de-lula-na-disputa-presidencial/",
       "rej_a": null,
@@ -1261,7 +1348,7 @@
       "vies_aplicado": -0.0012354337948372596,
       "p": 0.49666184417171433,
       "peso": 707.1067811865476,
-      "peso_rel": 0.015424908654047574,
+      "peso_rel": 0.014019518507815583,
       "origem": "pos_1t",
       "urls": "https://transmissaopolitica.com.br/politica-nacional/2026/10/19/pesquisa-futura-lula-flavio-19-outubro/ https://www.cnnbrasil.com.br/eleicoes/futura-474-rejeitam-voto-em-lula-458-em-flavio/ https://www.plantaobrasil.net/noticias/157843",
       "rej_a": 47.4,
@@ -1290,7 +1377,7 @@
       "vies_aplicado": 0.0026064919914955964,
       "p": 0.4990715817537258,
       "peso": 742.462120245875,
-      "peso_rel": 0.016196154086749952,
+      "peso_rel": 0.014720494433206364,
       "origem": "pos_1t",
       "urls": "https://www.jota.info/eleicoes/eleicoes-2026/lula-tem-51-dos-votos-validos-e-flavio-bolsonaro-49-diz-pesquisa-vox-brasil https://www.poder360.com.br/poder-eleicoes-2026/lula-tem-51-contra-49-de-flavio-em-votos-validos-diz-vox/",
       "rej_a": 45.3,
@@ -1319,7 +1406,7 @@
       "vies_aplicado": 0.011249449259968125,
       "p": 0.4887505507400319,
       "peso": 624.3337353764286,
-      "peso_rel": 0.013619287912444836,
+      "peso_rel": 0.01237841099964549,
       "origem": "pos_1t",
       "urls": "https://depoisdas17.com.br https://fonte83.com.br https://mauriliojunior.com",
       "rej_a": null,
@@ -1348,7 +1435,7 @@
       "vies_aplicado": 0.010778490946222356,
       "p": 0.47822150905377764,
       "peso": 4624.231866688082,
-      "peso_rel": 0.10087352580484142,
+      "peso_rel": 0.09168276413737428,
       "origem": "pos_1t",
       "urls": "https://www.blogdobg.com.br/ https://www.blogdojasao.com.br/",
       "rej_a": null,
@@ -1377,7 +1464,7 @@
       "vies_aplicado": -0.0004980831719031131,
       "p": 0.48559701834472613,
       "peso": 713.5242690016328,
-      "peso_rel": 0.015564900471365526,
+      "peso_rel": 0.014146755428166277,
       "origem": "pos_1t",
       "urls": "https://revistaforum.com.br/politica/lula-flavio-bolsonaro-pesquisa-gerp/ https://www.blogdobg.com.br/ https://www.cnnbrasil.com.br/eleicoes/gerp-49-rejeitam-voto-em-lula-46-em-flavio-bolsonaro/ https://www.gazetadopovo.com.br/eleicoes/2026/pesquisa-eleitoral-2026/gerp-presidente-outubro-2026-segundo-turno-2/ https://www.poder360.com.br/poder-eleicoes-2026/flavio-tem-52-e-lula-48-dos-votos-validos-no-2o-turno-diz-gerp/",
       "rej_a": 49.0,
@@ -1406,7 +1493,7 @@
       "vies_aplicado": 0.010778490946222356,
       "p": 0.48675108025559366,
       "peso": 375.0,
-      "peso_rel": 0.008180293131345075,
+      "peso_rel": 0.007434972454385029,
       "origem": "pos_1t",
       "urls": "https://www.cnnbrasil.com.br/eleicoes/ipespe-abrapel-flavio-tem-512-dos-votos-validos-no-2o-turno-lula-488/ https://www.cnnbrasil.com.br/eleicoes/ipespe-flavio-e-lula-sao-igualmente-rejeitados-por-47-dos-eleitores/ https://www.cnnbrasil.com.br/tudo-sobre/luiz-inacio-lula-da-silva-lula/ https://www.cnnbrasil.com.br/ultimas-noticias/",
       "rej_a": 47.0,
@@ -1435,7 +1522,7 @@
       "vies_aplicado": 0.020908417878646834,
       "p": 0.4741695542944771,
       "peso": 500.5,
-      "peso_rel": 0.01091796456596856,
+      "peso_rel": 0.009923209902452552,
       "origem": "pos_1t",
       "urls": "https://veja.abril.com.br/politica/a-nova-pesquisa-cnt-mda-sobre-a-disputa-entre-flavio-e-lula-no-segundo-turno/ https://www.infomoney.com.br/politica/cnt-mda-flavio-oscila-para-46-e-lula-empata-tecnicamente-com-45-no-segundo-turno/ https://www.metropoles.com/brasil/cnt-mda-flavio-bolsonaro-tem-505-e-lula-495-no-segundo-turno https://www.moneytimes.com.br/pesquisa-cnt-mda-flavio-bolsonaro-tem-468-e-lula-459-em-empate-tecnico-gaep/",
       "rej_a": 48.8,
@@ -1464,7 +1551,7 @@
       "vies_aplicado": 0.008069520576423517,
       "p": 0.49231114983737606,
       "peso": 750.0,
-      "peso_rel": 0.01636058626269015,
+      "peso_rel": 0.014869944908770059,
       "origem": "pos_1t",
       "urls": "https://www.poder360.com.br/poderdata/flavio-e-lula-empatam-em-50-dos-votos-validos-diz-poderdata-aya/ https://www.poder360.com.br/poderdata/poderdata-aya-flavio-tem-51-de-expectativa-de-vitoria-ante-42-de-lula/",
       "rej_a": 46.0,
@@ -1493,7 +1580,7 @@
       "vies_aplicado": -0.0012354337948372596,
       "p": 0.4959438429361453,
       "peso": 500.0,
-      "peso_rel": 0.0109070575084601,
+      "peso_rel": 0.009913296605846706,
       "origem": "pos_1t",
       "urls": "https://transmissaopolitica.com.br/politica-nacional/2026/10/16/pesquisa-futura-flavio-lula-segundo-turno/ https://www.blogdobg.com.br/ https://www.cnnbrasil.com.br/eleicoes/futura-472-rejeitam-voto-em-lula-461-em-flavio/",
       "rej_a": 47.2,
@@ -1505,93 +1592,6 @@
       "tse_prazo": "2026-10-21"
     },
     {
-      "poll_id": "6d60a355f1f1",
-      "instituto": "Datafolha",
-      "registro_tse": "BR-00466/2026",
-      "data_campo_inicio": "2026-10-13",
-      "data_campo_fim": "2026-10-15",
-      "data_divulgacao": "2026-10-15",
-      "modo": "presencial",
-      "n": 2520.0,
-      "n_original": 2520,
-      "amostra_fonte": "imprensa",
-      "imputada": false,
-      "pct_a": 45.0,
-      "pct_b": 49.0,
-      "p_bruto": 0.478723,
-      "vies_aplicado": 0.013678162038824881,
-      "p": 0.4754482282433068,
-      "peso": 630.0,
-      "peso_rel": 0.013742892460659727,
-      "origem": "pos_1t",
-      "urls": "https://www.metropoles.com/brasil/eleicoes-2026/lula-x-flavio-datafolha-divulga-nova-pesquisa-de-2o-turno-hoje-15-10 https://www1.folha.uol.com.br/poder/2026/10/datafolha-lula-e-rejeitado-por-46-e-flavio-bolsonaro-por-44.shtml",
-      "rej_a": 46.0,
-      "rej_b": 44.0,
-      "p_intencao": 0.46504483796117513,
-      "p_potencial": 0.48585161852543846,
-      "adicionada_em": "2026-10-15T11:00:29-03:00",
-      "situacao_tse": "confirmado",
-      "tse_prazo": "2026-10-20"
-    },
-    {
-      "poll_id": "c7341a03fe97",
-      "instituto": "Indexa Pesquisas",
-      "registro_tse": "BR-04629/2026",
-      "data_campo_inicio": "2026-10-13",
-      "data_campo_fim": "2026-10-14",
-      "data_divulgacao": "2026-10-15",
-      "modo": "telefone",
-      "n": 2000.0,
-      "n_original": 2000,
-      "amostra_fonte": "imprensa",
-      "imputada": false,
-      "pct_a": 42.0,
-      "pct_b": 44.0,
-      "p_bruto": 0.488372,
-      "vies_aplicado": 0.010778490946222356,
-      "p": 0.48946233278084617,
-      "peso": 420.4482076268573,
-      "peso_rel": 0.00917170555983021,
-      "origem": "pos_1t",
-      "urls": "https://tmc.com.br/politica/indexa-broadcast-flavio-tem-51-e-lula-49-das-intencoes-de-votos-validos/ https://www.correiobraziliense.com.br/politica/2026/10/7520971-indexa-divulga-pesquisa-sobre-2-turno-presidencial-nesta-quinta.html https://www.estadao.com.br/politica/eleicoes/flavio-bolsonaro-tem-44-e-lula-42-no-2-turno-em-empate-tecnico-aponta-indexabroadcast/ https://www.gazetadopovo.com.br/eleicoes/2026/pesquisa-eleitoral-2026/indexa-broadcast-presidente-outubro-2026-segundo-turno/",
-      "rej_a": 50.0,
-      "rej_b": 51.0,
-      "p_intencao": 0.4775935090537776,
-      "p_potencial": 0.5013311565079147,
-      "adicionada_em": "2026-10-15T09:20:23-03:00",
-      "situacao_tse": "confirmado",
-      "tse_prazo": "2026-10-20"
-    },
-    {
-      "poll_id": "2ad2494b4c3e",
-      "instituto": "Palver",
-      "registro_tse": "BR-08028/2026",
-      "data_campo_inicio": "2026-10-10",
-      "data_campo_fim": "2026-10-13",
-      "data_divulgacao": "2026-10-15",
-      "modo": "online",
-      "n": 5000.0,
-      "n_original": 5000,
-      "amostra_fonte": "imprensa",
-      "imputada": false,
-      "pct_a": 49.0,
-      "pct_b": 50.0,
-      "p_bruto": 0.494949,
-      "vies_aplicado": -0.006053638727458649,
-      "p": 0.5010026387274586,
-      "peso": 883.8834764831845,
-      "peso_rel": 0.01928113581755947,
-      "origem": "pos_1t",
-      "urls": "https://exame.com/brasil/pesquisa-que-acertou-tendencia-do-1o-turno-mostra-flavio-bolsonaro-com-50-e-lula-com-49-no-2o/ https://www.jota.info/eleicoes/eleicoes-2026/lula-e-flavio-bolsonaro-empatam-em-eleicao-sem-indecisos-aponta-pesquisa-da-palver",
-      "rej_a": null,
-      "rej_b": null,
-      "p_intencao": 0.5010026387274586,
-      "p_potencial": null,
-      "adicionada_em": "2026-10-15T07:20:25-03:00",
-      "situacao_tse": "confirmado",
-      "tse_prazo": "2026-10-20"
-    },
-    {
       "poll_id": "ancora_1t",
       "instituto": "Resultado 1º turno (TSE)",
       "registro_tse": "",
@@ -1599,7 +1599,7 @@
       "data_campo_fim": "2026-10-04",
       "data_divulgacao": "2026-10-04",
       "modo": "urna",
-      "n": 3190.390243902439,
+      "n": 3136.5,
       "n_original": null,
       "amostra_fonte": "tse",
       "imputada": false,
@@ -1608,8 +1608,8 @@
       "p_bruto": 0.4898850552326951,
       "vies_aplicado": 0.0,
       "p": 0.4898850552326951,
-      "peso": 118.56358680262647,
-      "peso_rel": 0.002586359719331096,
+      "peso": 116.56087863143858,
+      "peso_rel": 0.0023110051250231,
       "origem": "ancora_1t",
       "urls": "https://resultados.tse.jus.br/oficial/app/index.html#/eleicao/6257/uf/br/cargo/1/vis/nominal/resultados",
       "rej_a": null,
@@ -2974,6 +2974,72 @@
       "tse_prazo": "2026-10-27"
     },
     {
+      "poll_id": "1159b3ee088e",
+      "instituto": "Ipespe",
+      "contratante": "Ipespe / Abrapel (Recursos próprios)",
+      "registro_tse": "BR-04350/2026",
+      "data_campo_inicio": "2026-10-20",
+      "data_campo_fim": "2026-10-22",
+      "data_divulgacao": "2026-10-23",
+      "modo": "telefone",
+      "amostra_n": 1500,
+      "amostra_fonte": "imprensa",
+      "margem_erro_pp": 2.6,
+      "nivel_confianca": 95.0,
+      "base_percentual": "votos_totais",
+      "pct_a": 47.0,
+      "pct_b": 48.0,
+      "pct_branco_nulo": 3.0,
+      "pct_indeciso": 2.0,
+      "rej_a": null,
+      "rej_b": null,
+      "rejeicao_disponivel_em": null,
+      "p_validos_a": 0.494737,
+      "urls": "https://www.reporterpb.com.br/noticia-extra/2026/10/23/ipespe-abrapel-flavio-bolsonaro-tem-50-5-dos-votos-validos-no-2o-turno-e-lula-49-5/134639.html https://www1.folha.uol.com.br/poder/2026/10/ipespeabrapel-flavio-bolsonaro-tem-505-dos-votos-validos-no-2o-turno-e-lula-495.shtml",
+      "verificado": true,
+      "adicionada_em": "2026-10-23T10:20:25-03:00",
+      "elegivel": true,
+      "motivo_exclusao": "",
+      "observacoes": "Pesquisa Ipespe/Abrapel. Em votos válidos, o cenário é: Flávio Bolsonaro 50,5% x Lula 49,5%. | cadastro TSE: IPESPE INST DE PESQUISAS SOCIAIS POLITICAS E ECONOMICAS, campo 20/10–22/10, 1500 entrevistas registradas | verificação: pct totais ok; registro=ok; n=ok | rejeição declarada 47 x 48 não confirmada na fonte",
+      "situacao_tse": "confirmado",
+      "tse_pendente_desde": "",
+      "tse_confirmado_em": "2026-10-23T10:20:25-03:00",
+      "tse_prazo": "2026-10-28"
+    },
+    {
+      "poll_id": "3ea072901b36",
+      "instituto": "Alfa Inteligência",
+      "contratante": "TMC",
+      "registro_tse": "BR-08496/2026",
+      "data_campo_inicio": "2026-10-18",
+      "data_campo_fim": "2026-10-22",
+      "data_divulgacao": "2026-10-23",
+      "modo": "presencial",
+      "amostra_n": 2700,
+      "amostra_fonte": "imprensa",
+      "margem_erro_pp": 1.9,
+      "nivel_confianca": 95.0,
+      "base_percentual": "votos_totais",
+      "pct_a": 46.0,
+      "pct_b": 49.9,
+      "pct_branco_nulo": 2.0,
+      "pct_indeciso": 2.1,
+      "rej_a": null,
+      "rej_b": null,
+      "rejeicao_disponivel_em": null,
+      "p_validos_a": 0.479666,
+      "urls": "https://exame.com/brasil/pesquisa-alfa-a-dois-dias-do-2o-turno-flavio-bolsonaro-tem-52-e-lula-48/ https://tmc.com.br/politica/flavio-bolsonaro-lula-pesquisa-alfa-segundo-turno-2026/ https://www.cnnbrasil.com.br/eleicoes/alfa-flavio-tem-52-dos-votos-validos-no-2o-turno-lula-48/",
+      "verificado": true,
+      "adicionada_em": "2026-10-23T08:00:37-03:00",
+      "elegivel": true,
+      "motivo_exclusao": "",
+      "observacoes": "A amostra informada nas matérias jornalísticas é de 2.700 entrevistas, divergindo dos 1.200 mencionados no enunciado. Os percentuais de intenção de voto referem-se ao cenário estimulado em votos totais (em votos válidos, o resultado divulgado foi Flávio 52% x Lula 48%). | cadastro TSE: ALFA INTELIGENCIA, campo 18/10–22/10, 1200 entrevistas registradas | verificação: pct totais ok; registro=ok; n=ok | rejeição declarada 45 x 44 não confirmada na fonte",
+      "situacao_tse": "confirmado",
+      "tse_pendente_desde": "",
+      "tse_confirmado_em": "2026-10-23T08:00:37-03:00",
+      "tse_prazo": "2026-10-28"
+    },
+    {
       "poll_id": "8345de1dafe5",
       "instituto": "Vox Brasil",
       "contratante": "o próprio instituto",
@@ -3038,6 +3104,39 @@
       "tse_pendente_desde": "",
       "tse_confirmado_em": "2026-10-23T07:00:29-03:00",
       "tse_prazo": "2026-10-28"
+    },
+    {
+      "poll_id": "f2f05f93cf87",
+      "instituto": "Vetor Arrow",
+      "contratante": "Agenda do Poder",
+      "registro_tse": "BR-06957/2026",
+      "data_campo_inicio": "2026-10-22",
+      "data_campo_fim": "2026-10-23",
+      "data_divulgacao": "2026-10-23",
+      "modo": "desconhecido",
+      "amostra_n": 3000,
+      "amostra_fonte": "pesqele",
+      "margem_erro_pp": 1.2,
+      "nivel_confianca": 95.0,
+      "base_percentual": "votos_totais",
+      "pct_a": 44.9,
+      "pct_b": 50.0,
+      "pct_branco_nulo": 3.6,
+      "pct_indeciso": 1.5,
+      "rej_a": null,
+      "rej_b": null,
+      "rejeicao_disponivel_em": null,
+      "p_validos_a": 0.47313,
+      "urls": "https://agendadopoder.com.br/ https://agendadopoder.com.br/flavio-bolsonaro-tem-527-dos-votos-validos-contra-473-de-lula-aponta-pesquisa-vetor-arrow/ https://agendadopoder.com.br/lula-comemora-empate-no-datafolha-em-live-com-janones-e-so-vitoria/ https://agendadopoder.com.br/pl-volta-a-convocar-fiscais-de-urnas-apos-flavio-levantar-suspeitas-sobre-processo-eleitoral/ https://agendadopoder.com.br/pt-entrega-malote-com-sigilos-de-lula-ao-tse-e-cobra-andre-mendonca-papel-de-arbitro/",
+      "verificado": true,
+      "adicionada_em": "2026-10-23T11:00:36-03:00",
+      "elegivel": true,
+      "motivo_exclusao": "",
+      "observacoes": "Votos válidos: Flávio Bolsonaro 52,7%, Lula 47,3%. | cadastro TSE: VETOR ARROW INSTITUTO DE PESQUISA E OPINIAO LTDA, campo 22/10–23/10, 3000 entrevistas registradas | verificação: pct totais ok; registro=ok; n=não",
+      "situacao_tse": "confirmado",
+      "tse_pendente_desde": "",
+      "tse_confirmado_em": "2026-10-23T11:00:36-03:00",
+      "tse_prazo": "2026-10-28"
     }
   ],
   "sensibilidade": [
@@ -3045,9 +3144,9 @@
       "codigo": "P",
       "variante": "Principal",
       "regra": "peso = n · meia-vida de 4 dias; âncora 1º turno; ajuste de viés do 1º turno; rejeição com peso 50%",
-      "p_validos_a": 0.483637,
-      "margem": -0.032726,
-      "prob_a": 0.20463,
+      "p_validos_a": 0.48062,
+      "margem": -0.038761,
+      "prob_a": 0.167475,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3056,9 +3155,9 @@
       "codigo": "S0",
       "variante": "Sem ajuste de viés",
       "regra": "peso = n · meia-vida de 4 dias, imputação pela média, sem ajuste 1T",
-      "p_validos_a": 0.491602,
-      "margem": -0.016796,
-      "prob_a": 0.331705,
+      "p_validos_a": 0.490028,
+      "margem": -0.019944,
+      "prob_a": 0.303,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3067,9 +3166,9 @@
       "codigo": "S1",
       "variante": "Peso igual por pesquisa",
       "regra": "peso 1 (mantém a meia-vida)",
-      "p_validos_a": 0.4844,
-      "margem": -0.031201,
-      "prob_a": 0.215275,
+      "p_validos_a": 0.481057,
+      "margem": -0.037886,
+      "prob_a": 0.1729,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3078,9 +3177,9 @@
       "codigo": "S2",
       "variante": "Sem meia-vida",
       "regra": "peso = n (pesquisa antiga pesa o mesmo que a recente)",
-      "p_validos_a": 0.483905,
-      "margem": -0.03219,
-      "prob_a": 0.20816,
+      "p_validos_a": 0.48168,
+      "margem": -0.036639,
+      "prob_a": 0.17987,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3089,9 +3188,9 @@
       "codigo": "S3",
       "variante": "Teto de amostra",
       "regra": "peso = min(n, 3.000) (mantém a meia-vida)",
-      "p_validos_a": 0.484262,
-      "margem": -0.031475,
-      "prob_a": 0.21351,
+      "p_validos_a": 0.480305,
+      "margem": -0.039389,
+      "prob_a": 0.16406,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3100,20 +3199,20 @@
       "codigo": "S4",
       "variante": "Só a mais recente",
       "regra": "apenas a última pesquisa de cada instituto",
-      "p_validos_a": 0.483482,
-      "margem": -0.033037,
-      "prob_a": 0.20315,
+      "p_validos_a": 0.48081,
+      "margem": -0.038379,
+      "prob_a": 0.17022,
       "favorito": "b",
       "inverte": false,
-      "n_pesquisas": 19
+      "n_pesquisas": 20
     },
     {
       "codigo": "S5",
       "variante": "n pela margem de erro",
       "regra": "n ausente ≈ 1,96² · 0,25 / ME²",
-      "p_validos_a": 0.483637,
-      "margem": -0.032726,
-      "prob_a": 0.20463,
+      "p_validos_a": 0.48062,
+      "margem": -0.038761,
+      "prob_a": 0.167475,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3122,9 +3221,9 @@
       "codigo": "S6",
       "variante": "Sem âncora do 1º turno",
       "regra": "só pesquisas pós-1º turno",
-      "p_validos_a": 0.483621,
-      "margem": -0.032759,
-      "prob_a": 0.20445,
+      "p_validos_a": 0.480598,
+      "margem": -0.038803,
+      "prob_a": 0.16723,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3133,9 +3232,9 @@
       "codigo": "S7",
       "variante": "Ajuste integral",
       "regra": "viés do 1º turno aplicado 100% (fator 1,0)",
-      "p_validos_a": 0.475672,
-      "margem": -0.048656,
-      "prob_a": 0.12111,
+      "p_validos_a": 0.471212,
+      "margem": -0.057577,
+      "prob_a": 0.089085,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3144,9 +3243,9 @@
       "codigo": "S8",
       "variante": "Sinal de redes",
       "regra": "desloca pela variação do índice de redes (coeficiente do teste retroativo, encolhido)",
-      "p_validos_a": 0.495434,
-      "margem": -0.009132,
-      "prob_a": 0.405675,
+      "p_validos_a": 0.492537,
+      "margem": -0.014926,
+      "prob_a": 0.34955,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3155,9 +3254,9 @@
       "codigo": "S9",
       "variante": "Viés só pelo modo de coleta",
       "regra": "ajuste pela média do modo (presencial, telefone, online), não pelo instituto",
-      "p_validos_a": 0.483113,
-      "margem": -0.033774,
-      "prob_a": 0.1981,
+      "p_validos_a": 0.481096,
+      "margem": -0.037807,
+      "prob_a": 0.1729,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3166,9 +3265,9 @@
       "codigo": "S10",
       "variante": "Sem rejeição",
       "regra": "só a intenção de voto (peso 0 para o voto potencial)",
-      "p_validos_a": 0.481503,
-      "margem": -0.036995,
-      "prob_a": 0.177775,
+      "p_validos_a": 0.478909,
+      "margem": -0.042182,
+      "prob_a": 0.149205,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -3177,9 +3276,9 @@
       "codigo": "S11",
       "variante": "Só rejeição",
       "regra": "nas pesquisas que medem rejeição, só o voto potencial (100 − rejeição)",
-      "p_validos_a": 0.485771,
-      "margem": -0.028458,
-      "prob_a": 0.23502,
+      "p_validos_a": 0.482331,
+      "margem": -0.035339,
+      "prob_a": 0.188755,
       "favorito": "b",
       "inverte": false,
       "n_pesquisas": 30
@@ -4742,7 +4841,7 @@
       },
       {
         "data": "2026-08-17",
-        "lula": 5,
+        "lula": 4,
         "flavio": 2,
         "parcial": false
       },
@@ -4976,7 +5075,7 @@
       },
       {
         "data": "2026-09-25",
-        "lula": 11,
+        "lula": 10,
         "flavio": 7,
         "parcial": false
       },
@@ -5019,7 +5118,7 @@
       {
         "data": "2026-10-02",
         "lula": 25,
-        "flavio": 12,
+        "flavio": 13,
         "parcial": false
       },
       {
@@ -5060,8 +5159,8 @@
       },
       {
         "data": "2026-10-09",
-        "lula": 29,
-        "flavio": 16,
+        "lula": 28,
+        "flavio": 17,
         "parcial": false
       },
       {
@@ -5072,14 +5171,14 @@
       },
       {
         "data": "2026-10-11",
-        "lula": 26,
+        "lula": 27,
         "flavio": 18,
         "parcial": false
       },
       {
         "data": "2026-10-12",
-        "lula": 28,
-        "flavio": 19,
+        "lula": 29,
+        "flavio": 20,
         "parcial": false
       },
       {
@@ -5090,20 +5189,20 @@
       },
       {
         "data": "2026-10-14",
-        "lula": 20,
-        "flavio": 16,
+        "lula": 21,
+        "flavio": 15,
         "parcial": false
       },
       {
         "data": "2026-10-15",
-        "lula": 21,
+        "lula": 20,
         "flavio": 16,
         "parcial": false
       },
       {
         "data": "2026-10-16",
         "lula": 24,
-        "flavio": 16,
+        "flavio": 15,
         "parcial": false
       },
       {
@@ -5114,55 +5213,55 @@
       },
       {
         "data": "2026-10-18",
-        "lula": 47,
+        "lula": 49,
         "flavio": 31,
         "parcial": false
       },
       {
         "data": "2026-10-19",
         "lula": 50,
-        "flavio": 48,
+        "flavio": 50,
         "parcial": false
       },
       {
         "data": "2026-10-20",
-        "lula": 39,
+        "lula": 40,
         "flavio": 29,
         "parcial": false
       },
       {
         "data": "2026-10-21",
-        "lula": 35,
-        "flavio": 30,
+        "lula": 36,
+        "flavio": 31,
         "parcial": false
       },
       {
         "data": "2026-10-22",
         "lula": 30,
-        "flavio": 34,
+        "flavio": 32,
         "parcial": false
       },
       {
         "data": "2026-10-23",
-        "lula": 29,
+        "lula": 26,
         "flavio": 25,
         "parcial": true
       }
     ],
     "youtube": [
       {
-        "momento": "2026-10-23T07:08:16-03:00",
+        "momento": "2026-10-23T11:06:26-03:00",
         "candidato": "lula",
         "inscritos": 2440000,
         "visualizacoes": 508806569,
         "videos": 2644
       },
       {
-        "momento": "2026-10-23T07:08:16-03:00",
+        "momento": "2026-10-23T11:06:26-03:00",
         "candidato": "flavio",
         "inscritos": 1570000,
         "visualizacoes": 213476681,
-        "videos": 5998
+        "videos": 6000
       }
     ],
     "indice": [
@@ -5476,52 +5575,52 @@
       },
       {
         "data": "2026-08-17",
-        "trends": 0.40540540540540543,
+        "trends": 0.4166666666666667,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.40540540540540543
+        "indice_flavio": 0.4166666666666667
       },
       {
         "data": "2026-08-18",
-        "trends": 0.41025641025641024,
+        "trends": 0.42105263157894735,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.41025641025641024
+        "indice_flavio": 0.42105263157894735
       },
       {
         "data": "2026-08-19",
-        "trends": 0.4047619047619047,
+        "trends": 0.4146341463414634,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.4047619047619047
+        "indice_flavio": 0.4146341463414634
       },
       {
         "data": "2026-08-20",
-        "trends": 0.35,
+        "trends": 0.358974358974359,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.35
+        "indice_flavio": 0.358974358974359
       },
       {
         "data": "2026-08-21",
+        "trends": 0.33333333333333337,
+        "impulsionamento": null,
+        "youtube": null,
+        "indice_flavio": 0.33333333333333337
+      },
+      {
+        "data": "2026-08-22",
         "trends": 0.325,
         "impulsionamento": null,
         "youtube": null,
         "indice_flavio": 0.325
       },
       {
-        "data": "2026-08-22",
-        "trends": 0.3170731707317073,
-        "impulsionamento": null,
-        "youtube": null,
-        "indice_flavio": 0.3170731707317073
-      },
-      {
         "data": "2026-08-23",
-        "trends": 0.2857142857142857,
+        "trends": 0.2926829268292683,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.2857142857142857
+        "indice_flavio": 0.2926829268292683
       },
       {
         "data": "2026-08-24",
@@ -5749,221 +5848,221 @@
       },
       {
         "data": "2026-09-25",
-        "trends": 0.34246575342465757,
+        "trends": 0.3472222222222222,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.34246575342465757
+        "indice_flavio": 0.3472222222222222
       },
       {
         "data": "2026-09-26",
-        "trends": 0.3522727272727273,
+        "trends": 0.3563218390804598,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.3522727272727273
+        "indice_flavio": 0.3563218390804598
       },
       {
         "data": "2026-09-27",
-        "trends": 0.35779816513761464,
+        "trends": 0.3611111111111111,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.35779816513761464
+        "indice_flavio": 0.3611111111111111
       },
       {
         "data": "2026-09-28",
-        "trends": 0.36434108527131787,
+        "trends": 0.3671875,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.36434108527131787
+        "indice_flavio": 0.3671875
       },
       {
         "data": "2026-09-29",
-        "trends": 0.3698630136986301,
+        "trends": 0.37241379310344824,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.3698630136986301
+        "indice_flavio": 0.37241379310344824
       },
       {
         "data": "2026-09-30",
-        "trends": 0.3658536585365853,
+        "trends": 0.36809815950920244,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.3658536585365853
+        "indice_flavio": 0.36809815950920244
       },
       {
         "data": "2026-10-01",
-        "trends": 0.3681318681318681,
+        "trends": 0.37016574585635365,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.3681318681318681
+        "indice_flavio": 0.37016574585635365
       },
       {
         "data": "2026-10-02",
-        "trends": 0.35820895522388063,
+        "trends": 0.36138613861386143,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.35820895522388063
+        "indice_flavio": 0.36138613861386143
       },
       {
         "data": "2026-10-03",
-        "trends": 0.36036036036036034,
+        "trends": 0.36322869955156956,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.36036036036036034
+        "indice_flavio": 0.36322869955156956
       },
       {
         "data": "2026-10-04",
-        "trends": 0.401595744680851,
+        "trends": 0.403183023872679,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.401595744680851
+        "indice_flavio": 0.403183023872679
       },
       {
         "data": "2026-10-05",
-        "trends": 0.4155555555555556,
+        "trends": 0.41685144124168516,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.4155555555555556
+        "indice_flavio": 0.41685144124168516
       },
       {
         "data": "2026-10-06",
-        "trends": 0.42372881355932207,
+        "trends": 0.4249471458773785,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.42372881355932207
+        "indice_flavio": 0.4249471458773785
       },
       {
         "data": "2026-10-07",
-        "trends": 0.4355828220858895,
+        "trends": 0.43673469387755104,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.4355828220858895
+        "indice_flavio": 0.43673469387755104
       },
       {
         "data": "2026-10-08",
-        "trends": 0.44246031746031744,
+        "trends": 0.44356435643564357,
         "impulsionamento": null,
         "youtube": 0.2715001496241139,
-        "indice_flavio": 0.35698023354221564
+        "indice_flavio": 0.35753225302987873
       },
       {
         "data": "2026-10-09",
-        "trends": 0.44335937500000006,
+        "trends": 0.4453125,
         "impulsionamento": null,
         "youtube": 0.3383463100035912,
-        "indice_flavio": 0.39085284250179564
+        "indice_flavio": 0.39182940500179564
       },
       {
         "data": "2026-10-10",
-        "trends": 0.44874274661508706,
+        "trends": 0.45067698259187616,
         "impulsionamento": null,
         "youtube": 0.29362914218272584,
-        "indice_flavio": 0.37118594439890645
+        "indice_flavio": 0.372153062387301
       },
       {
         "data": "2026-10-11",
-        "trends": 0.44473684210526315,
+        "trends": 0.44619422572178474,
         "impulsionamento": null,
         "youtube": 0.33357424039605066,
-        "indice_flavio": 0.3891555412506569
+        "indice_flavio": 0.38988423305891773
       },
       {
         "data": "2026-10-12",
-        "trends": 0.4342507645259939,
+        "trends": 0.43636363636363634,
         "impulsionamento": null,
         "youtube": 0.37594871519271844,
-        "indice_flavio": 0.4050997398593562
+        "indice_flavio": 0.4061561757781774
       },
       {
         "data": "2026-10-13",
-        "trends": 0.42812500000000003,
+        "trends": 0.4303405572755418,
         "impulsionamento": null,
         "youtube": 0.23165042319236925,
-        "indice_flavio": 0.32988771159618463
+        "indice_flavio": 0.3309954902339555
       },
       {
         "data": "2026-10-14",
-        "trends": 0.4193548387096774,
+        "trends": 0.4185303514376997,
         "impulsionamento": null,
         "youtube": null,
-        "indice_flavio": 0.4193548387096774
+        "indice_flavio": 0.4185303514376997
       },
       {
         "data": "2026-10-15",
-        "trends": 0.41333333333333333,
+        "trends": 0.413907284768212,
         "impulsionamento": null,
         "youtube": 0.26641292084153495,
-        "indice_flavio": 0.3398731270874341
+        "indice_flavio": 0.34016010280487347
       },
       {
         "data": "2026-10-16",
-        "trends": 0.42033898305084755,
+        "trends": 0.4155405405405405,
         "impulsionamento": null,
         "youtube": 0.2572848334694107,
-        "indice_flavio": 0.33881190826012914
+        "indice_flavio": 0.3364126870049756
       },
       {
         "data": "2026-10-17",
-        "trends": 0.42622950819672134,
+        "trends": 0.4215686274509804,
         "impulsionamento": null,
         "youtube": 0.38401572132218337,
-        "indice_flavio": 0.4051226147594523
+        "indice_flavio": 0.4027921743865819
       },
       {
         "data": "2026-10-18",
-        "trends": 0.4218289085545722,
+        "trends": 0.41642228739002934,
         "impulsionamento": null,
         "youtube": 0.44447568604826343,
-        "indice_flavio": 0.4331522973014178
+        "indice_flavio": 0.4304489867191464
       },
       {
         "data": "2026-10-19",
-        "trends": 0.44102564102564107,
+        "trends": 0.4387755102040817,
         "impulsionamento": null,
         "youtube": 0.6756041152359199,
-        "indice_flavio": 0.5583148781307805
+        "indice_flavio": 0.5571898127200008
       },
       {
         "data": "2026-10-20",
-        "trends": 0.43990384615384615,
+        "trends": 0.4367541766109785,
         "impulsionamento": null,
         "youtube": 0.42486760823280373,
-        "indice_flavio": 0.4323857271933249
+        "indice_flavio": 0.4308108924218911
       },
       {
         "data": "2026-10-21",
-        "trends": 0.44269662921348313,
+        "trends": 0.44222222222222224,
         "impulsionamento": null,
         "youtube": 0.26694595448886366,
-        "indice_flavio": 0.3548212918511734
+        "indice_flavio": 0.35458408835554295
       },
       {
         "data": "2026-10-22",
-        "trends": 0.4555084745762712,
+        "trends": 0.45168067226890757,
         "impulsionamento": null,
         "youtube": 0.31350509080500727,
-        "indice_flavio": 0.3845067826906392
+        "indice_flavio": 0.3825928815369574
       },
       {
         "data": "2026-10-23",
-        "trends": 0.4609053497942387,
+        "trends": 0.4610655737704918,
         "impulsionamento": null,
         "youtube": 0.0,
-        "indice_flavio": 0.23045267489711935
+        "indice_flavio": 0.2305327868852459
       }
     ],
     "backtest": {
       "n_obs": 35,
-      "beta": 0.055207457022352656,
-      "se_hac": 0.037825943529099446,
+      "beta": 0.05590668551990618,
+      "se_hac": 0.0367704805485335,
       "ic95": [
-        -0.018931392294682263,
-        0.12934630633938757
+        -0.01616345635521948,
+        0.12797682739503183
       ],
       "n_oos": 19,
-      "mse_ratio": 1.1289306837212896,
-      "beta_posterior": 0.0539718876620436,
+      "mse_ratio": 1.131159505601869,
+      "beta_posterior": 0.05472286084568524,
       "aprovado": false,
-      "nivel_indice_vespera": 0.36036036036036034,
+      "nivel_indice_vespera": 0.36322869955156956,
       "erro_pesquisas_1t_pp": 2.0119847899247145,
       "nota": "NÃO aprovado: o sinal fica só na sensibilidade (S8)",
       "parametros": {
@@ -5976,7 +6075,7 @@
     },
     "s8": {
       "data_referencia_pesquisas": "2026-10-19",
-      "deslocamento_flavio": -0.011796894667704843
+      "deslocamento_flavio": -0.011917071312680466
     }
   },
   "primeiro_turno": {
@@ -7044,9 +7143,9 @@
     ],
     "fatia_busca_por_fase": {
       "Julho": 0.43198449834479247,
-      "Agosto": 0.3571088980648105,
+      "Agosto": 0.3591777008665629,
       "1 a 15 de setembro": 0.3256983844530305,
-      "Reta final (16/09 a 03/10)": 0.34700585555774954
+      "Reta final (16/09 a 03/10)": 0.3485525012238932
     },
     "trends_fatia": [
       {
@@ -7227,31 +7326,31 @@
       },
       {
         "data": "2026-08-17",
-        "fracao_flavio": 0.40540540540540543
+        "fracao_flavio": 0.4166666666666667
       },
       {
         "data": "2026-08-18",
-        "fracao_flavio": 0.41025641025641024
+        "fracao_flavio": 0.42105263157894735
       },
       {
         "data": "2026-08-19",
-        "fracao_flavio": 0.4047619047619047
+        "fracao_flavio": 0.4146341463414634
       },
       {
         "data": "2026-08-20",
-        "fracao_flavio": 0.35
+        "fracao_flavio": 0.358974358974359
       },
       {
         "data": "2026-08-21",
-        "fracao_flavio": 0.325
+        "fracao_flavio": 0.33333333333333337
       },
       {
         "data": "2026-08-22",
-        "fracao_flavio": 0.3170731707317073
+        "fracao_flavio": 0.325
       },
       {
         "data": "2026-08-23",
-        "fracao_flavio": 0.2857142857142857
+        "fracao_flavio": 0.2926829268292683
       },
       {
         "data": "2026-08-24",
@@ -7383,43 +7482,43 @@
       },
       {
         "data": "2026-09-25",
-        "fracao_flavio": 0.34246575342465757
+        "fracao_flavio": 0.3472222222222222
       },
       {
         "data": "2026-09-26",
-        "fracao_flavio": 0.3522727272727273
+        "fracao_flavio": 0.3563218390804598
       },
       {
         "data": "2026-09-27",
-        "fracao_flavio": 0.35779816513761464
+        "fracao_flavio": 0.3611111111111111
       },
       {
         "data": "2026-09-28",
-        "fracao_flavio": 0.36434108527131787
+        "fracao_flavio": 0.3671875
       },
       {
         "data": "2026-09-29",
-        "fracao_flavio": 0.3698630136986301
+        "fracao_flavio": 0.37241379310344824
       },
       {
         "data": "2026-09-30",
-        "fracao_flavio": 0.3658536585365853
+        "fracao_flavio": 0.36809815950920244
       },
       {
         "data": "2026-10-01",
-        "fracao_flavio": 0.3681318681318681
+        "fracao_flavio": 0.37016574585635365
       },
       {
         "data": "2026-10-02",
-        "fracao_flavio": 0.35820895522388063
+        "fracao_flavio": 0.36138613861386143
       },
       {
         "data": "2026-10-03",
-        "fracao_flavio": 0.36036036036036034
+        "fracao_flavio": 0.36322869955156956
       },
       {
         "data": "2026-10-04",
-        "fracao_flavio": 0.401595744680851
+        "fracao_flavio": 0.403183023872679
       }
     ],
     "impulsionamento_fatia": [
@@ -7504,15 +7603,15 @@
         "sinal": "trends",
         "defasagem": "mesma semana",
         "n_semanas": 12,
-        "r": -0.4085968463389589,
-        "p_valor": 0.1872564891305231
+        "r": -0.38908036682535274,
+        "p_valor": 0.211274978051088
       },
       {
         "sinal": "trends",
         "defasagem": "semana anterior",
         "n_semanas": 11,
-        "r": 0.42182662554984773,
-        "p_valor": 0.19626794952084217
+        "r": 0.4026951536542008,
+        "p_valor": 0.21947500780071502
       }
     ],
     "insights": [
@@ -7521,7 +7620,7 @@
       "Impulsionamento declarado ao TSE: até 10/09, última data em que as duas campanhas já tinham declarado despesas, Lula contratou R$ 2,69 mi e Flávio R$ 1,00 mi. Depois disso, só Flávio declarou novos contratos; a prestação de contas de Lula ainda não traz despesas posteriores a 10/09 (as campanhas completam as contas até depois da eleição). Por isso não dá para comparar o gasto dos dois na reta final.",
       "Nas buscas do Google, Lula teve mais atenção que Flávio em todas as fases (fatia de Flávio entre 33% e 43%). Busca mede atenção, inclusive negativa, e não apoio.",
       "O erro a favor de Lula foi menor nas pesquisas pela internet e maior nas presenciais (misto -0,1, online +0,7, telefone +2,2, presencial +2,2 p.p.).",
-      "Semana a semana, a variação dos sinais online não acompanhou a variação das pesquisas de forma estatisticamente clara (maior correlação: trends, semana anterior, r = 0,42, p = 0,20, 11 semanas)."
+      "Semana a semana, a variação dos sinais online não acompanhou a variação das pesquisas de forma estatisticamente clara (maior correlação: trends, semana anterior, r = 0,40, p = 0,22, 11 semanas)."
     ],
     "primeira_pesquisa": "2026-07-06",
     "fonte_pesquisas": "https://en.wikipedia.org/wiki/Opinion_polling_for_the_2026_Brazilian_presidential_election"
@@ -8137,29 +8236,62 @@
     ],
     "impacto_hoje": {
       "quem_menos_2t": {
-        "n": 17,
-        "media_a": 46.48823529411764,
-        "media_b": 45.688235294117646,
-        "diferenca_pp": -0.7999999999999972,
+        "n": 15,
+        "media_a": 46.28666666666666,
+        "media_b": 45.44666666666667,
+        "diferenca_pp": -0.8399999999999892,
         "menos_rejeitado": "empate",
-        "a_menos_em": 4,
-        "b_menos_em": 11,
+        "a_menos_em": 3,
+        "b_menos_em": 10,
         "empates": 2,
         "empate_pp": 1.5
       },
       "sem_rejeicao": {
-        "p_validos_a": 0.481503,
-        "prob_a": 0.177775
+        "p_validos_a": 0.478909,
+        "prob_a": 0.149205
       },
       "principal": {
-        "p_validos_a": 0.483637,
-        "prob_a": 0.20463
+        "p_validos_a": 0.48062,
+        "prob_a": 0.167475
       },
       "so_rejeicao": {
-        "p_validos_a": 0.485771,
-        "prob_a": 0.23502
+        "p_validos_a": 0.482331,
+        "prob_a": 0.188755
       },
       "pesquisas": [
+        {
+          "instituto": "Vetor Arrow",
+          "registro_tse": "BR-06957/2026",
+          "data_campo_fim": "2026-10-23",
+          "rej_a": null,
+          "rej_b": null,
+          "p_bruto": 0.47313,
+          "p_intencao": 0.4619680483341427,
+          "p_potencial": null,
+          "p_usado": 0.4619680483341427
+        },
+        {
+          "instituto": "Ipespe",
+          "registro_tse": "BR-04350/2026",
+          "data_campo_fim": "2026-10-22",
+          "rej_a": null,
+          "rej_b": null,
+          "p_bruto": 0.494737,
+          "p_intencao": 0.48395850905377763,
+          "p_potencial": null,
+          "p_usado": 0.48395850905377763
+        },
+        {
+          "instituto": "Alfa Inteligência",
+          "registro_tse": "BR-08496/2026",
+          "data_campo_fim": "2026-10-22",
+          "rej_a": null,
+          "rej_b": null,
+          "p_bruto": 0.479666,
+          "p_intencao": 0.4506359248766215,
+          "p_potencial": null,
+          "p_usado": 0.4506359248766215
+        },
         {
           "instituto": "Vox Brasil",
           "registro_tse": "BR-03259/2026",
@@ -8456,39 +8588,6 @@
           "p_intencao": 0.49346343379483726,
           "p_potencial": 0.49842425207745333,
           "p_usado": 0.4959438429361453
-        },
-        {
-          "instituto": "Datafolha",
-          "registro_tse": "BR-00466/2026",
-          "data_campo_fim": "2026-10-15",
-          "rej_a": 46.0,
-          "rej_b": 44.0,
-          "p_bruto": 0.478723,
-          "p_intencao": 0.46504483796117513,
-          "p_potencial": 0.48585161852543846,
-          "p_usado": 0.4754482282433068
-        },
-        {
-          "instituto": "Indexa Pesquisas",
-          "registro_tse": "BR-04629/2026",
-          "data_campo_fim": "2026-10-14",
-          "rej_a": 50.0,
-          "rej_b": 51.0,
-          "p_bruto": 0.488372,
-          "p_intencao": 0.4775935090537776,
-          "p_potencial": 0.5013311565079147,
-          "p_usado": 0.48946233278084617
-        },
-        {
-          "instituto": "Palver",
-          "registro_tse": "BR-08028/2026",
-          "data_campo_fim": "2026-10-13",
-          "rej_a": null,
-          "rej_b": null,
-          "p_bruto": 0.494949,
-          "p_intencao": 0.5010026387274586,
-          "p_potencial": null,
-          "p_usado": 0.5010026387274586
         }
       ]
     }
@@ -8497,58 +8596,57 @@
     "modelo": "efeito_fixo",
     "n_pesquisas": 30,
     "data_eleicao": "2026-10-25",
-    "p_hoje_a": 0.483637,
+    "p_hoje_a": 0.48062,
     "disponivel": true,
-    "inclinacao_pp_dia": -0.0124,
-    "ep_pp_dia": 0.0507,
+    "inclinacao_pp_dia": -0.0334,
+    "ep_pp_dia": 0.0577,
     "ic95_inclinacao_pp_dia": [
-      -0.1253,
-      0.1005
+      -0.164,
+      0.0972
     ],
-    "gl": 10,
-    "p_valor": 0.8114,
+    "gl": 9,
+    "p_valor": 0.5775,
     "firme": false,
-    "cresce": null,
-    "institutos": 19,
+    "cresce": "b",
+    "institutos": 20,
     "institutos_repetidos": [
-      "Datafolha",
+      "Alfa Inteligência",
       "Futura",
       "Gerp",
-      "Indexa Pesquisas",
       "Instituto Veritá",
-      "Palver",
+      "Ipespe",
       "PoderData",
       "Real Time Big Data",
       "Vox Brasil"
     ],
-    "n_pesquisas_repetidas": 20,
+    "n_pesquisas_repetidas": 18,
     "vencedor": "b",
     "lider_hoje": "b",
     "data_referencia": "2026-10-19",
     "dias": 6,
-    "p_proj_a": 0.482892,
-    "p_proj_b": 0.517108,
-    "sigma": 0.023557,
-    "ic95_inf": 0.436157,
-    "ic95_sup": 0.529464,
-    "margem_ic95_inf": -0.127687,
-    "margem_ic95_sup": 0.058927,
-    "prob_a": 0.19707,
-    "prob_b": 0.80293,
+    "p_proj_a": 0.478618,
+    "p_proj_b": 0.521382,
+    "sigma": 0.023634,
+    "ic95_inf": 0.431731,
+    "ic95_sup": 0.525341,
+    "margem_ic95_inf": -0.136539,
+    "margem_ic95_sup": 0.050683,
+    "prob_a": 0.148485,
+    "prob_b": 0.851515,
     "empate_tecnico": true,
     "comparacao": [
       {
         "modelo": "efeito_fixo",
         "nome": "Reta por instituto (adotado)",
         "descricao": "Compara cada instituto com ele mesmo; peso pela amostra.",
-        "inclinacao_pp_dia": -0.0124,
-        "ep_pp_dia": 0.0507,
-        "p_proj_a": 0.482892,
-        "prob_a": 0.19707,
+        "inclinacao_pp_dia": -0.0334,
+        "ep_pp_dia": 0.0577,
+        "p_proj_a": 0.478618,
+        "prob_a": 0.148485,
         "teste_2t": {
           "origens": 7,
-          "previsoes": 96,
-          "erro_medio_pp": 1.133
+          "previsoes": 117,
+          "erro_medio_pp": 1.406
         },
         "teste_1t": {
           "origens": 22,
@@ -8561,14 +8659,14 @@
         "modelo": "efeito_fixo_recente",
         "nome": "Reta por instituto com meia-vida",
         "descricao": "Igual ao adotado, mas pesquisas antigas pesam menos (peso da média do site).",
-        "inclinacao_pp_dia": -0.0016,
-        "ep_pp_dia": 0.0541,
-        "p_proj_a": 0.48354,
-        "prob_a": 0.205465,
+        "inclinacao_pp_dia": -0.0304,
+        "ep_pp_dia": 0.0595,
+        "p_proj_a": 0.478794,
+        "prob_a": 0.150465,
         "teste_2t": {
           "origens": 7,
-          "previsoes": 96,
-          "erro_medio_pp": 1.207
+          "previsoes": 117,
+          "erro_medio_pp": 1.481
         },
         "teste_1t": {
           "origens": 22,
@@ -8581,14 +8679,14 @@
         "modelo": "reta_simples",
         "nome": "Reta simples com todas as pesquisas",
         "descricao": "Uma reta só, misturando institutos; sofre com o 'efeito instituto'.",
-        "inclinacao_pp_dia": -0.0461,
-        "ep_pp_dia": 0.0786,
-        "p_proj_a": 0.480872,
-        "prob_a": 0.17471,
+        "inclinacao_pp_dia": -0.079,
+        "ep_pp_dia": 0.0911,
+        "p_proj_a": 0.475878,
+        "prob_a": 0.126495,
         "teste_2t": {
           "origens": 7,
-          "previsoes": 96,
-          "erro_medio_pp": 1.079
+          "previsoes": 117,
+          "erro_medio_pp": 1.314
         },
         "teste_1t": {
           "origens": 22,
@@ -8601,14 +8699,14 @@
         "modelo": "serie_agregador",
         "nome": "Inclinação da média do site (7 dias)",
         "descricao": "Inclinação da projeção diária do site nos últimos 7 dias.",
-        "inclinacao_pp_dia": 0.0449,
-        "ep_pp_dia": 0.0231,
-        "p_proj_a": 0.484534,
-        "prob_a": 0.216935,
+        "inclinacao_pp_dia": 0.0125,
+        "ep_pp_dia": 0.0256,
+        "p_proj_a": 0.48087,
+        "prob_a": 0.17044,
         "teste_2t": {
           "origens": 7,
-          "previsoes": 96,
-          "erro_medio_pp": 0.98
+          "previsoes": 117,
+          "erro_medio_pp": 1.207
         },
         "teste_1t": {
           "origens": 22,
@@ -8623,12 +8721,12 @@
         "descricao": "Supõe que nada muda até 25/10 (é a projeção 'se fosse hoje').",
         "inclinacao_pp_dia": 0.0,
         "ep_pp_dia": 0.0,
-        "p_proj_a": 0.483637,
-        "prob_a": 0.20463,
+        "p_proj_a": 0.48062,
+        "prob_a": 0.167475,
         "teste_2t": {
           "origens": 7,
-          "previsoes": 96,
-          "erro_medio_pp": 0.958
+          "previsoes": 117,
+          "erro_medio_pp": 1.103
         },
         "teste_1t": {
           "origens": 22,
@@ -8639,9 +8737,9 @@
       }
     ],
     "textos": {
-      "frase": "Nenhum dos dois está crescendo de forma clara. Se nada mudar, no dia da eleição, 25 de outubro de 2026, Flávio Bolsonaro será eleito com 51,7% dos votos válidos.",
-      "aviso": "Mesmo nesse cenário seria empate técnico: a faixa de 95% para Lula em 25/10 vai de 43,6% a 52,9%. O crescimento ainda não é estatisticamente firme: pode ser só oscilação das pesquisas. No teste retroativo do 2º turno, prolongar a tendência errou mais que supor nenhuma mudança (1,13 contra 0,96 ponto, em 7 datas de avaliação). Significância do ritmo não garante melhor previsão.",
-      "ritmo": "Flávio ganha em média 0,01 ponto por dia entre os dois, comparando cada instituto com ele mesmo (20 pesquisas de 9 institutos que repetiram a pesquisa)."
+      "frase": "Se Flávio Bolsonaro continuar nessa tendência, no dia da eleição, 25 de outubro de 2026, ele será eleito com 52,1% dos votos válidos.",
+      "aviso": "Mesmo nesse cenário seria empate técnico: a faixa de 95% para Lula em 25/10 vai de 43,2% a 52,5%. O crescimento ainda não é estatisticamente firme: pode ser só oscilação das pesquisas. No teste retroativo do 2º turno, prolongar a tendência errou mais que supor nenhuma mudança (1,41 contra 1,10 ponto, em 7 datas de avaliação). Significância do ritmo não garante melhor previsão.",
+      "ritmo": "Flávio ganha em média 0,03 ponto por dia entre os dois, comparando cada instituto com ele mesmo (18 pesquisas de 8 institutos que repetiram a pesquisa)."
     }
   },
   "fatos_texto": {
@@ -8693,36 +8791,36 @@
     "tend_erro_zero": "1,83"
   },
   "guarda": {
-    "verificado_em": "2026-10-23T07:08:24-03:00",
+    "verificado_em": "2026-10-23T11:06:36-03:00",
     "checagens": 151,
     "efeito": {
       "antes": {
-        "lula": "48,3%",
+        "lula": "48,2%",
         "faixa95_lula": [
-          "43,7%",
-          "53,0%"
+          "43,5%",
+          "52,8%"
         ],
         "faixa95_diferenca_pp": [
-          -12.6,
-          6.0
+          -12.9,
+          5.6
         ],
         "empate_tecnico": true,
-        "chance_lula": "20,4%",
-        "incerteza_pp": 2.35,
+        "chance_lula": "18,0%",
+        "incerteza_pp": 2.34,
         "n_pesquisas": 30
       },
       "depois": {
-        "lula": "48,4%",
+        "lula": "48,1%",
         "faixa95_lula": [
-          "43,7%",
-          "53,0%"
+          "43,4%",
+          "52,7%"
         ],
         "faixa95_diferenca_pp": [
-          -12.5,
-          6.0
+          -13.2,
+          5.4
         ],
         "empate_tecnico": true,
-        "chance_lula": "20,5%",
+        "chance_lula": "16,7%",
         "incerteza_pp": 2.34,
         "n_pesquisas": 30
       },
@@ -8731,8 +8829,7 @@
       "chance_mudou": true
     },
     "pesquisas_novas": [
-      "Vox Brasil",
-      "Real Time Big Data"
+      "Vetor Arrow"
     ]
   }
 }

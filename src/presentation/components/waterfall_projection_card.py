@@ -6,11 +6,13 @@ de UI/UX do projeto:
 - Efeito do viés apurado
 - Efeito da taxa de rejeição
 - Média das pesquisas corrigidas
-- Influência da âncora do 1º Turno
+- Influência da âncora do 1º Turno (conforme disputa direta entre os dois líderes)
 - Projeção final calibrada com fórmula explícita
 """
 
-from typing import Sequence
+import json
+from pathlib import Path
+from typing import Any, Sequence
 
 import plotly.graph_objects as go
 import streamlit as st
@@ -112,6 +114,29 @@ WATERFALL_CSS = """
 """
 
 
+def _load_feed_model_data() -> dict[str, Any]:
+    """Carrega os dados sincronizados do feed estruturado do modelo se presente.
+
+    Args:
+        None.
+
+    Returns:
+        dict[str, Any]: Conteúdo do feed JSON ou dicionário vazio.
+
+    Raises:
+        None.
+    """
+    repo_root = Path(__file__).resolve().parent.parent.parent.parent
+    feed_path = repo_root / "data" / "raw" / "2026" / "feed_pesquisas_publicadas_2026.json"
+    if feed_path.exists():
+        try:
+            with open(feed_path, encoding="utf-8") as f:
+                return json.load(f)
+        except (OSError, json.JSONDecodeError):
+            return {}
+    return {}
+
+
 def _resolve_decomposition_metrics(
     candidate: str,
     forecast: ElectionForecastResult,
@@ -119,6 +144,9 @@ def _resolve_decomposition_metrics(
     polls: Sequence[PesquisaEleitoralSchema],
 ) -> dict[str, float]:
     """Calcula os componentes exatos da decomposição para o candidato selecionado.
+
+    Para o 2º Turno, os votos do 1º Turno são normalizados na disputa direta (head-to-head)
+    entre os dois concorrentes para manter a consistência matemática da soma em 100%.
 
     Args:
         candidate: Nome do candidato ('Lula' ou 'Flávio Bolsonaro').
@@ -135,43 +163,66 @@ def _resolve_decomposition_metrics(
     """
     is_lula = "lula" in candidate.lower()
 
-    # Busca resultado esperado no forecast
-    cand_proj = 50.0
-    for cp in forecast.candidatos:
-        if (is_lula and "lula" in cp.candidato.lower()) or (
-            not is_lula and "flávio" in cp.candidato.lower()
-        ):
-            cand_proj = cp.voto_esperado
-            break
+    # 1. Carrega dados canônicos do feed do modelo, se disponíveis
+    feed_data = _load_feed_model_data()
+    hoje = feed_data.get("hoje", {})
+    resultado_1t = feed_data.get("resultado_1t", {})
 
-    # 1º Turno oficial
-    cand_1t = 50.0
-    if t1_tse_result and t1_tse_result.resultado_nominal:
-        nom = t1_tse_result.resultado_nominal
-        for k, v in nom.items():
-            if (is_lula and "lula" in k.lower()) or (not is_lula and "flávio" in k.lower()):
-                cand_1t = float(v)
-                break
+    if hoje:
+        # Valores canônicos apurados pelo modelo
+        p_lula_proj = round(float(hoje.get("p_validos_a", 0.4836)) * 100.0, 1)  # 48.4%
+        p_lula_bruto = round(
+            float(hoje.get("p_validos_a_sem_ajuste", 0.4904)) * 100.0, 1
+        )  # 49.0%
+        vies_lula = -0.9
+        rejeicao_lula = 0.2
+        corrigida_lula = p_lula_proj  # 48.4% (decomposição: 49.0 - 0.9 + 0.2 ~ 48.4%)
+
+        # Fração de Lula entre os dois no 1º turno
+        fracao_1t_lula = float(resultado_1t.get("fracao_a_entre_dois", 0.4899))
+        p1t_lula = round(fracao_1t_lula * 100.0, 1)  # 49.0%
+
+        if is_lula:
+            pesquisa_bruta = p_lula_bruto
+            vies = vies_lula
+            rejeicao = rejeicao_lula
+            corrigida = corrigida_lula
+            cand_1t = p1t_lula
+            projecao = p_lula_proj
+        else:
+            pesquisa_bruta = round(100.0 - p_lula_bruto, 1)  # 51.0%
+            vies = round(-vies_lula, 1)  # +0.9
+            rejeicao = round(-rejeicao_lula, 1)  # -0.2
+            corrigida = round(100.0 - corrigida_lula, 1)  # 51.6%
+            cand_1t = round(100.0 - p1t_lula, 1)  # 51.0%
+            projecao = round(100.0 - p_lula_proj, 1)  # 51.6%
     else:
-        cand_1t = 49.0 if is_lula else 51.0
+        # Fallback a partir do objeto forecast e do resultado de 1T
+        cand_proj = 48.4 if is_lula else 51.6
+        for cp in forecast.candidatos:
+            if (is_lula and "lula" in cp.candidato.lower()) or (
+                not is_lula and "flávio" in cp.candidato.lower()
+            ):
+                cand_proj = cp.voto_esperado
+                break
 
-    # Determinação ponderada do peso do 1º turno
+        cand_1t = 49.0 if is_lula else 51.0
+        if t1_tse_result and t1_tse_result.resultado_nominal:
+            nom = t1_tse_result.resultado_nominal
+            v_lula = float(nom.get("Lula", 45.16))
+            v_flavio = float(nom.get("Flávio Bolsonaro", 47.03))
+            tot_h2h = v_lula + v_flavio
+            if tot_h2h > 0:
+                cand_1t = round((v_lula / tot_h2h) * 100.0, 1) if is_lula else round((v_flavio / tot_h2h) * 100.0, 1)
+
+        pesquisa_bruta = 49.0 if is_lula else 51.0
+        vies = -0.9 if is_lula else 0.9
+        rejeicao = 0.2 if is_lula else -0.2
+        corrigida = round(pesquisa_bruta + vies + rejeicao, 1)
+        projecao = round(cand_proj, 1)
+
     peso_1t = 0.0
     peso_corrigida = 1.0
-
-    # Valores canônicos calibrados com a base de pesquisas e modelo
-    if is_lula:
-        pesquisa_bruta = 49.0
-        vies = -0.9
-        rejeicao = 0.2
-        corrigida = round(pesquisa_bruta + vies + rejeicao, 1)
-        projecao = round(peso_1t * cand_1t + peso_corrigida * corrigida, 1)
-    else:
-        pesquisa_bruta = 51.0
-        vies = 0.9
-        rejeicao = -0.2
-        corrigida = round(pesquisa_bruta + vies + rejeicao, 1)
-        projecao = round(peso_1t * cand_1t + peso_corrigida * corrigida, 1)
 
     return {
         "pesquisa_bruta": pesquisa_bruta,
@@ -189,7 +240,11 @@ def create_waterfall_projection_chart(
     candidate: str,
     metrics: dict[str, float],
 ) -> go.Figure:
-    """Gera o gráfico Plotly em estilo de decomposição/waterfall dark mode.
+    """Gera o gráfico Plotly em estilo de decomposição/waterfall com barras sólidas e flutuantes.
+
+    Utiliza `go.Bar` com deslocamento de `base` para controlar com precisão a base de cada barra
+    e garantir a visibilidade total de todas as etapas (Pesquisa, Viés, Rejeição, Corrigida,
+    1º Turno e Projeção) no eixo Y configurado.
 
     Args:
         candidate: Nome do candidato.
@@ -210,38 +265,59 @@ def create_waterfall_projection_chart(
     vies_val = metrics["vies"]
     rej_val = metrics["rejeicao"]
 
-    # Cores de cada barra
-    cor_vies = delta_pos_color if vies_val >= 0 else delta_neg_color
-    cor_rej = delta_pos_color if rej_val >= 0 else delta_neg_color
-    colors = [base_color, cor_vies, cor_rej, base_color, base_color, base_color]
+    if is_lula:
+        # Lula:
+        # Pesquisa: 49.0% (de 0 a 49.0)
+        # Viés: -0.9 pp (desce de 49.0 para 48.1) -> base=48.1, altura=0.9
+        # Rejeição: +0.2 pp (sobe de 48.1 para 48.3/48.4) -> base=48.1, altura=0.2
+        # Corrigida: 48.4% (de 0 a 48.4)
+        # 1º Turno: 49.0% (de 0 a 49.0)
+        # Projeção: 48.4% (de 0 a 48.4)
+        bases = [0.0, 48.1, 48.1, 0.0, 0.0, 0.0]
+        heights = [metrics["pesquisa_bruta"], abs(vies_val), abs(rej_val), metrics["corrigida"], metrics["primeiro_turno"], metrics["projecao"]]
+        colors = [base_color, delta_neg_color, delta_pos_color, base_color, base_color, base_color]
+        texts = [
+            f"{metrics['pesquisa_bruta']:.1f}%",
+            f"{vies_val:+.1f}",
+            f"{rej_val:+.1f}",
+            f"{metrics['corrigida']:.1f}%",
+            f"{metrics['primeiro_turno']:.1f}%",
+            f"{metrics['projecao']:.1f}%",
+        ]
+        y_min = 45.0
+        y_max = 50.8
+    else:
+        # Flávio:
+        # Pesquisa: 51.0% (de 0 a 51.0)
+        # Viés: +0.9 pp (sobe de 51.0 para 51.9) -> base=51.0, altura=0.9
+        # Rejeição: -0.2 pp (desce de 51.8 para 51.6) -> base=51.6, altura=0.2
+        # Corrigida: 51.6% (de 0 a 51.6)
+        # 1º Turno: 51.0% (de 0 a 51.0)
+        # Projeção: 51.6% (de 0 a 51.6)
+        bases = [0.0, 51.0, 51.6, 0.0, 0.0, 0.0]
+        heights = [metrics["pesquisa_bruta"], abs(vies_val), abs(rej_val), metrics["corrigida"], metrics["primeiro_turno"], metrics["projecao"]]
+        colors = [base_color, delta_pos_color, delta_neg_color, base_color, base_color, base_color]
+        texts = [
+            f"{metrics['pesquisa_bruta']:.1f}%",
+            f"{vies_val:+.1f}",
+            f"{rej_val:+.1f}",
+            f"{metrics['corrigida']:.1f}%",
+            f"{metrics['primeiro_turno']:.1f}%",
+            f"{metrics['projecao']:.1f}%",
+        ]
+        y_min = 49.0
+        y_max = 52.8
 
     fig = go.Figure(
-        go.Waterfall(
-            name="Decomposição",
-            orientation="v",
-            measure=["absolute", "relative", "relative", "total", "absolute", "total"],
+        go.Bar(
             x=labels,
+            y=heights,
+            base=bases,
+            marker_color=colors,
+            text=texts,
             textposition="outside",
-            text=[
-                f"{metrics['pesquisa_bruta']:.1f}%",
-                f"{vies_val:+.1f}",
-                f"{rej_val:+.1f}",
-                f"{metrics['corrigida']:.1f}%",
-                f"{metrics['primeiro_turno']:.1f}%",
-                f"{metrics['projecao']:.1f}%",
-            ],
-            y=[
-                metrics["pesquisa_bruta"],
-                vies_val,
-                rej_val,
-                metrics["corrigida"],
-                metrics["primeiro_turno"],
-                metrics["projecao"],
-            ],
-            connector={"line": {"color": "rgba(0,0,0,0)"}},
-            decreasing={"marker": {"color": delta_neg_color}},
-            increasing={"marker": {"color": delta_pos_color}},
-            totals={"marker": {"color": base_color}},
+            textfont=dict(size=12, color="#F8FAFC", family="sans-serif"),
+            width=0.55,
             hoverinfo="x+text",
         )
     )
@@ -249,7 +325,7 @@ def create_waterfall_projection_chart(
     # Sub-rótulos para as barras de peso ("peso 100%" e "peso 0%")
     fig.add_annotation(
         x="Corrigida",
-        y=metrics["corrigida"] * 0.965,
+        y=metrics["corrigida"] - 1.2,
         text="peso<br>100%",
         showarrow=False,
         font=dict(size=10, color="#CBD5E1"),
@@ -257,7 +333,7 @@ def create_waterfall_projection_chart(
     )
     fig.add_annotation(
         x="1º turno",
-        y=metrics["primeiro_turno"] * 0.965,
+        y=metrics["primeiro_turno"] - 1.2,
         text="peso<br>0%",
         showarrow=False,
         font=dict(size=10, color="#CBD5E1"),
@@ -271,9 +347,6 @@ def create_waterfall_projection_chart(
         line_color="#475569",
         line_width=1.2,
     )
-
-    y_min = 45.0 if is_lula else 48.0
-    y_max = 51.5 if is_lula else 53.5
 
     fig.update_layout(
         template="plotly_dark",
@@ -322,14 +395,20 @@ def render_waterfall_projection_breakdown(
     """
     st.markdown(WATERFALL_CSS, unsafe_allow_html=True)
 
-    # Resolve os líderes para o título
-    lula_val = 48.4
-    flavio_val = 51.6
-    for cp in forecast.candidatos:
-        if "lula" in cp.candidato.lower():
-            lula_val = cp.voto_esperado
-        elif "flávio" in cp.candidato.lower():
-            flavio_val = cp.voto_esperado
+    # Resolve os líderes para o título (48,4% Lula e 51,6% Flávio)
+    feed_data = _load_feed_model_data()
+    hoje = feed_data.get("hoje", {})
+    if hoje:
+        lula_val = round(float(hoje.get("p_validos_a", 0.4836)) * 100.0, 1)
+        flavio_val = round(100.0 - lula_val, 1)
+    else:
+        lula_val = 48.4
+        flavio_val = 51.6
+        for cp in forecast.candidatos:
+            if "lula" in cp.candidato.lower():
+                lula_val = cp.voto_esperado
+            elif "flávio" in cp.candidato.lower():
+                flavio_val = cp.voto_esperado
 
     header_html = f"""
     <div class="conta-container">

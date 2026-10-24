@@ -13,12 +13,7 @@ from src.presentation.components.waterfall_projection_card import (
     _resolve_decomposition_metrics,
     create_waterfall_projection_chart,
 )
-from src.transformations.schemas import (
-    AbrangenciaEnum,
-    MetodologiaEnum,
-    PesquisaEleitoralSchema,
-    ResultadoOficialTSESchema,
-)
+from src.transformations.schemas import ResultadoOficialTSESchema
 
 
 @pytest.fixture

@@ -154,9 +154,7 @@ def _resolve_decomposition_metrics(
     if hoje:
         # Valores canônicos apurados pelo modelo a partir do feed oficial
         p_lula_proj = round(float(hoje.get("p_validos_a", 0.48)) * 100.0, 1)
-        p_lula_bruto = round(
-            float(hoje.get("p_validos_a_sem_ajuste", 0.48812)) * 100.0, 1
-        )
+        p_lula_bruto = round(float(hoje.get("p_validos_a_sem_ajuste", 0.48812)) * 100.0, 1)
         vies_lula = -0.9
         rejeicao_lula = round(p_lula_proj - p_lula_bruto - vies_lula, 1)
         corrigida_lula = round(p_lula_bruto + vies_lula + rejeicao_lula, 1)
@@ -196,7 +194,11 @@ def _resolve_decomposition_metrics(
             v_flavio = float(nom.get("Flávio Bolsonaro", 47.03))
             tot_h2h = v_lula + v_flavio
             if tot_h2h > 0:
-                cand_1t = round((v_lula / tot_h2h) * 100.0, 1) if is_lula else round((v_flavio / tot_h2h) * 100.0, 1)
+                cand_1t = (
+                    round((v_lula / tot_h2h) * 100.0, 1)
+                    if is_lula
+                    else round((v_flavio / tot_h2h) * 100.0, 1)
+                )
 
         pesquisa_bruta = 48.8 if is_lula else 51.2
         vies = -0.9 if is_lula else 0.9
@@ -257,7 +259,14 @@ def create_waterfall_projection_chart(
         # 1º Turno: 49.0% (de 0 a 49.0)
         # Projeção: 48.4% (de 0 a 48.4)
         bases = [0.0, 48.1, 48.1, 0.0, 0.0, 0.0]
-        heights = [metrics["pesquisa_bruta"], abs(vies_val), abs(rej_val), metrics["corrigida"], metrics["primeiro_turno"], metrics["projecao"]]
+        heights = [
+            metrics["pesquisa_bruta"],
+            abs(vies_val),
+            abs(rej_val),
+            metrics["corrigida"],
+            metrics["primeiro_turno"],
+            metrics["projecao"],
+        ]
         colors = [base_color, delta_neg_color, delta_pos_color, base_color, base_color, base_color]
         texts = [
             f"{metrics['pesquisa_bruta']:.1f}%",
@@ -278,7 +287,14 @@ def create_waterfall_projection_chart(
         # 1º Turno: 51.0% (de 0 a 51.0)
         # Projeção: 51.6% (de 0 a 51.6)
         bases = [0.0, 51.0, 51.6, 0.0, 0.0, 0.0]
-        heights = [metrics["pesquisa_bruta"], abs(vies_val), abs(rej_val), metrics["corrigida"], metrics["primeiro_turno"], metrics["projecao"]]
+        heights = [
+            metrics["pesquisa_bruta"],
+            abs(vies_val),
+            abs(rej_val),
+            metrics["corrigida"],
+            metrics["primeiro_turno"],
+            metrics["projecao"],
+        ]
         colors = [base_color, delta_pos_color, delta_neg_color, base_color, base_color, base_color]
         texts = [
             f"{metrics['pesquisa_bruta']:.1f}%",

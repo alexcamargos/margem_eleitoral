@@ -29,6 +29,7 @@ from src.ingestion.data_loader import (
 from src.ingestion.pesqele_collector import PesqEleCollector
 from src.ingestion.pipeline import run_etl_for_year
 from src.ingestion.web_poll_extractor import WebPollExtractor
+from src.transformations.gatekeeper import ElectoralGatekeeper, GatekeeperViolationError
 from src.transformations.normalizer import TaxonomyNormalizer
 from src.transformations.valid_votes import calculate_valid_votes
 
@@ -234,6 +235,23 @@ def cmd_add_poll(args: argparse.Namespace) -> None:
     brancos_nulos = float(args.brancos_nulos)
     indecisos = float(args.indecisos)
 
+    # Aplica a blindagem do Gatekeeper eleitoral antes de qualquer gravação em disco
+    try:
+        ElectoralGatekeeper.validate_raw_poll_entry(
+            turno=turno,
+            votos_brutos=votos_brutos,
+            brancos_nulos=brancos_nulos,
+            indecisos=indecisos,
+            poll_id=args.registro,
+        )
+    except GatekeeperViolationError as e:
+        print(
+            "\n[ERRO DE GATEKEEPER] Inserção rejeitada com base nas regras de integridade:",
+            file=sys.stderr,
+        )
+        print(f"-> {e}\n", file=sys.stderr)
+        sys.exit(1)
+
     validos = calculate_valid_votes(
         votos_totais=votos_brutos,
         percentual_brancos_nulos=brancos_nulos,
@@ -401,7 +419,9 @@ def cmd_predict(args: argparse.Namespace) -> None:
         tau_days=float(args.tau),
         n_simulations=int(args.simulations),
     )
-    print(f"-> Parâmetros estocásticos: {cfg.n_simulations:,} cenários de Monte Carlo (tau={cfg.tau_days}d)")
+    print(
+        f"-> Parâmetros estocásticos: {cfg.n_simulations:,} cenários de Monte Carlo (tau={cfg.tau_days}d)"
+    )
 
     calib_t1 = None
     if turno == 2:

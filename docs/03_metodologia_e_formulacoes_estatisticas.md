@@ -250,3 +250,108 @@ Para cada instituto $I$, calcula-se a média longitudinal $\bar{\delta}_I$ e o r
 $$IC_{80\%}(\bar{\delta}_I) = \bar{\delta}_I \pm t_{0{,}90; \, n_I - 1} \times \frac{s_I}{\sqrt{n_I}}$$
 
 Se o intervalo cobre o zero ($IC \cap \{0\} \ne \emptyset$), o instituto operou em conformidade com o consenso médio de mercado. Se todo o intervalo estiver estritamente acima de zero, o instituto exibiu viés estrutural favorável ao Candidato 1.
+
+---
+
+## 8. Modelagem de Rejeição e Teto Eleitoral Teórico (Ato 3)
+
+O módulo `src/analytics/rejection_analysis.py` modela a aversão declarada dos eleitores a cada candidatura ("não votaria de jeito nenhum"):
+
+### 8.1 Agregação e Média Simples de Rejeição
+Para um conjunto de pesquisas com rejeição declarada, a taxa média observada do candidato $c$ é obtida por:
+
+$$\bar{R}_c = \frac{1}{K_c} \sum_{k=1}^{K_c} R_{k, c}$$
+
+onde $K_c$ é a quantidade de pesquisas com medição válida para o candidato $c$.
+
+### 8.2 Teto Eleitoral Teórico
+Em disputas polarizadas de 2º Turno, a taxa de rejeição define a barreira superior intransponível de crescimento eleitoral, sob a premissa de que eleitores com aversão categórica não são convertíveis:
+
+$$\text{Teto}_c = 100\% - \bar{R}_c$$
+
+Se um concorrente exibe rejeição de $52{,}0\%$, seu teto máximo teórico é de $48{,}0\%$, tornando matematicamente improvável a vitória sem a quebra prévia da resistência subjetiva do eleitorado.
+
+### 8.3 Classificação de Liderança e Empate Técnico em Rejeição
+Dada a natureza sensível da métrica, diferenças entre dois concorrentes dentro de um limiar $\epsilon = 1{,}0$ ponto percentual são formalmente tratadas como empate técnico:
+
+$$\text{Veredito} = \begin{cases} 
+\text{"Empate Técnico"}, & \text{se } |R_1 - R_2| \le 1{,}0\text{ pp} \\
+\text{"Candidato 1 menos rejeitado"}, & \text{se } R_1 < R_2 - 1{,}0 \\
+\text{"Candidato 2 menos rejeitado"}, & \text{se } R_2 < R_1 - 1{,}0
+\end{cases}$$
+
+---
+
+## 9. Modelo Preditivo Estado-Espaço Hierárquico Calibrado (Ato 7)
+
+Implementado em `src/analytics/predictive_model.py`, o modelo preditivo sintetiza pesquisas em múltiplos recortes territoriais com pós-estratificação demográfica, de-biasing histórico e simulação estocástica de trajetórias.
+
+### 9.1 Ponderação de Escopo Geográfico
+Pesquisas com abrangências distintas recebem pesos proporcionais à sua cobertura amostral:
+
+$$w_{\text{escopo}} = \begin{cases}
+1{,}00, & \text{Nacional} \\
+0{,}75, & \text{Estadual} \\
+0{,}45, & \text{Regional (Macrorregião)}
+\end{cases}$$
+
+### 9.2 Pós-Estratificação pelo Colégio Eleitoral do TSE
+O eleitorado nacional é repartido em 5 macrorregiões oficiais do TSE com os respectivos pesos demográficos $\omega_r$:
+
+$$\omega_{\text{SE}} = 0{,}426, \quad \omega_{\text{NE}} = 0{,}271, \quad \omega_{\text{S}} = 0{,}147, \quad \omega_{\text{N}} = 0{,}086, \quad \omega_{\text{CO}} = 0{,}070$$
+
+A intenção latente nacional $\hat{\mu}_{\text{nac}}(t)$ é a média ponderada das intenções projetadas regionalmente:
+
+$$\hat{\mu}_{\text{nac}}(t) = \sum_{r \in \{\text{SE, NE, S, N, CO}\}} \omega_r \hat{\mu}_r(t)$$
+
+Para garantir consistência estocástica, os diferenciais estruturais regionais $D_{r, c}$ (em relação à média nacional) satisfazem a condição de soma-zero estrita:
+
+$$\sum_{r} \omega_r D_{r, c} = 0{,}0$$
+
+### 9.3 Calibração Empírica Pós-1º Turno (De-biasing)
+No 2º Turno, o modelo aproveita o desempenho verificado de cada instituto no 1º Turno:
+1. **Ponderação por Precisão Auditada:** O peso de auditoria decai exponencialmente com o Erro Ponderado no 1º Turno ($EP_{\text{T1}}$):
+   $$w_{\text{audit}, i} = \exp\left(-\lambda \cdot EP_{\text{T1}, i}\right), \quad \lambda = 0{,}25$$
+2. **Encolhimento de Viés Direcional (Bias Shrinkage):** A estimativa é corrigida pelo viés histórico encolhido em direção a zero:
+   $$\tilde{y}_{k, c} = y_{k, c} - \alpha_{\text{shrink}} \cdot \hat{\delta}_{i(k), c}, \quad \alpha_{\text{shrink}} = 0{,}45$$
+
+### 9.4 Simulação de Monte Carlo com Caudas Pesadas ($t$-Student, $\nu = 5$)
+Para modelar choques eleitorais inesperados e volatilidade de reta final com maior realismo que a curva normal, os $N_{\text{sim}} = 10{.}000$ cenários de resultado na data da eleição $T_{\text{eleição}}$ são gerados a partir de uma distribuição multivariada $t$ de Student com $\nu = 5$ graus de liberdade:
+
+$$\tilde{\mathbf{P}}^{(s)} \sim t_{\nu=5}\left(\hat{\boldsymbol{\mu}}(T_{\text{eleição}}), \; \boldsymbol{\Sigma}_{\text{total}}\right), \quad s = 1, \dots, N_{\text{sim}}$$
+
+onde $\boldsymbol{\Sigma}_{\text{total}} = \boldsymbol{\Sigma}_{\text{amostral}} + \boldsymbol{\Sigma}_{\text{tempo}} + \boldsymbol{\Sigma}_{\text{estrutural}}$ incorpora o erro de amostragem acumulado, a incerteza de momentum e o resíduo do Total Survey Error.
+
+A probabilidade empírica de vitória do Candidato $A$ é dada pela proporção de trajetórias simuladas em que $A$ supera os demais concorrentes:
+
+$$P(\text{Vitória}_A) = \frac{1}{N_{\text{sim}}} \sum_{s=1}^{N_{\text{sim}}} \mathbb{I}\left( \tilde{P}_A^{(s)} > \max_{B \neq A} \tilde{P}_B^{(s)} \right)$$
+
+### 9.5 Backtesting Retroativo (Point-in-Time) e Portões de Qualidade
+Para assegurar ausência de vazamento de dados futuros (*data leakage*), o algoritmo simula a data de corte em horizontes retrospectivos ($T-30, T-21, T-14, T-7, T-3, T-1$). O modelo deve atender aos seguintes portões formais de promoção:
+* Erro absoluto médio do líder: $M_3 \le 2{,}0$ pp;
+* Erro médio na margem: $M_5 \le 3{,}5$ pp;
+* Calibração probabilística: Brier Score $\le 0{,}15$;
+* Taxa de cobertura nominal empírica do envelope de 95%: $\ge 80{,}0\%$.
+
+---
+
+## 10. Análise de Sensibilidade Metodológica (13 Variantes)
+
+O motor analítico implementado em `src/analytics/sensitivity_analysis.py` submete as projeções a um teste de estresse contra 12 formulações concorrentes ($S0$ a $S11$), garantindo que a previsão do modelo Principal ($P$) não seja um artefato espúrio de hiperparâmetros arbitrários:
+
+| Código | Variante Metodológica | Racional e Regra de Ajuste |
+| :---: | :--- | :--- |
+| **$P$** | **Modelo Principal Oficial** | Pós-estratificação TSE, calibração T1, meia-vida $\tau=14$d, Monte Carlo $t$-Student ($\nu=5$). |
+| **$S0$** | Média Aritmética Simples | Sem decaimento temporal nem ponderação amostral ou metodológica. |
+| **$S1$** | Ponderação por Amostra ($\sqrt{n}$) | Pondera exclusivamente pelo volume amostral, sem decaimento temporal. |
+| **$S2$** | Decaimento Exponencial Acelerado | Meia-vida ultra-curta de 3 dias ($\tau=3$d), priorizando extrema volatilidade. |
+| **$S3$** | Decaimento Exponencial Conservador | Meia-vida longa de 21 dias ($\tau=21$d), suavizando oscilações pontuais. |
+| **$S4$** | Ponderação Estrita de Qualidade | Pondera apenas pelo método de coleta (Presencial Domiciliar = 1,10; CATI = 1,00; URA = 0,85). |
+| **$S5$** | Calibração de Viés de 1º Turno Pura | Aplica de-biasing com base no histórico do 1º Turno sem ajuste de escopo regional. |
+| **$S6$** | Correção de Consenso Contemporâneo | Subtrai o viés longitudinal relativo frente aos pares na janela de $\pm 7$ dias (*peer tilt*). |
+| **$S7$** | De-biasing Duplo (T1 + Peer Tilt) | Combina simultaneamente o encolhimento de viés do 1º Turno e a correção por pares. |
+| **$S8$** | Re-ponderação Subnacional TSE Pura | Aplica exclusivamente a pós-estratificação pelas 5 macrorregiões do Colégio Eleitoral. |
+| **$S9$** | Limite Superior de Teto por Rejeição | Trunca o percentual projetado pelo teto teórico derived da rejeição ($100\% - \text{Rejeição}$). |
+| **$S10$** | Simulação Normal Gaussiana Leve | Substitui a cauda pesada de $t$-Student por distribuição normal padrão ($\nu \to \infty$). |
+| **$S11$** | Modelo Integrado com Voto Potencial | Incorpora os eleitores indecisos a partir de modelos de propensão e rejeição cruzada. |
+

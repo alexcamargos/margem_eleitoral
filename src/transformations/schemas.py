@@ -10,6 +10,8 @@ from typing import Self
 
 from pydantic import BaseModel, Field, model_validator
 
+from src.transformations.gatekeeper import ElectoralGatekeeper
+
 
 class MetodologiaEnum(str, Enum):
     """Classificação metodológica das pesquisas eleitorais."""
@@ -147,6 +149,35 @@ class PesquisaEleitoralSchema(BaseModel):
             )
         return self
 
+    @model_validator(mode="after")
+    def validate_gatekeeper(self) -> Self:
+        """Aplica a blindagem e regras do Gatekeeper de integridade eleitoral.
+
+        Args:
+            self: A própria instância do modelo validado.
+
+        Returns:
+            Self: Instância validada do modelo.
+
+        Raises:
+            GatekeeperViolationError: Se o 2º Turno não contiver estritamente 2 candidatos
+                ou se a soma de votos nominais + brancos/nulos + indecisos violar o fechamento amostral.
+        """
+        if self.turno == 2:
+            ElectoralGatekeeper.validate_second_round_candidate_count(
+                turno=self.turno,
+                candidates_with_votes=self.votos_totais,
+                poll_id=self.id_registro_tse,
+            )
+            ElectoralGatekeeper.validate_poll_sum(
+                votos_totais=self.votos_totais,
+                percentual_brancos_nulos=self.percentual_brancos_nulos,
+                percentual_indecisos=self.percentual_indecisos,
+                poll_id=self.id_registro_tse,
+                turno=self.turno,
+            )
+        return self
+
 
 class ResultadoOficialTSESchema(BaseModel):
     """Contrato de dados para o resultado oficial totalizado das urnas pelo TSE.
@@ -224,4 +255,3 @@ class RejeicaoPesquisaSchema(BaseModel):
     margem_erro: float | None = Field(default=None, gt=0.0)
     observacao: str | None = None
     onda_anterior: bool = False
-

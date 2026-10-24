@@ -22,6 +22,7 @@ import polars as pl
 import yaml
 
 from src.analytics.metrics import calculate_mosteller_m5, calculate_weighted_poll_error
+from src.transformations.gatekeeper import ElectoralGatekeeper
 from src.transformations.schemas import (
     AbrangenciaEnum,
     PesquisaEleitoralSchema,
@@ -106,8 +107,7 @@ def balance_regional_differentials(
         drift_cand: dict[str, float] = {}
         for c in candidates:
             drift = sum(
-                norm_w.get(reg, 0.0) * float(reg_dict.get(reg, {}).get(c, 0.0))
-                for reg in norm_w
+                norm_w.get(reg, 0.0) * float(reg_dict.get(reg, {}).get(c, 0.0)) for reg in norm_w
             )
             drift_cand[c] = drift
 
@@ -750,16 +750,14 @@ def predict_election_outcome(
     candidate_set: set[str] = set()
     for p in eligible_polls:
         candidate_set.update(p.votos_validos.keys())
-    candidates = sorted(candidate_set)
+    raw_candidates = sorted(candidate_set)
 
-    # No 2º Turno, a disputa constitucional é estritamente binária entre os 2 finalistas
-    if turno == 2 and len(candidates) > 2:
-        cand_mass = {
-            c: sum(float(p.votos_validos.get(c, 0.0)) for p in eligible_polls)
-            for c in candidates
-        }
-        top_2 = sorted(candidates, key=lambda c: cand_mass[c], reverse=True)[:2]
-        candidates = sorted(top_2)
+    # Aplica o Gatekeeper eleitoral: no 2º Turno, a disputa é estritamente binária entre os 2 finalistas
+    candidates = ElectoralGatekeeper.filter_and_enforce_two_candidates(
+        candidates=raw_candidates,
+        polls=eligible_polls,
+        turno=turno,
+    )
 
     # 1. Projeta todas as pesquisas elegíveis no espaço latente nacional e calcula pesos compostos
     projected_list: list[dict[str, float]] = []
@@ -830,10 +828,7 @@ def predict_election_outcome(
                         dtype=float,
                     )
                     peer_dt = np.array(
-                        [
-                            abs((eligible_polls[j].data_fim_campo - t_i).days)
-                            for j in peer_idxs
-                        ],
+                        [abs((eligible_polls[j].data_fim_campo - t_i).days) for j in peer_idxs],
                         dtype=float,
                     )
                     peer_time_w = np.exp(-peer_dt / cfg.tau_days)

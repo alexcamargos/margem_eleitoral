@@ -123,9 +123,7 @@ def create_rejection_dumbbell_chart(
                 line=dict(color="#181B20", width=1.5),
             ),
             hovertemplate=(
-                "<b>%{y}</b><br>"
-                + f"Rejeição ({c1_disp}): %{{x:.1f}}%<br>"
-                + "<extra></extra>"
+                "<b>%{y}</b><br>" + f"Rejeição ({c1_disp}): %{{x:.1f}}%<br>" + "<extra></extra>"
             ),
         )
     )
@@ -143,9 +141,7 @@ def create_rejection_dumbbell_chart(
                 line=dict(color="#181B20", width=1.5),
             ),
             hovertemplate=(
-                "<b>%{y}</b><br>"
-                + f"Rejeição ({c2_disp}): %{{x:.1f}}%<br>"
-                + "<extra></extra>"
+                "<b>%{y}</b><br>" + f"Rejeição ({c2_disp}): %{{x:.1f}}%<br>" + "<extra></extra>"
             ),
         )
     )
@@ -170,11 +166,17 @@ def create_rejection_dumbbell_chart(
                 showarrow=False,
                 xanchor="left",
                 yanchor="middle",
-                font=dict(size=10.5, color=txt_color, family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto"),
+                font=dict(
+                    size=10.5,
+                    color=txt_color,
+                    family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto",
+                ),
             )
         )
 
-    title_text = chart_title or "% que não votaria de jeito nenhum — quanto mais à esquerda, menos rejeitado"
+    title_text = (
+        chart_title or "% que não votaria de jeito nenhum — quanto mais à esquerda, menos rejeitado"
+    )
     left_margin = 210 if include_dates_in_label else 140
 
     fig.update_layout(
@@ -214,4 +216,3 @@ def create_rejection_dumbbell_chart(
     )
 
     return fig
-

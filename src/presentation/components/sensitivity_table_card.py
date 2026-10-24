@@ -344,9 +344,13 @@ def render_sensitivity_analysis_section(
         column_config={
             "Código": st.column_config.TextColumn("Código", width="small"),
             "Variante": st.column_config.TextColumn("Variante", width="medium"),
-            f"{candidate_a} válidos": st.column_config.TextColumn(f"{candidate_a} válidos", width="small"),
+            f"{candidate_a} válidos": st.column_config.TextColumn(
+                f"{candidate_a} válidos", width="small"
+            ),
             "Diferença": st.column_config.TextColumn("Diferença", width="small"),
-            f"Chance {candidate_a}": st.column_config.TextColumn(f"Chance {candidate_a}", width="small"),
+            f"Chance {candidate_a}": st.column_config.TextColumn(
+                f"Chance {candidate_a}", width="small"
+            ),
             "Favorito": st.column_config.TextColumn("Favorito", width="small"),
             "Regra Metodológica": st.column_config.TextColumn("Regra Metodológica", width="large"),
         },

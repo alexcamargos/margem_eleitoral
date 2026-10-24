@@ -165,7 +165,10 @@ def test_web_poll_extractor_filters_unverified() -> None:
     mock_data = _build_mock_feed_data()
     extractor = WebPollExtractor(year=2026)
     polls_2t = extractor.extract_and_transform(
-        feed_data=mock_data, only_verified=True, only_eligible=True, include_first_round_history=False
+        feed_data=mock_data,
+        only_verified=True,
+        only_eligible=True,
+        include_first_round_history=False,
     )
 
     # Das 3 pesquisas de 2T no mock, 1 é não-verificada e deve ser filtrada
@@ -242,7 +245,9 @@ def test_web_poll_extractor_update_published_polls_csv(tmp_path: Path) -> None:
     assert df_csv2.height == 4
 
 
-def test_web_poll_extractor_network_error_without_cache(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_web_poll_extractor_network_error_without_cache(
+    mocker: MockerFixture, tmp_path: Path
+) -> None:
     """Garante que exceções adequadas são propagadas em falhas de rede sem cache local.
 
     Args:
@@ -294,4 +299,3 @@ def test_web_poll_extractor_first_round_history() -> None:
         soma = sum(p.votos_validos.values())
         assert 99.8 <= soma <= 100.2
         assert p.id_registro_tse.startswith("BR-")
-

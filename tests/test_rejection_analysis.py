@@ -20,7 +20,9 @@ def test_calculate_rejection_averages_success() -> None:
         {"rejeicao": {"Lula": 48.0, "Flávio Bolsonaro": 51.0}},
         {"rejeicao": {"Lula": 50.0, "Flávio Bolsonaro": 45.0}},
     ]
-    averages = calculate_rejection_averages(polls=polls, candidates=["Lula", "Flávio Bolsonaro", "Candidato Ausente"])
+    averages = calculate_rejection_averages(
+        polls=polls, candidates=["Lula", "Flávio Bolsonaro", "Candidato Ausente"]
+    )
     assert averages["Lula"] == 49.0
     assert averages["Flávio Bolsonaro"] == 48.0
     assert averages["Candidato Ausente"] == 0.0
@@ -325,4 +327,3 @@ def test_create_rejection_dumbbell_chart_options() -> None:
     # Verifica que os rótulos do eixo Y nos traços contêm datas formatadas (ex: "(14 a 15/10)")
     y_labels = list(fig.data[1].y)
     assert any(" a " in str(label) for label in y_labels)
-

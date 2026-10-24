@@ -46,7 +46,7 @@ def test_get_election_dataset_2026() -> None:
     elec_date = date(2026, 10, 4)
     for p in eve_polls:
         assert isinstance(p, PesquisaEleitoralSchema)
-        assert (elec_date - p.data_fim_campo).days <= 3
+        assert 0 <= (elec_date - p.data_fim_campo).days <= 3
 
 
 def test_get_election_dataset_2022() -> None:
@@ -60,7 +60,7 @@ def test_get_election_dataset_2022() -> None:
 
     elec_date = date(2022, 10, 2)
     for p in eve_polls:
-        assert (elec_date - p.data_fim_campo).days <= 3
+        assert 0 <= (elec_date - p.data_fim_campo).days <= 3
 
 
 def test_get_election_dataset_2026_turno_2() -> None:

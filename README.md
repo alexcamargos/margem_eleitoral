@@ -2,12 +2,12 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Package Manager](https://img.shields.io/badge/package%20manager-uv-blueviolet.svg)](https://docs.astral.sh/uv/)
-[![Test Suite](https://img.shields.io/badge/tests-114%20passed-success.svg)](https://pytest.org/)
-[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://pytest-cov.readthedocs.io/)
+[![Test Suite](https://img.shields.io/badge/tests-186%20passed-success.svg)](https://pytest.org/)
+[![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](https://pytest-cov.readthedocs.io/)
 [![Code Style](https://img.shields.io/badge/code%20style-ruff-black.svg)](https://docs.astral.sh/ruff/)
 [![Standards](https://img.shields.io/badge/standards-WAPOR%20%7C%20AAPOR-orange.svg)](https://wapor.org/)
 
-Aplicação analítica interativa de **Data Storytelling** em Python projetada para auditar tecnicamente as pesquisas de intenção de voto registradas no Tribunal Superior Eleitoral (TSE). Desenvolvida sob uma arquitetura modular extensível a múltiplos anos e ciclos eleitorais, a metodologia do projeto é validada inicialmente no MVP com dados de 2022 e 2026, com suporte estrutural de expansão contínua para outros anos e pleitos futuros.
+Aplicação analítica interativa de **Data Storytelling** em Python projetada para auditar tecnicamente as pesquisas de intenção de voto registradas no Tribunal Superior Eleitoral (TSE). Desenvolvida sob uma arquitetura modular extensível a múltiplos anos (2018, 2022 e 2026) e múltiplos cargos eletivos (Presidente, Governador e Senador), com suporte estrutural de expansão contínua para outros anos e pleitos futuros.
 
 O projeto confronta o ceticismo popular e narrativas conspiratórias de fraude eleitoral a partir de **testes formais de hipótese estatística**, medição do ***Total Survey Error* (TSE)**, cálculo da taxa de cobertura de intervalos de confiança com **efeito de delineamento ($deff$)** e modelagem contínua de tendências latentes do eleitorado.
 
@@ -52,7 +52,8 @@ A jornada do usuário na aplicação é estruturada pedagogicamente em sete atos
 7. **Ato 7: Modelo Preditivo & Previsão Eleitoral:**
    * Modelo de estado-espaço com pós-estratificação pelo Colégio Eleitoral do TSE e calibração empírica pós-1º Turno;
    * Simulação de Monte Carlo com caudas pesadas ($t$-Student, $\nu = 5$) para probabilidades de vitória e envelopes de 95%;
-   * Backtesting retroativo (*Point-in-Time*) com portões de qualidade MLE sem vazamento de dados futuros.
+   * Backtesting retroativo (*Point-in-Time*) com portões de qualidade MLE sem vazamento de dados futuros;
+   * Relatório com 13 variantes metodológicas na Análise de Sensibilidade e card de projeção Waterfall.
 
 ---
 
@@ -78,6 +79,8 @@ O projeto segue premissas estatísticas não-negociáveis respaldadas pelos padr
    onde $D$ é o erro nas margens com decaimento exponencial por competitividade, $F$ é o Eleitorado Fora do Lugar (Distância de Variação Total $L_1$ / Índice de Duncan) e $X$ é a penalização suave de fronteiras eleitorais.
 6. **Distribuição Nula via Simulação de Monte Carlo ($H_0$):**
    * Sorteios multinomiais sobre o resultado oficial com tamanho efetivo $n_{\text{eff}} = n / deff$ ($10{.}000$ iterações) para estabelecer os percentis objetivos $P_{25}$, mediana $A_{50}$, $P_{75}$ e a **Faixa do Acaso ($P_{90}$)**.
+7. **Gatekeeper Eleitoral e Blindagem Constitucional:**
+   * Garantia formal de que no 2º Turno haja estritamente 2 candidatos ativos e que o somatório de votos totais, brancos/nulos e indecisos convirja para 100%.
 
 ---
 
@@ -91,7 +94,7 @@ margem_eleitoral/
 │   ├── settings.yaml            # Parâmetros de corte temporal, thresholds e metadados
 │   └── taxonomy_mapping.yaml    # Harmonização de institutos, métodos e candidatos
 ├── data/
-│   ├── raw/                     # Snapshots brutos imutáveis (PesqEle e API TSE)
+│   ├── raw/                     # Snapshots brutos imutáveis por ano (2018, 2022, 2026)
 │   └── processed/               # Datasets limpos e padronizados em Parquet e JSON
 ├── docs/                        # Documentação técnica e estatística modular
 │   ├── 00_indice_geral.md       # Mapa de leitura e navegação
@@ -107,23 +110,32 @@ margem_eleitoral/
 │   │   ├── aggregator_model.py  # Média ponderada com decaimento t1/2 = 14 dias
 │   │   ├── house_effects.py     # GLM, ANOVA de 2 fatores e tilt longitudinal
 │   │   ├── hypothesis_tests.py  # Testes de Wilcoxon, t-Student, Binomial e TSE
-│   │   └── metrics.py           # Mosteller, Log-Odds, Erro Ponderado e Monte Carlo
+│   │   ├── metrics.py           # Mosteller, Log-Odds, Erro Ponderado e Monte Carlo
+│   │   ├── predictive_model.py  # Modelo estado-espaço hierárquico e calibração
+│   │   ├── rejection_analysis.py # Modelagem de rejeição, teto eleitoral e dumbbell
+│   │   └── sensitivity_analysis.py # Avaliação das 13 variantes metodológicas
 │   ├── ingestion/               # Coletores de dados e pipelines de ETL
 │   │   ├── base.py              # Classe base abstrata para extração eleitoral
 │   │   ├── data_loader.py       # Carregador com cache em sessão
+│   │   ├── multi_office_collector.py # Coletor multi-ano e multi-cargo
 │   │   ├── pesqele_collector.py # Ingestão e censo de registros do PesqEle
 │   │   ├── pipeline.py          # Pipeline de transformação e persistência Parquet
-│   │   └── tse_results.py       # Extração oficial da apuração do TSE
+│   │   ├── tse_results.py       # Extração oficial da apuração do TSE
+│   │   └── web_poll_extractor.py # Extrator e sincronizador de pesquisas web
 │   ├── presentation/            # Camada visual e storytelling
 │   │   ├── app.py               # Ponto de entrada Streamlit (Dark Theme)
-│   │   ├── components/          # Figuras interativas reutilizáveis em Plotly
-│   │   └── story_acts/          # Roteiro dos Atos 1 a 5
-│   └── transformations/         # Validação de contratos e normalização
-│       ├── normalizer.py        # Harmonização taxonômica de nomes e métodos
-│       ├── schemas.py           # Contratos estritos Pydantic v2
-│       └── valid_votes.py       # Algoritmo de conversão para votos válidos
-├── tests/                       # Suíte de 68 testes funcionais (pytest)
-├── pyproject.toml               # Configuração do projeto e dependências uv
+│   │   ├── components/          # Figuras Plotly, modais e cards executivos
+│   │   └── story_acts/          # Roteiro completo dos Atos 1 a 7
+│   ├── transformations/         # Validação de contratos e normalização
+│   │   ├── gatekeeper.py        # Guardião de integridade e regras de 2º Turno
+│   │   ├── normalizer.py        # Harmonização taxonômica de nomes e métodos
+│   │   ├── schemas.py           # Contratos estritos Pydantic v2
+│   │   └── valid_votes.py       # Algoritmo de conversão para votos válidos
+│   └── cli.py                   # Interface de linha de comando (CLI margem)
+├── tests/                       # Suíte de 186 testes funcionais (pytest)
+├── app.py                       # Wrapper de execução raiz do Streamlit
+├── get.py                       # Script CLI para raspagem multi-cargo
+├── pyproject.toml               # Configuração do projeto, scripts e dependências uv
 └── uv.lock                      # Trava determinística de dependências
 ```
 
@@ -152,13 +164,45 @@ uv run app.py
 ```
 *(ou pelo comando tradicional: `uv run streamlit run src/presentation/app.py`)*
 
-### 4. Execução dos Testes Automatizados e Cobertura
-O repositório conta com **68 testes unitários** e de integração, com **91% de cobertura global**:
+### 4. Utilização da Interface de Linha de Comando (CLI `margem`)
+O utilitário `margem` permite gerenciar e consultar dados eleitorais diretamente pelo terminal:
+
+```bash
+# Consultar status do ciclo eleitoral e pesquisas catalogadas
+uv run margem status --year 2026 --turno 2
+
+# Sincronizar pesquisas oficiais do 2º Turno junto ao TSE ou feed web
+uv run margem sync --year 2026
+
+# Auditar autenticidade das pesquisas cruzando com o censo do PesqEle
+uv run margem audit --year 2026
+
+# Inserir nova pesquisa manualmente sob validação estrita do Gatekeeper
+uv run margem add-poll --year 2026 --turno 2 --registro "BR-01115/2026" \
+  --instituto "Datafolha" --dt-inicio "2026-10-21" --dt-fim "2026-10-23" \
+  --dt-divulgacao "2026-10-24" --amostra 2000 --margem 2.0 \
+  --voto "Lula=47.5" --voto "Flávio Bolsonaro=48.0" \
+  --brancos-nulos 3.0 --indecisos 1.5
+
+# Executar pipeline completo de ETL para geração de arquivos Parquet
+uv run margem process --year 2026 --turno 2
+
+# Executar e ajustar modelos agregador e preditivo via terminal
+uv run margem predict --year 2026 --turno 2 --simulations 10000
+```
+
+Para raspagem e sincronização multi-cargo em lote (Presidente, Governador e Senador):
+```bash
+uv run python get.py --cargos presidente governador senador --anos 2026 2022 2018
+```
+
+### 5. Execução dos Testes Automatizados e Cobertura
+O repositório conta com **186 testes unitários** e de integração, com **87% de cobertura global**:
 ```bash
 uv run pytest --cov=src --cov-report=term-missing tests/
 ```
 
-### 5. Verificação de Lint e Estilo de Código
+### 6. Verificação de Lint e Estilo de Código
 ```bash
 uv run ruff check src/ tests/
 ```
@@ -170,13 +214,13 @@ uv run ruff check src/ tests/
 A documentação detalhada foi modularizada na pasta [`docs/`](docs/00_indice_geral.md):
 
 * [**Doc 00: Sumário e Mapa de Navegação**](docs/00_indice_geral.md) — Índice temático completo.
-* [**Doc 01: Visão Geral e Arquitetura de Software**](docs/01_visao_geral_e_arquitetura.md) — Princípios de SoC, contratos Pydantic v2, Polars e pipelines Parquet.
+* [**Doc 01: Visão Geral e Arquitetura de Software**](docs/01_visao_geral_e_arquitetura.md) — Princípios de SoC, contratos Pydantic v2, Polars, Gatekeeper e pipelines Parquet.
 * [**Doc 02: Guia Estatístico para Não-Estatísticos**](docs/02_guia_estatistico_para_nao_estatisticos.md) — Explicações pedagógicas sem jargões: analogia do exame de sangue, margem de erro, votos válidos e $deff$.
-* [**Doc 03: Metodologia e Formulações Estatísticas**](docs/03_metodologia_e_formulacoes_estatisticas.md) — Deduções matemáticas exaustivas em LaTeX de todas as equações, do Erro Ponderado ao Agregador.
+* [**Doc 03: Metodologia e Formulações Estatísticas**](docs/03_metodologia_e_formulacoes_estatisticas.md) — Deduções matemáticas exaustivas em LaTeX: Erro Ponderado, Agregador, Rejeição e Modelo Preditivo.
 * [**Doc 04: Framework de Total Survey Error (TSE)**](docs/04_framework_tse_total_survey_error.md) — Modelo de Groves et al. aplicado ao Brasil, abstenção diferencial e testes de hipótese antifraude.
-* [**Doc 05: Jornada de Storytelling e Interface**](docs/05_jornada_data_storytelling_e_interface.md) — Roteiro dos 5 Atos, componentes visuais em Plotly, dark mode e sincronização do 2º Turno.
+* [**Doc 05: Jornada de Storytelling e Interface**](docs/05_jornada_data_storytelling_e_interface.md) — Roteiro completo dos 7 Atos, componentes visuais em Plotly, dark mode e sincronização do 2º Turno.
 * [**Doc 06: Referências Bibliográficas e Normas**](docs/06_referencias_bibliograficas_e_normas.md) — Normas WAPOR/AAPOR, legislação do TSE e bibliografia científica seminal (Mosteller, Kish, Groves, Gelman, Silver).
-* [**Doc 07: Guia de Engenharia e Reprodução**](docs/07_guia_de_desenvolvimento_e_reproducao.md) — Manual prático de operação, testes, matriz de cobertura, linters e pipelines de dados.
+* [**Doc 07: Guia de Engenharia e Reprodução**](docs/07_guia_de_desenvolvimento_e_reproducao.md) — Manual prático de operação, testes, matriz de cobertura com 186 testes, linters e pipelines de dados.
 
 ---
 

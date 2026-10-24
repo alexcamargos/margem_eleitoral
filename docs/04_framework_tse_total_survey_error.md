@@ -97,7 +97,7 @@ H_0: & \text{As divergências observadas entre as pesquisas e o TSE são consist
 H_1: & \text{Há evidência empírica de desvio sistemático inexplicável ou manipulação fraudulenta.}
 \end{cases}$$
 
-O diagnóstico automatizado no Ato 5 da aplicação executa quatro baterias de testes estatísticos complementares:
+O diagnóstico automatizado no Ato 6 da aplicação (O Veredito Científico) executa quatro baterias de testes estatísticos complementares:
 
 ### 1. Teste t de Student Pareado sobre os Resíduos
 Testa se a média dos resíduos das pesquisas de véspera difere estatisticamente de zero:

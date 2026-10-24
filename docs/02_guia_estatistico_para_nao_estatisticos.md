@@ -150,22 +150,33 @@ Mesmo quando divulgadas na mesma semana, duas pesquisas de institutos respeitado
 
 ## Como Interpretar os Gráficos da Nossa Aplicação
 
-### 1. Forest Plot (Ato 3)
+### 1. Gráfico de Halteres / Cleveland Dot Plot (Ato 3: Quem é Menos Rejeitado?)
+* Confronta lado a lado as taxas de rejeição ("não votaria de jeito nenhum") de cada concorrente em cada instituto.
+* Uma barra conecta os pontos dos dois concorrentes: quanto mais à esquerda estiver o ponto, menor a rejeição do candidato.
+* Estabelece o **Teto Eleitoral Teórico** ($100\% - \text{Rejeição}$), indicando o limite máximo de votos que uma candidatura pode alcançar sem converter eleitores avessos.
+* Diferenças dentro da margem de $\le 1{,}0$ pp são identificadas pedagogicamente como empate técnico.
+
+### 2. Forest Plot (Ato 4: A Prova dos Fatos)
 * Cada linha horizontal representa a estimativa de um instituto com sua respectiva margem de incerteza (intervalo de confiança de 95% corrigido por $deff$).
-* A linha vertical sólida e colorida no centro é o **resultado oficial apurado pelo TSE na urna**.
+* A linha vertical sólida no centro é o **resultado oficial apurado pelo TSE na urna**.
 * **Como avaliar:** Se a barra horizontal do instituto cruza a linha vertical do TSE, a pesquisa foi estatisticamente precisa e cobriu a apuração dentro da margem de erro. Se não cruza, houve divergência além da margem teórica.
-* A métrica central é a **Taxa de Cobertura Empírica**: se mais de 80% a 90% das pesquisas cobrirem a linha, o sistema eleitoral e as pesquisas operaram dentro da normalidade estocástica.
+* A métrica central é a **Taxa de Cobertura Empírica**: avalia se a proporção de pesquisas que cobrem a urna é compatível com a meta nominal de $95\%$ via teste binomial exato.
 
-### 2. Gráfico de Barras de Erro Ponderado (Ato 4)
-* Não avalia apenas o candidato líder, mas a eleição inteira: o erro na margem da vitória, o erro no segundo turno e a proporção de eleitores que estariam alocados no candidato errado.
-* Cada barra é dividida em cores:
-  * **Azul Escuro:** Desvio no 1º colocado.
-  * **Azul Claro:** Desvio no 2º colocado.
-  * **Laranja:** Desvio médio nos demais concorrentes.
-* **Linha Tracejada Amarela (Faixa do Acaso - P90):** Calculada por 10.000 simulações de computador. Mostra até onde o erro de uma pesquisa pode chegar por pura sorte ou azar de amostragem. Pesquisas que ficam abaixo dessa linha estão plenamente justificadas pelo acaso estatístico.
+### 3. Gráfico de Barras de Erro Ponderado (Ato 5: Anatomia do Erro)
+* Não avalia apenas o candidato líder, mas a eleição inteira: o erro na margem da vitória ($D$), o erro no segundo turno, o eleitorado fora do lugar ($F$) e penalização de fronteiras críticas ($X$).
+* **Faixa do Acaso ($P_{90}$):** Linha tracejada calculada por 10.000 simulações de Monte Carlo. Mostra até onde o erro de uma pesquisa perfeita pode chegar por puro ruído amostral. Pesquisas abaixo dessa linha estão plenamente justificadas pelo acaso estatístico.
 
-### 3. Grid de Inclinação ao Longo da Campanha (Small Multiples - Ato 4)
-* Exibe a trajetória de cada instituto individual comparada com o consenso de todos os outros institutos na mesma semana.
+### 4. Grid de Inclinação ao Longo da Campanha (Small Multiples - Ato 5)
+* Exibe a trajetória de cada instituto individual comparada com o consenso contemporâneo de pares em janelas de $\pm 7$ dias.
 * Uma linha no zero representa o consenso da campanha.
-* Pontos acima ou abaixo do zero mostram se o instituto teve tendência histórica a enxergar um candidato à frente dos concorrentes (*house effect*).
-* Permite ver de imediato quais empresas têm metodologia calibrada e quais possuem vieses sistemáticos persistentes.
+* Pontos acima ou abaixo do zero com intervalo $t$-Student de 80% revelam se o instituto exibiu viés sistemático (*house effect*).
+
+### 5. Diagnóstico Antifraude e Decomposição do Total Survey Error (Ato 6: O Veredito Científico)
+* Painel inferencial com testes $t$ de Student pareado e Wilcoxon sobre os resíduos para descartar desvios intencionais;
+* Tabela ANOVA para isolar efeitos de instituto e método;
+* Decomposição formal do erro quadrático médio em amostragem teórica, excesso de dispersão, voto útil de última hora (*late swing*) e resíduo estrutural.
+
+### 6. Modelo Preditivo & Previsão Eleitoral (Ato 7)
+* Simulação de Monte Carlo com caudas pesadas ($t$-Student, $\nu = 5$) estimando as probabilidades de vitória e envelopes de 95%;
+* Gráficos de Projeção Waterfall com decomposição por macrorregiões do Colégio Eleitoral do TSE;
+* Tabela de Análise de Sensibilidade confrontando o modelo Principal contra 12 variantes metodológicas ($S0$ a $S11$).

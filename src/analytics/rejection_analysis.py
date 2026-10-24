@@ -261,7 +261,9 @@ def structure_rejection_metrics(dataset: dict[str, Any]) -> dict[str, Any]:
         KeyError: Se chaves fundamentais estiverem ausentes no dataset.
     """
     if "candidatos" not in dataset or "primeiro_turno" not in dataset:
-        raise KeyError("Dataset de rejeição inválido: ausência de 'candidatos' ou 'primeiro_turno'.")
+        raise KeyError(
+            "Dataset de rejeição inválido: ausência de 'candidatos' ou 'primeiro_turno'."
+        )
 
     c1, c2 = dataset["candidatos"][0], dataset["candidatos"][1]
     c1_display = dataset.get("candidatos_nomes_exibicao", {}).get(c1, c1)

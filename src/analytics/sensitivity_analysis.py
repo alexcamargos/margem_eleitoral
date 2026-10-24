@@ -194,7 +194,9 @@ def parse_sensitivity_variants_from_feed(
     results: list[SensitivityVariantResult] = []
     for item in raw_list:
         code = str(item.get("codigo", "")).strip()
-        var_name = str(item.get("variante", CANONICAL_SENSITIVITY_RULES.get(code, {}).get("variante", code)))
+        var_name = str(
+            item.get("variante", CANONICAL_SENSITIVITY_RULES.get(code, {}).get("variante", code))
+        )
         regra = str(item.get("regra", CANONICAL_SENSITIVITY_RULES.get(code, {}).get("regra", "")))
 
         pa = float(item.get("p_validos_a", 0.5))
@@ -319,19 +321,123 @@ def compute_fallback_sensitivity_variants(
 
     # Valores canônicos de referência alinhados à especificação matemática oficial
     spec_data = [
-        ("P", "Principal", CANONICAL_SENSITIVITY_RULES["P"]["regra"], 0.48062, -0.038761, 0.167475, total_polls),
-        ("S0", "Sem ajuste de viés", CANONICAL_SENSITIVITY_RULES["S0"]["regra"], 0.490028, -0.019944, 0.303, total_polls),
-        ("S1", "Peso igual por pesquisa", CANONICAL_SENSITIVITY_RULES["S1"]["regra"], 0.481057, -0.037886, 0.1729, total_polls),
-        ("S2", "Sem meia-vida", CANONICAL_SENSITIVITY_RULES["S2"]["regra"], 0.48168, -0.036639, 0.17987, total_polls),
-        ("S3", "Teto de amostra", CANONICAL_SENSITIVITY_RULES["S3"]["regra"], 0.480305, -0.039389, 0.16406, total_polls),
-        ("S4", "Só a mais recente", CANONICAL_SENSITIVITY_RULES["S4"]["regra"], 0.48081, -0.038379, 0.17022, 20),
-        ("S5", "n pela margem de erro", CANONICAL_SENSITIVITY_RULES["S5"]["regra"], 0.48062, -0.038761, 0.167475, total_polls),
-        ("S6", "Sem âncora do 1º turno", CANONICAL_SENSITIVITY_RULES["S6"]["regra"], 0.480598, -0.038803, 0.16723, total_polls),
-        ("S7", "Ajuste integral", CANONICAL_SENSITIVITY_RULES["S7"]["regra"], 0.471212, -0.057577, 0.089085, total_polls),
-        ("S8", "Sinal de redes", CANONICAL_SENSITIVITY_RULES["S8"]["regra"], 0.492537, -0.014926, 0.34955, total_polls),
-        ("S9", "Viés só pelo modo de coleta", CANONICAL_SENSITIVITY_RULES["S9"]["regra"], 0.481096, -0.037807, 0.1729, total_polls),
-        ("S10", "Sem rejeição", CANONICAL_SENSITIVITY_RULES["S10"]["regra"], 0.478909, -0.042182, 0.149205, total_polls),
-        ("S11", "Só rejeição", CANONICAL_SENSITIVITY_RULES["S11"]["regra"], 0.482331, -0.035339, 0.188755, total_polls),
+        (
+            "P",
+            "Principal",
+            CANONICAL_SENSITIVITY_RULES["P"]["regra"],
+            0.48062,
+            -0.038761,
+            0.167475,
+            total_polls,
+        ),
+        (
+            "S0",
+            "Sem ajuste de viés",
+            CANONICAL_SENSITIVITY_RULES["S0"]["regra"],
+            0.490028,
+            -0.019944,
+            0.303,
+            total_polls,
+        ),
+        (
+            "S1",
+            "Peso igual por pesquisa",
+            CANONICAL_SENSITIVITY_RULES["S1"]["regra"],
+            0.481057,
+            -0.037886,
+            0.1729,
+            total_polls,
+        ),
+        (
+            "S2",
+            "Sem meia-vida",
+            CANONICAL_SENSITIVITY_RULES["S2"]["regra"],
+            0.48168,
+            -0.036639,
+            0.17987,
+            total_polls,
+        ),
+        (
+            "S3",
+            "Teto de amostra",
+            CANONICAL_SENSITIVITY_RULES["S3"]["regra"],
+            0.480305,
+            -0.039389,
+            0.16406,
+            total_polls,
+        ),
+        (
+            "S4",
+            "Só a mais recente",
+            CANONICAL_SENSITIVITY_RULES["S4"]["regra"],
+            0.48081,
+            -0.038379,
+            0.17022,
+            20,
+        ),
+        (
+            "S5",
+            "n pela margem de erro",
+            CANONICAL_SENSITIVITY_RULES["S5"]["regra"],
+            0.48062,
+            -0.038761,
+            0.167475,
+            total_polls,
+        ),
+        (
+            "S6",
+            "Sem âncora do 1º turno",
+            CANONICAL_SENSITIVITY_RULES["S6"]["regra"],
+            0.480598,
+            -0.038803,
+            0.16723,
+            total_polls,
+        ),
+        (
+            "S7",
+            "Ajuste integral",
+            CANONICAL_SENSITIVITY_RULES["S7"]["regra"],
+            0.471212,
+            -0.057577,
+            0.089085,
+            total_polls,
+        ),
+        (
+            "S8",
+            "Sinal de redes",
+            CANONICAL_SENSITIVITY_RULES["S8"]["regra"],
+            0.492537,
+            -0.014926,
+            0.34955,
+            total_polls,
+        ),
+        (
+            "S9",
+            "Viés só pelo modo de coleta",
+            CANONICAL_SENSITIVITY_RULES["S9"]["regra"],
+            0.481096,
+            -0.037807,
+            0.1729,
+            total_polls,
+        ),
+        (
+            "S10",
+            "Sem rejeição",
+            CANONICAL_SENSITIVITY_RULES["S10"]["regra"],
+            0.478909,
+            -0.042182,
+            0.149205,
+            total_polls,
+        ),
+        (
+            "S11",
+            "Só rejeição",
+            CANONICAL_SENSITIVITY_RULES["S11"]["regra"],
+            0.482331,
+            -0.035339,
+            0.188755,
+            total_polls,
+        ),
     ]
 
     variants: list[SensitivityVariantResult] = []

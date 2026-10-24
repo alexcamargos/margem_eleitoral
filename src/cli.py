@@ -367,7 +367,16 @@ def cmd_predict(args: argparse.Namespace) -> None:
 
     # 1. Agregador Dinâmico Contínuo
     print("\n--- [1] Agregador Dinâmico com Decaimento Temporal ---")
-    candidatos = sorted({c for p in all_polls for c in p.votos_validos.keys() if c != "Outros"})
+    if turno == 2:
+        cand_mass = {
+            c: sum(float(p.votos_validos.get(c, 0.0)) for p in all_polls)
+            for p in all_polls
+            for c in p.votos_validos
+            if c != "Outros"
+        }
+        candidatos = sorted(sorted(cand_mass.keys(), key=lambda c: cand_mass[c], reverse=True)[:2])
+    else:
+        candidatos = sorted({c for p in all_polls for c in p.votos_validos.keys() if c != "Outros"})
     df_agg = compute_poll_aggregation_series(
         polls=all_polls,
         candidates=candidatos,

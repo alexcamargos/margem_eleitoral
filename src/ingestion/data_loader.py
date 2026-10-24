@@ -343,9 +343,7 @@ def get_election_dataset(
     # 3. Segrega pesquisas de véspera (<= 72 horas / 3 dias da eleição, estritamente pré-eleição)
     election_date = get_election_date(year=year, turno=turno)
     eve_polls = [
-        p
-        for p in all_polls_filtered
-        if 0 <= (election_date - p.data_fim_campo).days <= cutoff_days
+        p for p in all_polls_filtered if 0 <= (election_date - p.data_fim_campo).days <= cutoff_days
     ]
 
     return tse_result, eve_polls, all_polls_filtered

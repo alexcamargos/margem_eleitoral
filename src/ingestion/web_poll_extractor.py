@@ -119,7 +119,9 @@ class WebPollExtractor(BaseElectionDataExtractor):
 
             # Salva snapshot local seguro para auditoria offline
             try:
-                target_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+                target_path.write_text(
+                    json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+                )
             except OSError:
                 pass
             return data
@@ -155,7 +157,13 @@ class WebPollExtractor(BaseElectionDataExtractor):
             return MetodologiaEnum.TELEFONICA_URA, 1.30
         if "online" in raw or "painel" in raw or "web" in raw or "atlas" in inst_upper:
             return MetodologiaEnum.ONLINE, 1.35
-        if "presencial" in raw or "domiciliar" in raw or "datafolha" in inst_upper or "quaest" in inst_upper or "parana" in inst_upper:
+        if (
+            "presencial" in raw
+            or "domiciliar" in raw
+            or "datafolha" in inst_upper
+            or "quaest" in inst_upper
+            or "parana" in inst_upper
+        ):
             return MetodologiaEnum.PRESENCIAL_DOMICILIAR, 1.35
         if "fluxo" in raw or "badra" in inst_upper:
             return MetodologiaEnum.PRESENCIAL_FLUXO, 1.30
@@ -212,9 +220,11 @@ class WebPollExtractor(BaseElectionDataExtractor):
             # Ordena por proximidade da data de divulgação
             sorted_candidates = sorted(
                 inst_candidates,
-                key=lambda x: abs((date.fromisoformat(x["data_divulgacao"]) - p_dt).days)
-                if x.get("data_divulgacao")
-                else 999,
+                key=lambda x: (
+                    abs((date.fromisoformat(x["data_divulgacao"]) - p_dt).days)
+                    if x.get("data_divulgacao")
+                    else 999
+                ),
             )
 
             for cand in sorted_candidates:
@@ -350,7 +360,9 @@ class WebPollExtractor(BaseElectionDataExtractor):
         if raw_polls:
             census_df = self.collector.get_tse_registration_census()
             census_map: dict[str, dict[str, Any]] = (
-                {r["id_registro_tse"]: r for r in census_df.to_dicts()} if census_df.height > 0 else {}
+                {r["id_registro_tse"]: r for r in census_df.to_dicts()}
+                if census_df.height > 0
+                else {}
             )
 
             for p in raw_polls:
@@ -514,23 +526,48 @@ class WebPollExtractor(BaseElectionDataExtractor):
 
             # Preserva valores pré-existentes de terceiros candidatos e recortes subnacionais se houver
             c_cury = str(p.votos_totais.get("Augusto Cury", 0.0))
-            if c_cury == "0.0" and existing.get("voto_bruto_Augusto Cury") not in ("0.0", "", "0", None):
+            if c_cury == "0.0" and existing.get("voto_bruto_Augusto Cury") not in (
+                "0.0",
+                "",
+                "0",
+                None,
+            ):
                 c_cury = existing["voto_bruto_Augusto Cury"]
 
             c_santos = str(p.votos_totais.get("Renan Santos", 0.0))
-            if c_santos == "0.0" and existing.get("voto_bruto_Renan Santos") not in ("0.0", "", "0", None):
+            if c_santos == "0.0" and existing.get("voto_bruto_Renan Santos") not in (
+                "0.0",
+                "",
+                "0",
+                None,
+            ):
                 c_santos = existing["voto_bruto_Renan Santos"]
 
             c_caiado = str(p.votos_totais.get("Ronaldo Caiado", 0.0))
-            if c_caiado == "0.0" and existing.get("voto_bruto_Ronaldo Caiado") not in ("0.0", "", "0", None):
+            if c_caiado == "0.0" and existing.get("voto_bruto_Ronaldo Caiado") not in (
+                "0.0",
+                "",
+                "0",
+                None,
+            ):
                 c_caiado = existing["voto_bruto_Ronaldo Caiado"]
 
             c_zema = str(p.votos_totais.get("Romeu Zema", 0.0))
-            if c_zema == "0.0" and existing.get("voto_bruto_Romeu Zema") not in ("0.0", "", "0", None):
+            if c_zema == "0.0" and existing.get("voto_bruto_Romeu Zema") not in (
+                "0.0",
+                "",
+                "0",
+                None,
+            ):
                 c_zema = existing["voto_bruto_Romeu Zema"]
 
             c_outros = str(p.votos_totais.get("Outros", 0.0))
-            if c_outros == "0.0" and existing.get("voto_bruto_Outros") not in ("0.0", "", "0", None):
+            if c_outros == "0.0" and existing.get("voto_bruto_Outros") not in (
+                "0.0",
+                "",
+                "0",
+                None,
+            ):
                 c_outros = existing["voto_bruto_Outros"]
 
             abrang_val = (
@@ -596,8 +633,7 @@ class WebPollExtractor(BaseElectionDataExtractor):
             writer.writeheader()
             for r in all_ordered_rows:
                 clean_r = {
-                    col: r.get(col, "0.0" if "voto_bruto" in col else "")
-                    for col in self.CSV_HEADER
+                    col: r.get(col, "0.0" if "voto_bruto" in col else "") for col in self.CSV_HEADER
                 }
                 writer.writerow(clean_r)
 

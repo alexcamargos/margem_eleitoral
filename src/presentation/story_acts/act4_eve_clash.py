@@ -146,4 +146,3 @@ def render_act4(
 
 # Alias para retrocompatibilidade
 render_act3 = render_act4
-

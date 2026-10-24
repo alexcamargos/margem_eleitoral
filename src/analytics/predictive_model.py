@@ -53,20 +53,72 @@ DEFAULT_SCOPE_WEIGHTS: dict[str, float] = {
 
 DEFAULT_REGIONAL_DIFFERENTIALS: dict[int, dict[str, dict[str, float]]] = {
     2026: {
-        "SE": {"Flávio Bolsonaro": 3.5, "Lula": -3.5},
+        "SE": {"Flávio Bolsonaro": 4.29, "Lula": -4.29},
         "NE": {"Flávio Bolsonaro": -17.0, "Lula": 17.0},
         "S": {"Flávio Bolsonaro": 12.5, "Lula": -12.5},
         "N": {"Flávio Bolsonaro": 2.0, "Lula": -2.0},
         "CO": {"Flávio Bolsonaro": 11.0, "Lula": -11.0},
     },
     2022: {
-        "SE": {"Bolsonaro": 4.2, "Lula": -4.2},
+        "SE": {"Bolsonaro": 5.39, "Lula": -5.39},
         "NE": {"Bolsonaro": -19.5, "Lula": 19.5},
         "S": {"Bolsonaro": 13.8, "Lula": -13.8},
         "N": {"Bolsonaro": 1.8, "Lula": -1.8},
         "CO": {"Bolsonaro": 11.5, "Lula": -11.5},
     },
 }
+
+
+def balance_regional_differentials(
+    differentials: dict[int, dict[str, dict[str, float]]],
+    macro_weights: dict[str, float],
+) -> dict[int, dict[str, dict[str, float]]]:
+    """Garante a condição de soma-zero estrita dos diferenciais regionais no Colégio Eleitoral.
+
+    Para cada ano e cada candidato, assegura que a soma ponderada dos diferenciais
+    estruturais regionais pelas frações do eleitorado seja estritamente nula
+    (sum_r w_r * D_{r, c} == 0.0). Caso exista deriva residual, redistribui subtraindo
+    o drift ponderado de cada região.
+
+    Args:
+        differentials: Dicionário mapeando ano -> região -> candidato -> diferencial (em pp).
+        macro_weights: Dicionário de pesos eleitorais oficiais por macrorregião (SE, NE, S, N, CO).
+
+    Returns:
+        dict[int, dict[str, dict[str, float]]]: Dicionário de diferenciais rebalanceados com soma-zero estrita.
+
+    Raises:
+        None.
+    """
+    sum_w = sum(macro_weights.values())
+    if sum_w <= 0.0:
+        return differentials
+
+    norm_w = {r: w / sum_w for r, w in macro_weights.items()}
+    balanced: dict[int, dict[str, dict[str, float]]] = {}
+
+    for year, reg_dict in differentials.items():
+        balanced[year] = {}
+        candidates: set[str] = set()
+        for cand_map in reg_dict.values():
+            candidates.update(cand_map.keys())
+
+        drift_cand: dict[str, float] = {}
+        for c in candidates:
+            drift = sum(
+                norm_w.get(reg, 0.0) * float(reg_dict.get(reg, {}).get(c, 0.0))
+                for reg in norm_w
+            )
+            drift_cand[c] = drift
+
+        for reg in norm_w:
+            balanced[year][reg] = {}
+            for c in candidates:
+                orig_d = float(reg_dict.get(reg, {}).get(c, 0.0))
+                d_corr = orig_d - drift_cand[c]
+                balanced[year][reg][c] = round(d_corr, 4)
+
+    return balanced
 
 
 @dataclass(frozen=True)
@@ -118,6 +170,23 @@ class PredictiveModelConfig:
             "eve_winner_accuracy_min": 1.0,
         }
     )
+
+    def __post_init__(self) -> None:
+        """Garante a condição de soma-zero estrita dos diferenciais regionais no Colégio Eleitoral.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            None.
+        """
+        balanced = balance_regional_differentials(
+            self.regional_differentials, self.macro_region_weights
+        )
+        object.__setattr__(self, "regional_differentials", balanced)
 
     @classmethod
     def load_from_settings(cls, settings_path: str | Path | None = None) -> "PredictiveModelConfig":
@@ -178,6 +247,8 @@ class PredictiveModelConfig:
 
         if not parsed_diffs:
             parsed_diffs = dict(DEFAULT_REGIONAL_DIFFERENTIALS)
+
+        parsed_diffs = balance_regional_differentials(parsed_diffs, macro_weights)
 
         raw_gates = pm.get("promotion_gates", {})
         normalized_gates = {
@@ -741,7 +812,23 @@ def predict_election_outcome(
                     and abs((eligible_polls[j].data_fim_campo - t_i).days) <= 10
                 ]
                 if len(peer_idxs) >= 2:
-                    peer_w = w_arr[peer_idxs]
+                    peer_n_eff = np.array(
+                        [
+                            eligible_polls[j].tamanho_amostra
+                            / max(1.0, eligible_polls[j].deff_estimado)
+                            for j in peer_idxs
+                        ],
+                        dtype=float,
+                    )
+                    peer_dt = np.array(
+                        [
+                            abs((eligible_polls[j].data_fim_campo - t_i).days)
+                            for j in peer_idxs
+                        ],
+                        dtype=float,
+                    )
+                    peer_time_w = np.exp(-peer_dt / cfg.tau_days)
+                    peer_w = peer_n_eff * peer_time_w
                     peer_v = np.array([projected_list[j][c] for j in peer_idxs], dtype=float)
                     peer_mean = float(np.sum(peer_w * peer_v) / np.sum(peer_w))
                 else:
@@ -781,9 +868,19 @@ def predict_election_outcome(
     recent_mask = np.array([d <= cfg.momentum_window_days for d in days_ago_list], dtype=bool)
     has_momentum_window = int(np.sum(recent_mask)) >= 4
 
+    has_national_polls = any(p.abrangencia == AbrangenciaEnum.NACIONAL for p in eligible_polls)
+    if has_national_polls:
+        base_mask = np.array(
+            [p.abrangencia == AbrangenciaEnum.NACIONAL for p in eligible_polls], dtype=bool
+        )
+        w_base = w_arr[base_mask] / np.sum(w_arr[base_mask])
+    else:
+        base_mask = np.ones(len(eligible_polls), dtype=bool)
+        w_base = w_norm
+
     for c in candidates:
         y_vec = np.array([d[c] for d in debiased_list], dtype=float)
-        base_est = float(np.sum(w_norm * y_vec))
+        base_est = float(np.sum(w_base * y_vec[base_mask]))
         slope = 0.0
 
         if has_momentum_window:
@@ -801,9 +898,13 @@ def predict_election_outcome(
                 slope = float(np.clip(raw_slope, -0.35, 0.35))
 
         # Extrapola tendência com amortecimento exponencial até o dia da eleição (máx 4 dias efetivos)
-        effective_horizon = min(4.0, dias_ate_eleicao * math.exp(-dias_ate_eleicao / 20.0))
-        # Se também houver pesquisas na janela final, incorpora o drift de última hora intra-janela
-        late_drift = slope * min(2.0, effective_horizon + 1.25)
+        if dias_ate_eleicao <= 0:
+            late_drift = 0.0
+        else:
+            effective_horizon = min(4.0, dias_ate_eleicao * math.exp(-dias_ate_eleicao / 20.0))
+            # Se também houver pesquisas na janela final, incorpora o drift de última hora intra-janela
+            late_drift = slope * min(2.0, effective_horizon + 1.25)
+
         latent_level[c] = max(0.05, base_est + late_drift)
         daily_slopes[c] = round(slope, 3)
 
@@ -872,17 +973,29 @@ def predict_election_outcome(
     mu_vec = np.array([final_expected[c] for c in candidates], dtype=float)
     sigma_vec = np.array([cand_sigmas[c] for c in candidates], dtype=float)
 
-    # Sorteios t-Student independentes com projeção centrada de soma zero no simplex
-    t_draws = rng.standard_t(df=cfg.student_t_df, size=(cfg.n_simulations, n_cands))
-    # Normaliza variância da t-Student (Var = df / (df - 2)) para igualar sigma_vec
+    # Sorteios t-Student com preservação estrita do desvio padrão no simplex de votos válidos
     t_scale = (
         math.sqrt((cfg.student_t_df - 2.0) / cfg.student_t_df) if cfg.student_t_df > 2 else 1.0
     )
-    shocks = t_draws * t_scale * sigma_vec
-
-    raw_sims = np.clip(mu_vec + shocks, 0.01, 99.99)
-    row_sums = np.sum(raw_sims, axis=1, keepdims=True)
-    sim_matrix = (raw_sims / row_sums) * 100.0
+    if n_cands == 2:
+        # No simplex bidimensional (p1 + p2 = 100), choques são estritamente antissimétricos
+        sigma_shared = max(sigma_vec[0], sigma_vec[1])
+        t_draw = rng.standard_t(df=cfg.student_t_df, size=(cfg.n_simulations, 1))
+        shock_1 = t_draw * t_scale * sigma_shared
+        shocks = np.hstack([shock_1, -shock_1])
+        raw_sims = np.clip(mu_vec + shocks, 0.01, 99.99)
+        row_sums = np.sum(raw_sims, axis=1, keepdims=True)
+        sim_matrix = (raw_sims / row_sums) * 100.0
+    else:
+        # Para C >= 3, centraliza os choques e corrige a variância pelo fator sqrt(C / (C - 1))
+        t_draws = rng.standard_t(df=cfg.student_t_df, size=(cfg.n_simulations, n_cands))
+        raw_shocks = t_draws * t_scale * sigma_vec
+        centered_shocks = raw_shocks - np.mean(raw_shocks, axis=1, keepdims=True)
+        scaling_simplex = math.sqrt(n_cands / (n_cands - 1.0))
+        shocks = centered_shocks * scaling_simplex
+        raw_sims = np.clip(mu_vec + shocks, 0.01, 99.99)
+        row_sums = np.sum(raw_sims, axis=1, keepdims=True)
+        sim_matrix = (raw_sims / row_sums) * 100.0
 
     # Vencedor em cada simulação
     winners_idx = np.argmax(sim_matrix, axis=1)

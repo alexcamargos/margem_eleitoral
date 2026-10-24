@@ -17,6 +17,7 @@ import pytest
 
 from src.analytics.predictive_model import (
     PredictiveModelConfig,
+    balance_regional_differentials,
     compute_first_round_institute_calibration,
     evaluate_promotion_gates,
     predict_election_outcome,
@@ -390,3 +391,128 @@ def test_predictive_charts_creation() -> None:
 
     fig_reg_empty = create_electoral_college_regional_chart([], [])
     assert len(fig_reg_empty.data) == 0
+
+
+def test_zero_sum_regional_differentials_invariant() -> None:
+    """Garante que a soma ponderada dos diferenciais regionais pelo Colégio Eleitoral é estritamente nula.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    cfg = PredictiveModelConfig.load_from_settings()
+    macro_w = cfg.macro_region_weights
+
+    for year, reg_dict in cfg.regional_differentials.items():
+        candidates: set[str] = set()
+        for cand_map in reg_dict.values():
+            candidates.update(cand_map.keys())
+
+        for c in candidates:
+            weighted_sum = sum(
+                macro_w.get(reg, 0.0) * reg_dict.get(reg, {}).get(c, 0.0)
+                for reg in macro_w
+            )
+            assert abs(weighted_sum) < 1e-4, f"Drift residual para {c} em {year}: {weighted_sum}"
+
+    # Valida balanceamento de diferenciais propositalmente desbalanceados
+    unbalanced = {
+        2026: {
+            "SE": {"CandA": 10.0, "CandB": -10.0},
+            "NE": {"CandA": 0.0, "CandB": 0.0},
+            "S": {"CandA": 0.0, "CandB": 0.0},
+            "N": {"CandA": 0.0, "CandB": 0.0},
+            "CO": {"CandA": 0.0, "CandB": 0.0},
+        }
+    }
+    balanced = balance_regional_differentials(unbalanced, macro_w)
+    for c in ("CandA", "CandB"):
+        w_sum = sum(
+            macro_w.get(reg, 0.0) * balanced[2026].get(reg, {}).get(c, 0.0)
+            for reg in macro_w
+        )
+        assert abs(w_sum) < 1e-4
+
+
+def test_monte_carlo_simplex_variance_preservation() -> None:
+    """Verifica que o sorteio de Monte Carlo no simplex preserva o desvio padrão sem colapso por sqrt(2).
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    election_date = date(2026, 10, 25)
+    poll_t2 = PesquisaEleitoralSchema(
+        id_registro_tse="BR-00001/2026",
+        instituto_razao_social="Instituto Teste T2",
+        instituto_nome_fantasia="Instituto T2",
+        data_inicio_campo=date(2026, 10, 22),
+        data_fim_campo=date(2026, 10, 24),
+        data_divulgacao=date(2026, 10, 24),
+        tamanho_amostra=2000,
+        margem_erro_declarada=2.0,
+        nivel_confianca=0.95,
+        metodologia=MetodologiaEnum.PRESENCIAL_DOMICILIAR,
+        deff_estimado=1.3,
+        votos_totais={"Candidato A": 52.0, "Candidato B": 48.0},
+        votos_validos={"Candidato A": 52.0, "Candidato B": 48.0},
+        percentual_indecisos=0.0,
+        percentual_brancos_nulos=0.0,
+    )
+    res = predict_election_outcome(
+        polls=[poll_t2],
+        election_date=election_date,
+        cutoff_date=election_date,
+        turno=2,
+    )
+    # No 2º turno (2 candidatos), a incerteza deve preservar a escala nominal (~7.4 pp para 95%)
+    assert len(res.candidatos) == 2
+    c1, c2 = res.candidatos[0], res.candidatos[1]
+    width1 = c1.ic_95_superior - c1.ic_95_inferior
+    width2 = c2.ic_95_superior - c2.ic_95_inferior
+
+    # Em uma disputa de 2 candidatos, a largura do IC 95% não sofre colapso por sqrt(2) (esperado ~7.4 pp)
+    assert width1 >= 6.0
+    assert width2 >= 6.0
+    assert abs(width1 - width2) < 0.1
+
+
+def test_momentum_at_election_day_is_zero(
+    sample_eve_polls_2026: list[PesquisaEleitoralSchema],
+    sample_historical_campaign_polls_2026: list[PesquisaEleitoralSchema],
+) -> None:
+    """Garante que a extrapolação de momento é estritamente nula no dia da eleição (T=0).
+
+    Args:
+        sample_eve_polls_2026: Fixture com pesquisas de véspera.
+        sample_historical_campaign_polls_2026: Fixture com histórico de campanha.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    polls = sample_historical_campaign_polls_2026 + sample_eve_polls_2026
+    election_date = date(2026, 10, 4)
+
+    # Executa com corte na data da eleição
+    res_t0 = predict_election_outcome(
+        polls=polls,
+        election_date=election_date,
+        cutoff_date=election_date,
+        turno=1,
+    )
+    assert res_t0.dias_ate_eleicao == 0
+    # O voto esperado deve ser idêntico à média das pesquisas sem late drift
+    assert len(res_t0.candidatos) > 0

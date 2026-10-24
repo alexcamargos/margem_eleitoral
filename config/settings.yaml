@@ -133,25 +133,25 @@ electoral_college:
   regional_differentials:
     # Desvio médio histórico em p.p. da região em relação à média nacional (positivo = acima da média nacional)
     SE:
-      "Flávio Bolsonaro": 4.2
-      "Bolsonaro": 4.5
-      "Lula": -4.0
+      "Flávio Bolsonaro": 4.29
+      "Bolsonaro": 5.39
+      "Lula": -4.29
     NE:
-      "Flávio Bolsonaro": -16.5
-      "Bolsonaro": -18.0
-      "Lula": 17.5
+      "Flávio Bolsonaro": -17.0
+      "Bolsonaro": -19.5
+      "Lula": 17.0
     S:
-      "Flávio Bolsonaro": 11.8
-      "Bolsonaro": 12.5
-      "Lula": -11.5
+      "Flávio Bolsonaro": 12.5
+      "Bolsonaro": 13.8
+      "Lula": -12.5
     N:
-      "Flávio Bolsonaro": 2.5
-      "Bolsonaro": 2.0
-      "Lula": -2.2
+      "Flávio Bolsonaro": 2.0
+      "Bolsonaro": 1.8
+      "Lula": -2.0
     CO:
-      "Flávio Bolsonaro": 10.5
-      "Bolsonaro": 11.0
-      "Lula": -10.0
+      "Flávio Bolsonaro": 11.0
+      "Bolsonaro": 11.5
+      "Lula": -11.0
 
 predictive_model:
   half_life_days: 14.0

@@ -29,7 +29,7 @@ def render_documentation_content() -> None:
 
     with tabs[0]:
         st.markdown(
-            """
+            r"""
             ### Propósito e Missão do Projeto
             O projeto **Margem Eleitoral** foi construído para confrontar de forma técnica e transparente
             a crença popular de que divergências entre pesquisas eleitorais e os resultados apurados nas
@@ -79,13 +79,14 @@ def render_documentation_content() -> None:
 
             ---
 
-            ### Como Navegar pelos Seis Atos da Aplicação
-            1. **Ato 1 (O Princípio da Incerteza):** Entenda como a Lei dos Grandes Números permite que 2.000 entrevistados representem 156 milhões de brasileiros.
-            2. **Ato 2 (O Filme da Eleição):** Acompanhe a trajetória da corrida eleitoral no agregador contínuo com faixas de incerteza.
-            3. **Ato 3 (O Confronto de Véspera):** Visualize no Forest Plot se os intervalos de confiança dos institutos cobriram o resultado oficial da urna.
-            4. **Ato 4 (Anatomia do Erro e Auditoria):** Analise o Erro Ponderado, a classificação por faixas de acerto e a inclinação longitudinal de cada instituto.
-            5. **Ato 5 (O Veredito Científico):** Veja a síntese dos testes formais de hipótese que demonstram por que as divergências decorrem de dinâmicas amostrais e comportamentais, descartando fraudes.
-            6. **Ato 6 (Modelo Preditivo & Previsão Eleitoral):** Explore o Modelo Estado-Espaço Hierárquico Calibrado que integra pesquisas Nacionais, Estaduais e Regionais ponderadas pelo Colégio Eleitoral do TSE, valida previsões contra o 1º Turno (*Point-in-Time Backtesting*) e calibra os institutos para prever o vencedor do 2º Turno de 2026.
+            ### Como Navegar pelos Sete Atos da Aplicação
+            1. **Ato 1 (O Princípio da Incerteza):** Entenda como a Lei dos Grandes Números e o Teorema Central do Limite permitem que 2.000 entrevistados representem 156 milhões de eleitores.
+            2. **Ato 2 (O Filme da Eleição):** Acompanhe a trajetória longitudinal no agregador dinâmico contínuo com decaimento exponencial e envelopes de incerteza de 80% e 95%.
+            3. **Ato 3 (Quem é Menos Rejeitado?):** Explore o termômetro de rejeição eleitoral em gráfico de halteres (Dumbbell Plot), cartões de liderança competitiva e cálculo do teto eleitoral teórico ($100\% - \text{Rejeição}$).
+            4. **Ato 4 (A Prova dos Fatos / Confronto de Véspera):** Visualize no Forest Plot se os intervalos de confiança dos institutos (ajustados com $deff$) cobriram a apuração oficial do TSE e confira a Taxa de Cobertura Empírica.
+            5. **Ato 5 (Anatomia do Erro e Auditoria):** Analise o Erro Ponderado multivariado ($EP = (1-a)D + aF + 0{,}5X$), a calibração sob a Faixa do Acaso ($P_{90}$) via Monte Carlo e o grid de inclinação longitudinal (*tilt*).
+            6. **Ato 6 (O Veredito Científico):** Veja a síntese dos testes inferenciais formais (teste $t$ pareado, Wilcoxon, ANOVA e decomposição de Total Survey Error de Groves et al.) demonstrando por que divergências refletem dinâmicas amostrais e não fraude.
+            7. **Ato 7 (Modelo Preditivo & Previsão Eleitoral):** Explore o Modelo Estado-Espaço Hierárquico Calibrado com pós-estratificação pelo Colégio Eleitoral do TSE, calibração empírica pós-1º Turno, simulação Monte Carlo ($t$-Student, $\nu=5$), projeção Waterfall e Análise de Sensibilidade com 13 variantes metodológicas.
             """
         )
 
@@ -226,7 +227,7 @@ def render_documentation_content() -> None:
 
             ---
 
-            ### 8. Modelo Preditivo Estado-Espaço Hierárquico Calibrado (Ato 6)
+            ### 8. Modelo Preditivo Estado-Espaço Hierárquico Calibrado (Ato 7)
             Combina pesquisas **Nacionais**, **Estaduais** e **Regionais** sob pós-estratificação pelo Colégio Eleitoral do TSE ($\omega_{\text{SE}}=0{,}426, \omega_{\text{NE}}=0{,}271, \omega_{\text{S}}=0{,}147, \omega_{\text{N}}=0{,}086, \omega_{\text{CO}}=0{,}070$), correção de House Effects e calibração pós-1º Turno:
             """
         )
@@ -235,6 +236,25 @@ def render_documentation_content() -> None:
         )
         st.latex(
             r"P(\text{Vitória}_A) = \frac{1}{N_{\text{sim}}} \sum_{s=1}^{N_{\text{sim}}} \mathbb{I}\left(\tilde{P}_A^{(s)} > \max_{B \neq A} \tilde{P}_B^{(s)}\right), \quad \tilde{\mathbf{P}}^{(s)} \sim t_{\nu=5}\left(\hat{\boldsymbol{\mu}}(T_{\text{eleição}}), \boldsymbol{\Sigma}_{\text{total}}\right)"
+        )
+        st.markdown(
+            r"""
+            ---
+
+            ### 9. Termômetro da Rejeição e Teto Eleitoral Teórico (Ato 3)
+            O teto eleitoral teórico de cada concorrente no 2º Turno é formulado por:
+            """
+        )
+        st.latex(r"\text{Teto}_i = 100\% - \text{Rejeição}_i")
+        st.markdown(
+            r"""
+            Diferenças na taxa de rejeição entre dois candidatos dentro do limiar de tolerância $\le 1{,}0$ pp são classificadas formalmente como empate técnico.
+
+            ---
+
+            ### 10. Análise de Sensibilidade Metodológica (13 Variantes)
+            Audita a estabilidade da previsão comparando o modelo Principal ($P$) contra 12 variantes metodológicas ($S0$ a $S11$) que testam diferentes janelas de decaimento ($\tau \in [3, 21]$ dias), esquemas de ponderação e limites de voto potencial.
+            """
         )
 
 

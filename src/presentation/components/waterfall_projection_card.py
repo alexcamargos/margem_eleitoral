@@ -152,18 +152,18 @@ def _resolve_decomposition_metrics(
     resultado_1t = feed_data.get("resultado_1t", {})
 
     if hoje:
-        # Valores canônicos apurados pelo modelo
-        p_lula_proj = round(float(hoje.get("p_validos_a", 0.4836)) * 100.0, 1)  # 48.4%
+        # Valores canônicos apurados pelo modelo a partir do feed oficial
+        p_lula_proj = round(float(hoje.get("p_validos_a", 0.48)) * 100.0, 1)
         p_lula_bruto = round(
-            float(hoje.get("p_validos_a_sem_ajuste", 0.4904)) * 100.0, 1
-        )  # 49.0%
+            float(hoje.get("p_validos_a_sem_ajuste", 0.48812)) * 100.0, 1
+        )
         vies_lula = -0.9
-        rejeicao_lula = 0.2
-        corrigida_lula = p_lula_proj  # 48.4% (decomposição: 49.0 - 0.9 + 0.2 ~ 48.4%)
+        rejeicao_lula = round(p_lula_proj - p_lula_bruto - vies_lula, 1)
+        corrigida_lula = round(p_lula_bruto + vies_lula + rejeicao_lula, 1)
 
         # Fração de Lula entre os dois no 1º turno
         fracao_1t_lula = float(resultado_1t.get("fracao_a_entre_dois", 0.4899))
-        p1t_lula = round(fracao_1t_lula * 100.0, 1)  # 49.0%
+        p1t_lula = round(fracao_1t_lula * 100.0, 1)
 
         if is_lula:
             pesquisa_bruta = p_lula_bruto
@@ -173,15 +173,15 @@ def _resolve_decomposition_metrics(
             cand_1t = p1t_lula
             projecao = p_lula_proj
         else:
-            pesquisa_bruta = round(100.0 - p_lula_bruto, 1)  # 51.0%
-            vies = round(-vies_lula, 1)  # +0.9
-            rejeicao = round(-rejeicao_lula, 1)  # -0.2
-            corrigida = round(100.0 - corrigida_lula, 1)  # 51.6%
-            cand_1t = round(100.0 - p1t_lula, 1)  # 51.0%
-            projecao = round(100.0 - p_lula_proj, 1)  # 51.6%
+            pesquisa_bruta = round(100.0 - p_lula_bruto, 1)
+            vies = round(-vies_lula, 1)
+            rejeicao = round(-rejeicao_lula, 1)
+            corrigida = round(100.0 - corrigida_lula, 1)
+            cand_1t = round(100.0 - p1t_lula, 1)
+            projecao = round(100.0 - p_lula_proj, 1)
     else:
         # Fallback a partir do objeto forecast e do resultado de 1T
-        cand_proj = 48.4 if is_lula else 51.6
+        cand_proj = 48.0 if is_lula else 52.0
         for cp in forecast.candidatos:
             if (is_lula and "lula" in cp.candidato.lower()) or (
                 not is_lula and "flávio" in cp.candidato.lower()
@@ -198,9 +198,9 @@ def _resolve_decomposition_metrics(
             if tot_h2h > 0:
                 cand_1t = round((v_lula / tot_h2h) * 100.0, 1) if is_lula else round((v_flavio / tot_h2h) * 100.0, 1)
 
-        pesquisa_bruta = 49.0 if is_lula else 51.0
+        pesquisa_bruta = 48.8 if is_lula else 51.2
         vies = -0.9 if is_lula else 0.9
-        rejeicao = 0.2 if is_lula else -0.2
+        rejeicao = 0.1 if is_lula else -0.1
         corrigida = round(pesquisa_bruta + vies + rejeicao, 1)
         projecao = round(cand_proj, 1)
 

@@ -516,3 +516,32 @@ def test_momentum_at_election_day_is_zero(
     assert res_t0.dias_ate_eleicao == 0
     # O voto esperado deve ser idêntico à média das pesquisas sem late drift
     assert len(res_t0.candidatos) > 0
+
+
+def test_second_round_strictly_two_candidates(
+    sample_eve_polls_2026: list[PesquisaEleitoralSchema],
+) -> None:
+    """Garante que no 2º Turno o modelo preditivo isola estritamente os 2 candidatos finalistas.
+
+    Args:
+        sample_eve_polls_2026: Fixture com pesquisas contendo múltiplos candidatos de 1º turno.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    election_date = date(2026, 10, 25)
+    # Executa com turno=2 mesmo que as pesquisas contenham chaves de candidatos de 1º turno
+    res = predict_election_outcome(
+        polls=sample_eve_polls_2026,
+        election_date=election_date,
+        cutoff_date=election_date,
+        turno=2,
+    )
+    assert len(res.candidatos) == 2
+    cand_names = {c.candidato for c in res.candidatos}
+    assert cand_names == {"Flávio Bolsonaro", "Lula"}
+    assert abs(sum(c.voto_esperado for c in res.candidatos) - 100.0) < 0.1
+    assert abs(sum(c.probabilidade_vitoria for c in res.candidatos) - 100.0) < 0.1

@@ -752,6 +752,15 @@ def predict_election_outcome(
         candidate_set.update(p.votos_validos.keys())
     candidates = sorted(candidate_set)
 
+    # No 2º Turno, a disputa constitucional é estritamente binária entre os 2 finalistas
+    if turno == 2 and len(candidates) > 2:
+        cand_mass = {
+            c: sum(float(p.votos_validos.get(c, 0.0)) for p in eligible_polls)
+            for c in candidates
+        }
+        top_2 = sorted(candidates, key=lambda c: cand_mass[c], reverse=True)[:2]
+        candidates = sorted(top_2)
+
     # 1. Projeta todas as pesquisas elegíveis no espaço latente nacional e calcula pesos compostos
     projected_list: list[dict[str, float]] = []
     weights: list[float] = []

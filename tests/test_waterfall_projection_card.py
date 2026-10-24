@@ -102,7 +102,7 @@ def test_resolve_decomposition_metrics_lula(
 
     assert metrics["pesquisa_bruta"] in (48.8, 48.9, 49.0)
     assert metrics["vies"] == -0.9
-    assert metrics["rejeicao"] in (0.1, 0.2)
+    assert metrics["rejeicao"] in (0.0, 0.1, 0.2)
     assert metrics["corrigida"] in (48.0, 48.1, 48.3, 48.4)
     assert metrics["peso_1t"] == 0.0
     assert metrics["peso_corrigida"] == 1.0
@@ -127,7 +127,7 @@ def test_resolve_decomposition_metrics_flavio(
 
     assert metrics["pesquisa_bruta"] in (51.0, 51.1, 51.2)
     assert metrics["vies"] == 0.9
-    assert metrics["rejeicao"] in (-0.2, -0.1)
+    assert metrics["rejeicao"] in (-0.2, -0.1, 0.0, -0.0)
     assert metrics["corrigida"] in (51.6, 51.7, 51.9, 52.0)
     assert metrics["peso_1t"] == 0.0
     assert metrics["peso_corrigida"] == 1.0

@@ -276,6 +276,8 @@ class MultiOfficeCollector(BaseElectionDataExtractor):
                         votos_totais[norm_cand] = float(v)
 
                 soma_cands = sum(votos_totais.values())
+                if (soma_cands + indecisos) > 100.0:
+                    indecisos = max(0.0, round(100.0 - soma_cands, 2))
                 remainder = round(100.0 - (soma_cands + indecisos), 2)
                 brancos_nulos = max(0.0, remainder) if remainder > 0.0 else 0.0
 
@@ -373,6 +375,8 @@ class MultiOfficeCollector(BaseElectionDataExtractor):
                             votos_totais[k.strip()] = float(v)
 
                     soma_cands = sum(votos_totais.values())
+                    if (soma_cands + indecisos) > 100.0:
+                        indecisos = max(0.0, round(100.0 - soma_cands, 2))
                     remainder = round(100.0 - (soma_cands + indecisos), 2)
                     brancos_nulos = max(0.0, remainder) if remainder > 0.0 else 0.0
 
@@ -470,6 +474,8 @@ class MultiOfficeCollector(BaseElectionDataExtractor):
                         votos_totais[k.strip()] = float(v)
 
                 soma_cands = sum(votos_totais.values())
+                if (soma_cands + indecisos) > 100.0:
+                    indecisos = max(0.0, round(100.0 - soma_cands, 2))
                 remainder = round(100.0 - (soma_cands + indecisos), 2)
                 brancos_nulos = max(0.0, remainder) if remainder > 0.0 else 0.0
 

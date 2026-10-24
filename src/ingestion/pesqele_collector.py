@@ -418,6 +418,8 @@ class PesqEleCollector(BaseElectionDataExtractor):
                     k.strip(): (v.strip() if v is not None else "") for k, v in row.items()
                 }
 
+                turno = int(clean_row.get("turno", "1"))
+
                 # Extrai votos brutos por candidato
                 totais: dict[str, float] = {}
                 for col in candidate_cols:
@@ -426,6 +428,11 @@ class PesqEleCollector(BaseElectionDataExtractor):
                     pct_val = float(clean_row.get(col, "0.0") or 0.0)
                     if pct_val > 0.0:
                         totais[canonical_cand] = pct_val
+
+                # Blindagem Gatekeeper: No 2º Turno, a disputa é estritamente binária entre os 2 finalistas
+                if turno == 2 and len(totais) > 2:
+                    top_2 = sorted(totais.keys(), key=lambda c: totais[c], reverse=True)[:2]
+                    totais = {c: totais[c] for c in top_2}
 
                 brancos_nulos = float(clean_row.get("brancos_nulos", "0.0") or 0.0)
                 indecisos = float(clean_row.get("indecisos", "0.0") or 0.0)

@@ -45,7 +45,7 @@ CANDIDATE_METADATA_REGISTRY: dict[str, dict[str, str]] = {
         "color": "#3B82F6",
         "bg_tint": "rgba(59, 130, 246, 0.15)",
         "initials": "FB",
-        "foto_url": "https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/2022802018/190000624083/RJ",
+        "foto_url": "https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/2022802018/190000614721/RJ",
     },
     "Bolsonaro": {
         "name": "Bolsonaro",

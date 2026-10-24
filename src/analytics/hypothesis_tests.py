@@ -245,19 +245,21 @@ def decompose_total_survey_error(
     # 3. Variância empírica observada entre as pesquisas de véspera
     var_empirica = float(np.var(p_arr, ddof=1)) if len(p_arr) > 1 else 0.0
 
-    # 4. Componente não-amostral (excesso de dispersão não explicado por erro de amostragem)
+    # 4. Componente não-amostral transversal (excesso de dispersão não explicado por erro de amostragem)
     excesso_dispersao = max(0.0, var_empirica - var_teorica)
 
     # 5. Estimativa de Late Swing (movimentação de última hora entre pré-véspera e véspera)
+    # Representa a movimentação temporal média do eleitorado (componente dinâmica do viés)
     if pre_eve_p_hat_series is not None and len(pre_eve_p_hat_series) > 0:
         mean_eve = float(np.mean(p_arr))
         mean_pre = float(np.mean(pre_eve_p_hat_series))
         delta_late = abs(mean_eve - mean_pre)
         late_swing_var: float | None = float(delta_late**2)
-        structural_var = max(0.0, excesso_dispersao - min(excesso_dispersao, late_swing_var))
     else:
         late_swing_var = None
-        structural_var = excesso_dispersao
+
+    # O resíduo estrutural não-amostral entre institutos de véspera é o excesso de dispersão transversal
+    structural_var = excesso_dispersao
 
     # 6. MSE Total
     mse = (bias**2) + var_empirica

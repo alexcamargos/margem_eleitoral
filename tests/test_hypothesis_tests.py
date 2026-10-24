@@ -107,15 +107,8 @@ def test_decompose_total_survey_error_with_late_swing() -> None:
     assert "late_swing_variance" in decomp
     assert "structural_non_sampling_variance" in decomp
     assert decomp["late_swing_variance"] is not None
-    assert decomp["late_swing_variance"] > 0.0
-    assert decomp["non_sampling_error_variance"] >= decomp["late_swing_variance"]
-    assert (
-        pytest.approx(
-            decomp["non_sampling_error_variance"],
-            abs=0.01,
-        )
-        == decomp["late_swing_variance"] + decomp["structural_non_sampling_variance"]
-    )
+    assert decomp["late_swing_variance"] == 1.0
+    assert decomp["structural_non_sampling_variance"] == decomp["non_sampling_error_variance"]
 
 
 def _make_dummy_poll(poll_id: str, end_date: date, p_cand: float) -> PesquisaEleitoralSchema:

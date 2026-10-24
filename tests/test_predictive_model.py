@@ -415,8 +415,7 @@ def test_zero_sum_regional_differentials_invariant() -> None:
 
         for c in candidates:
             weighted_sum = sum(
-                macro_w.get(reg, 0.0) * reg_dict.get(reg, {}).get(c, 0.0)
-                for reg in macro_w
+                macro_w.get(reg, 0.0) * reg_dict.get(reg, {}).get(c, 0.0) for reg in macro_w
             )
             assert abs(weighted_sum) < 1e-4, f"Drift residual para {c} em {year}: {weighted_sum}"
 
@@ -433,8 +432,7 @@ def test_zero_sum_regional_differentials_invariant() -> None:
     balanced = balance_regional_differentials(unbalanced, macro_w)
     for c in ("CandA", "CandB"):
         w_sum = sum(
-            macro_w.get(reg, 0.0) * balanced[2026].get(reg, {}).get(c, 0.0)
-            for reg in macro_w
+            macro_w.get(reg, 0.0) * balanced[2026].get(reg, {}).get(c, 0.0) for reg in macro_w
         )
         assert abs(w_sum) < 1e-4
 

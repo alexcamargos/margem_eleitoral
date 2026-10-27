@@ -29,6 +29,36 @@ def test_tse_results_extractor_2026() -> None:
     assert sum(result.resultado_nominal.values()) == 100.0
 
 
+def test_tse_results_extractor_2026_t2() -> None:
+    """Valida a extração dos resultados oficiais do TSE para o 2º turno de 2026.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+
+    Raises:
+        None.
+    """
+    extractor = TSEResultsExtractor(year=2026, turno=2)
+    result = extractor.extract_and_transform()
+
+    assert isinstance(result, ResultadoOficialTSESchema)
+    assert result.ano == 2026
+    assert result.turno == 2
+    assert result.apuracao_concluida is True
+    assert "Flávio Bolsonaro" in result.resultado_nominal
+    assert "Lula" in result.resultado_nominal
+    assert result.resultado_nominal["Lula"] == 51.79
+    assert result.resultado_nominal["Flávio Bolsonaro"] == 48.21
+    assert result.total_votos_validos == 124082273
+    assert result.total_brancos == 1430496
+    assert result.total_nulos == 2723305
+    assert result.total_abstencoes == 30509005
+    assert sum(result.resultado_nominal.values()) == 100.0
+
+
 def test_tse_results_extractor_2022() -> None:
     """Valida a extração dos resultados oficiais do TSE para o 1º e 2º turnos de 2022."""
     ext_t1 = TSEResultsExtractor(year=2022, turno=1)

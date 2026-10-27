@@ -80,7 +80,9 @@ def test_get_election_dataset_2026_turno_2() -> None:
     """
     tse_result, eve_polls, all_polls = get_election_dataset(year=2026, turno=2, cutoff_days=3)
 
-    assert tse_result is None or not getattr(tse_result, "apuracao_concluida", True)
+    if tse_result is not None:
+        assert isinstance(tse_result, ResultadoOficialTSESchema)
+        assert tse_result.turno == 2
     assert len(eve_polls) >= 0
     assert len(all_polls) >= 5
 

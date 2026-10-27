@@ -21,6 +21,9 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
     TSE_API_URL_2026_T1 = (
         "https://resultados.tse.jus.br/oficial/ele2026/6257/dados/br/br-c0001-e006257-u.json"
     )
+    TSE_API_URL_2026_T2 = (
+        "https://resultados.tse.jus.br/oficial/ele2026/6258/dados/br/br-c0001-e006258-u.json"
+    )
 
     def __init__(self, year: int, turno: int = 1, raw_base_dir: str | Path | None = None) -> None:
         """Inicializa o extrator para o ano e turno especificados.
@@ -41,9 +44,9 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
         self.normalizer = TaxonomyNormalizer()
 
     def fetch_from_tse_api(self) -> ResultadoOficialTSESchema:
-        """Consome a API oficial de resultados do TSE para o 1º Turno de 2026.
+        """Consome a API oficial de resultados do TSE para o ano e turno configurados.
 
-        Baixa o arquivo JSON oficial de totalização (br-c0001-e006257-u.json),
+        Baixa o arquivo JSON oficial de totalização (br-c0001-e006257-u.json ou br-c0001-e006258-u.json),
         salva o snapshot bruto em data/raw/2026/ e extrai os percentuais e votos oficiais.
 
         Args:
@@ -56,18 +59,27 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
             httpx.HTTPError: Se houver falha de rede ou timeout na requisição.
             ValueError: Se a estrutura JSON retornada pelo TSE for incompatível.
         """
+        if self.year != 2026 or self.turno not in (1, 2):
+            raise ValueError(
+                f"Download da API do TSE implementado para o ciclo 2026 (T1 e T2). "
+                f"Parâmetros informados: {self.year} (Turno {self.turno})."
+            )
+
+        election_code = "6257" if self.turno == 1 else "6258"
+        api_url = self.TSE_API_URL_2026_T1 if self.turno == 1 else self.TSE_API_URL_2026_T2
+
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) margem_eleitoral/0.1.0",
             "Accept": "application/json, text/plain, */*",
         }
 
         with httpx.Client(timeout=15.0, follow_redirects=True) as client:
-            resp = client.get(self.TSE_API_URL_2026_T1, headers=headers)
+            resp = client.get(api_url, headers=headers)
             resp.raise_for_status()
             data: dict[str, Any] = resp.json()
 
         # Salva o snapshot bruto imutável recebido diretamente do TSE
-        raw_api_file = self.raw_dir / "br-c0001-e006257-u.json"
+        raw_api_file = self.raw_dir / f"br-c0001-e00{election_code}-u.json"
         raw_api_file.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
         # Parsing dos blocos de votação oficial
@@ -98,25 +110,30 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
 
         resultado_nominal: dict[str, float] = {}
         for name, pct, _ in cands_raw:
-            if pct >= 0.25:
+            if self.turno == 2:
+                resultado_nominal[name] = pct
+            elif pct >= 0.25:
                 resultado_nominal[name] = pct
 
-        # Agrupa candidatos minoritários (< 0.25%) em Outros para fechar exatamente 100.0%
-        soma_principais = sum(resultado_nominal.values())
-        resultado_nominal["Outros"] = round(100.0 - soma_principais, 2)
+        if self.turno == 1:
+            # Agrupa candidatos minoritários (< 0.25%) em Outros para fechar exatamente 100.0%
+            soma_principais = sum(resultado_nominal.values())
+            if round(100.0 - soma_principais, 2) > 0:
+                resultado_nominal["Outros"] = round(100.0 - soma_principais, 2)
 
         result_obj = ResultadoOficialTSESchema(
             cargo="PRESIDENTE",
-            turno=1,
-            ano=2026,
+            turno=self.turno,
+            ano=self.year,
             total_votos_validos=total_validos,
             total_brancos=total_brancos,
             total_nulos=total_nulos,
             total_abstencoes=total_abstencoes,
             resultado_nominal=resultado_nominal,
+            apuracao_concluida=True,
         )
 
-        # Salva o arquivo de apuração normalizado em data/raw/2026/resultado_tse_2026_t1.json
+        # Salva o arquivo de apuração normalizado em data/raw/2026/resultado_tse_2026_t{turno}.json
         local_target = self.raw_dir / f"resultado_tse_{self.year}_t{self.turno}.json"
         local_target.write_text(result_obj.model_dump_json(indent=2), encoding="utf-8")
 
@@ -125,7 +142,7 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
     def extract_and_transform(self) -> ResultadoOficialTSESchema | None:
         """Carrega, valida e retorna a totalização oficial do TSE para o ano e turno.
 
-        Para 2026 (Turno 1), consulta primeiramente a API oficial do TSE em tempo real
+        Para 2026 (Turnos 1 e 2), consulta primeiramente a API oficial do TSE em tempo real
         com fallback para o snapshot bruto local caso a rede esteja indisponível.
 
         Args:
@@ -138,11 +155,12 @@ class TSEResultsExtractor(BaseElectionDataExtractor):
             FileNotFoundError: Se o snapshot de dados brutos da apuração não for localizado.
             ValueError: Se os dados brutos violarem os invariantes de validação.
         """
-        if self.year == 2026 and self.turno == 1:
+        if self.year == 2026 and self.turno in (1, 2):
             try:
                 return self.fetch_from_tse_api()
             except (httpx.HTTPError, json.JSONDecodeError, ValueError, OSError):
                 # Fallback para snapshot local se a requisição à API falhar
+                pass
                 pass
 
         json_filename = f"resultado_tse_{self.year}_t{self.turno}.json"

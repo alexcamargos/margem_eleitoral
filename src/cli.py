@@ -147,10 +147,11 @@ def cmd_audit(args: argparse.Namespace) -> None:
 
 
 def cmd_sync(args: argparse.Namespace) -> None:
-    """Dispara a sincronização automática de pesquisas do 2º Turno junto ao TSE ou feed web.
+    """Dispara a sincronização automática de pesquisas do 2º Turno junto ao TSE ou feed web,
+    ou da apuração oficial totalizada das urnas.
 
     Args:
-        args: Argumentos parseados do terminal (ano, force, feed_url).
+        args: Argumentos parseados do terminal (ano, force, feed_url, official, turno).
 
     Returns:
         None.
@@ -159,6 +160,34 @@ def cmd_sync(args: argparse.Namespace) -> None:
         None.
     """
     year = int(args.year)
+    if getattr(args, "official", False):
+        turno = int(getattr(args, "turno", 2))
+        format_header(f"Sincronizando Apuração Oficial das Urnas do TSE ({year} - Turno {turno})")
+        try:
+            from src.ingestion.tse_results import TSEResultsExtractor
+
+            extractor = TSEResultsExtractor(year=year, turno=turno)
+            res = extractor.fetch_from_tse_api()
+            dest = extractor.save_processed()
+            print("[OK] Apuração oficial obtida e validada diretamente do TSE com sucesso!")
+            print(f"-> Votos Válidos: {res.total_votos_validos:,}")
+            print(
+                f"-> Votos Brancos: {res.total_brancos:,} | "
+                f"Nulos: {res.total_nulos:,} | "
+                f"Abstenções: {res.total_abstencoes:,}"
+            )
+            print("-> Votação Nominal Oficial:")
+            for cand, pct in sorted(
+                res.resultado_nominal.items(), key=lambda x: x[1], reverse=True
+            ):
+                print(f"   * {cand}: {pct:.2f}%")
+            print(f"-> Snapshot salvo em: {dest}")
+        except (httpx.HTTPError, OSError, ValueError) as e:
+            print(f"[ERRO] Falha ao sincronizar resultado oficial do TSE: {e}", file=sys.stderr)
+            sys.exit(1)
+        print("=" * 70 + "\n")
+        return
+
     feed_url = getattr(args, "feed_url", None)
     if feed_url:
         format_header(f"Sincronizando Pesquisas via Feed Web ({year})")
@@ -509,9 +538,21 @@ def build_parser() -> argparse.ArgumentParser:
 
     # 2. sync
     p_sync = subparsers.add_parser(
-        "sync", help="Sincroniza as pesquisas eleitorais junto ao TSE ou feed web"
+        "sync", help="Sincroniza as pesquisas eleitorais ou apuração oficial junto ao TSE"
     )
     p_sync.add_argument("--year", type=int, default=2026, help="Ano eleitoral (default: 2026)")
+    p_sync.add_argument(
+        "--turno",
+        type=int,
+        default=2,
+        choices=[1, 2],
+        help="Turno eleitoral (default: 2)",
+    )
+    p_sync.add_argument(
+        "--official",
+        action="store_true",
+        help="Sincroniza a apuração oficial das urnas (resultado_tse_{year}_t{turno}.json)",
+    )
     p_sync.add_argument("--force", action="store_true", help="Força novo download do CDN do TSE")
     p_sync.add_argument(
         "--feed-url",
